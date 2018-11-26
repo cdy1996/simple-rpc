@@ -1,6 +1,6 @@
 package com.cdy.simplerpc.remoting.netty;
 
-import com.cdy.simplerpc.config.RPCService;
+import com.cdy.simplerpc.container.RPCService;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.Server;
 import io.netty.bootstrap.ServerBootstrap;

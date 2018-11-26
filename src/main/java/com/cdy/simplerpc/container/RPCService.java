@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.config;
+package com.cdy.simplerpc.container;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
