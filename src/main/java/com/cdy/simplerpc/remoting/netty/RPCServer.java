@@ -28,9 +28,10 @@ public class RPCServer implements Server {
     
     //服务注册
     //监听
-    IServiceRegistry registry;
-    String address;
+    private IServiceRegistry registry;
+    private String address;
     
+    //服务类和方法列表
     private HashMap<String, Object> handlerMap = new HashMap<>();
     
     

@@ -2,12 +2,10 @@ package com.cdy.simplerpc.remoting.netty;
 
 import com.cdy.simplerpc.registry.IServiceDiscovery;
 import com.cdy.simplerpc.remoting.Client;
+import com.cdy.simplerpc.remoting.RPCFuture;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -18,6 +16,11 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.cdy.simplerpc.remoting.netty.RPCProxyHandler.responseConcurrentHashMap;
 
 /**
  * 客户端
@@ -26,10 +29,51 @@ import java.lang.reflect.Method;
  */
 public class RPCClient implements Client {
     
-    IServiceDiscovery serviceDiscovery;
+    private IServiceDiscovery serviceDiscovery;
+    private Bootstrap bootstrap;
+    private EventLoopGroup boss;
+    private AtomicInteger requestId = new AtomicInteger(0);
+    
+    private ConcurrentHashMap<String, Channel> concurrentHashMap = new ConcurrentHashMap<>();
+    
+    private void init(){
+        boss = new NioEventLoopGroup();
+        bootstrap = new Bootstrap();
+        bootstrap.group(boss)
+                .channel(NioSocketChannel.class)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline()
+                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
+                                .addLast(new LengthFieldPrepender(4))
+                                .addLast("encoder", new ObjectEncoder())
+                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
+                                .addLast(new RPCProxyHandler(concurrentHashMap));
+                    }
+                })
+                .option(ChannelOption.TCP_NODELAY, true);
+//                                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+    }
     
     public RPCClient(IServiceDiscovery serviceDiscovery) {
         this.serviceDiscovery = serviceDiscovery;
+    }
+    
+    public Channel connect(String serviceName){
+        try {
+            String address = serviceDiscovery.discovery(serviceName);
+            String[] addres = address.split(":");
+            String ip = addres[0];
+            int port = Integer.parseInt(addres[1]);
+            ChannelFuture sync = bootstrap.connect(ip, port).sync();
+            Channel channel = sync.channel();
+            concurrentHashMap.put(serviceName, channel);
+            return channel;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
     
     public Object invoke(Method method, Object[] args, Class interfaceClass) {
@@ -38,49 +82,30 @@ public class RPCClient implements Client {
         rpcRequest.setMethodName(method.getName());
         rpcRequest.setTypes(method.getParameterTypes());
         rpcRequest.setParams(args);
-        
+        rpcRequest.setRequestId(requestId.getAndIncrement()+"");
         //服务发现
         String serviceName = interfaceClass.getName();
-        String address = serviceDiscovery.discovery(serviceName);
-        
         //netty 连接
-        EventLoopGroup boss = new NioEventLoopGroup();
-        
-        RPCProxyHandler rpcProxyHandler = new RPCProxyHandler();
+        Channel channel = concurrentHashMap.getOrDefault(serviceName, connect(serviceName));
+        concurrentHashMap.put(serviceName, channel);
+        RPCFuture rpcResponse = new RPCFuture();
+        responseConcurrentHashMap.put(rpcRequest.getRequestId(), rpcResponse);
+        channel.writeAndFlush(rpcRequest);
         try {
-            // 监听端口 并通讯
-            
-            Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(boss)
-                    .channel(NioSocketChannel.class)
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline()
-                                    .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
-                                    .addLast(new LengthFieldPrepender(4))
-                                    .addLast("encoder", new ObjectEncoder())
-                                    .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                    .addLast(rpcProxyHandler);
-                            
-                        }
-                    })
-                    .option(ChannelOption.TCP_NODELAY, true);
-//                                    .childOption(ChannelOption.SO_KEEPALIVE, true);
-            
-            String[] addres = address.split(":");
-            String ip = addres[0];
-            int port = Integer.parseInt(addres[1]);
-            
-            ChannelFuture sync = bootstrap.connect(ip, port).sync();
-            sync.channel().writeAndFlush(rpcRequest).sync();
-            sync.channel().closeFuture().sync();
-        } catch (Exception e) {
+            return rpcResponse.get();
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
-        } finally {
-            boss.shutdownGracefully();
         }
-        return rpcProxyHandler.getResponse();
+        return null;
+    }
+    
+    public void channelClose(String serviceName, Channel channel){
+        channel.close();
+        concurrentHashMap.remove(serviceName);
+    }
+    
+    public void close(){
+        boss.shutdownGracefully();
     }
     
 }

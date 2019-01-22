@@ -11,10 +11,19 @@ public class RPCRequest implements Serializable {
     
     private static final long serialVersionUID = 6361575016627900950L;
     
+    private String requestId;
     private String className;
     private String methodName;
     private Class<?>[] types;
     private Object[] params;
+    
+    public String getRequestId() {
+        return requestId;
+    }
+    
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
     
     public String getClassName() {
         return className;
