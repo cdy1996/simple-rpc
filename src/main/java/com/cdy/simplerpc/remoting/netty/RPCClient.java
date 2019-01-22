@@ -58,6 +58,7 @@ public class RPCClient implements Client {
     
     public RPCClient(IServiceDiscovery serviceDiscovery) {
         this.serviceDiscovery = serviceDiscovery;
+        init();
     }
     
     public Channel connect(String serviceName){

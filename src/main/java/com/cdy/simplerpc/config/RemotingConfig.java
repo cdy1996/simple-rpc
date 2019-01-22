@@ -8,4 +8,6 @@ package com.cdy.simplerpc.config;
 public class RemotingConfig {
     
     // 通信类型 netty nio bio
+    private RemotingType type;
+    
 }
