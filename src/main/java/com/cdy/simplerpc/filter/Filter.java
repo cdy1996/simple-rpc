@@ -1,5 +1,7 @@
 package com.cdy.simplerpc.filter;
 
+import com.cdy.simplerpc.proxy.Invocation;
+
 /**
  * 过滤器
  * Created by 陈东一
@@ -7,10 +9,7 @@ package com.cdy.simplerpc.filter;
  */
 public interface Filter {
     
+    void doFilter(Invocation invocation) throws Exception;
     
-    boolean pre();
-    
-    Object invoke();
-    
-    void after();
+    void setNext(Filter filter);
 }

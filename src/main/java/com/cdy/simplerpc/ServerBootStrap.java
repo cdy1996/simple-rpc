@@ -25,10 +25,14 @@ public class ServerBootStrap {
         this.registry = registry;
         
         Server server = new RPCServer(registry, "127.0.0.1:8899");
-        server.bind(new TestServiceImpl());
-        server.registerAndListen();
         this.server = server;
-        
         return this;
+    }
+    
+    public void bind(Object ...objects){
+        for (Object object : objects) {
+            server.bind(objects);
+        }
+        server.registerAndListen();
     }
 }

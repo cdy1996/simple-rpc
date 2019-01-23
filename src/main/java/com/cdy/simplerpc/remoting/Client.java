@@ -1,6 +1,6 @@
 package com.cdy.simplerpc.remoting;
 
-import java.lang.reflect.Method;
+import com.cdy.simplerpc.proxy.Invocation;
 
 /**
  * 客户端接口
@@ -10,5 +10,5 @@ import java.lang.reflect.Method;
 public interface Client {
     
     
-    <T> Object invoke(Method method, Object[] args, Class<T> interfaceClass);
+    <T> Object invoke(Invocation invocation);
 }

@@ -13,17 +13,13 @@ import java.util.concurrent.TimeoutException;
  */
 public class RPCFuture implements Serializable, Future<Object> {
     
-    private String requestId;
+    private static final long serialVersionUID = -3577840344928082441L;
+    
     private Object resultData;
-    private Object lock = new Object();
+    private final Object lock;
     
-    
-    public String getRequestId() {
-        return requestId;
-    }
-    
-    public void setRequestId(String requestId) {
-        this.requestId = requestId;
+    public RPCFuture() {
+        this.lock = new Object();
     }
     
     public Object getResultData() {
@@ -33,7 +29,7 @@ public class RPCFuture implements Serializable, Future<Object> {
     public void setResultData(Object resultData) {
         synchronized (lock){
             this.resultData = resultData;
-            notifyAll();
+            lock.notifyAll();
         }
     }
     
@@ -56,7 +52,7 @@ public class RPCFuture implements Serializable, Future<Object> {
     public Object get() throws InterruptedException, ExecutionException {
         synchronized (lock){
             if (resultData == null) {
-                wait();
+                lock.wait();
             }
             return resultData;
         }
@@ -64,6 +60,11 @@ public class RPCFuture implements Serializable, Future<Object> {
     
     @Override
     public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-        throw new UnsupportedOperationException("超时获取操作");
+        synchronized (lock){
+            if (resultData == null) {
+                lock.wait(timeout);
+            }
+            return resultData;
+        }
     }
 }

@@ -31,11 +31,10 @@ public class RPCHandler extends SimpleChannelInboundHandler<RPCRequest> {
             Object o = handlerMap.get(className);
             Method method = o.getClass().getMethod(msg1.getMethodName(),msg1.getTypes());
             result = method.invoke(o, msg1.getParams());
-          
+            System.out.println("执行结果" + result);
         }
         rpcResponse.setRequestId(msg1.getRequestId());
         rpcResponse.setResultData(result);
         ctx.writeAndFlush(rpcResponse);
-        
     }
 }

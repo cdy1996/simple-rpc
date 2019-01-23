@@ -18,10 +18,14 @@ public class SimpleRegisteryImpl implements IServiceRegistry {
     public void register(String name, String address) {
         File file = new File("/simpleRPC-register-center.txt");
         if (!file.exists()) {
-            file.mkdir();
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         try {
-            FileUtils.writeLines(file, "utf-8", Collections.singleton(name + ":" + address));
+            FileUtils.writeLines(file, "utf-8", Collections.singleton(name + " " + address));
         } catch (IOException e) {
             e.printStackTrace();
         }

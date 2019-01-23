@@ -5,10 +5,11 @@ import com.cdy.simplerpc.remoting.RPCResponse;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.util.Attribute;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.cdy.simplerpc.remoting.netty.RPCClient.ATTRIBUTE_KEY_ADDRESS;
 
 /**
  * 客户端消息处理
@@ -28,23 +29,16 @@ public class RPCProxyHandler extends SimpleChannelInboundHandler<RPCResponse> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
-        Set<Map.Entry<String, Channel>> entries = concurrentHashMap.entrySet();
-        String key = null;
-        for (Map.Entry<String, Channel> entry : entries) {
-            if (entry.getValue().equals(channel)) {
-                key = entry.getKey();
-                break;
-            }
-        }
-        if (key != null) {
-            concurrentHashMap.remove(key);
-        }
+        Attribute<String> attr = channel.attr(ATTRIBUTE_KEY_ADDRESS);
+        String address = attr.get();
+        concurrentHashMap.remove(address);
         super.channelInactive(ctx);
     }
     
     @Override
     public void channelRead0(ChannelHandlerContext ctx, RPCResponse msg) throws Exception {
         System.out.println("接收到内容" + msg);
+        
         RPCFuture rpcFuture = responseConcurrentHashMap.remove(msg.getRequestId());
         rpcFuture.setResultData(msg.getResultData());
     }

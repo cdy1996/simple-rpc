@@ -25,7 +25,7 @@ public class ProxyFactory {
                 new InvocationHandler() {
                     @Override
                     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                       return client.invoke(method, args, interfaceClass);
+                        return client.invoke(new Invocation(method, args, interfaceClass));
                     }
                 });
         

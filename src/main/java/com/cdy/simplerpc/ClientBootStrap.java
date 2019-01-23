@@ -39,11 +39,11 @@ public class ClientBootStrap {
     }
     
     public <T>T inject(T t){
-        Field[] fields = t.getClass().getFields();
+        Field[] fields = t.getClass().getDeclaredFields();
         for (Field field : fields) {
             RPCReference annotation = field.getAnnotation(RPCReference.class);
             if (annotation != null) {
-                Class<?> clazz = t.getClass();
+                Class<?> clazz = field.getType();
                 field.setAccessible(true);
                 try {
                     field.set(t, proxyFactory.create(clazz));

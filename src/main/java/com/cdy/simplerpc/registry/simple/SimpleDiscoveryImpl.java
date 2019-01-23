@@ -24,7 +24,7 @@ public class SimpleDiscoveryImpl implements IServiceDiscovery {
             try {
                 List<String> strings = FileUtils.readLines(file, "utf-8");
                 strings.forEach(e->{
-                    String[] split = e.split(":");
+                    String[] split = e.split(" ");
                     map.put(split[0], split[1]);
                 });
             } catch (IOException e) {

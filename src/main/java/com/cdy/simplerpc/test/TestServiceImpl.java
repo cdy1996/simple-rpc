@@ -1,4 +1,4 @@
-package com.cdy.simplerpc;
+package com.cdy.simplerpc.test;
 
 import com.cdy.simplerpc.container.RPCService;
 
