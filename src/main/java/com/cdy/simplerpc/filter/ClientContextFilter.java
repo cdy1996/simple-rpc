@@ -1,9 +1,6 @@
 package com.cdy.simplerpc.filter;
 
 import com.cdy.simplerpc.proxy.Invocation;
-import com.cdy.simplerpc.remoting.RPCContext;
-
-import java.util.Map;
 
 /**
  * 过滤器
@@ -20,9 +17,7 @@ public class ClientContextFilter implements Filter {
      */
     @Override
     public void doFilter(Invocation invocation) throws Exception {
-        RPCContext rpcContext = RPCContext.local.get();
-        Map<String, Object> map = rpcContext.getMap();
-        invocation.setAttach(map);
+        System.out.println("测试过滤器");
         next.doFilter(invocation);
     }
     

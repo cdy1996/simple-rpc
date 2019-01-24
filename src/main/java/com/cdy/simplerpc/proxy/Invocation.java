@@ -14,7 +14,6 @@ public class Invocation {
     private Method method;
     private Object[] args;
     private Class interfaceClass;
-    private Map<String, Object> attach = new HashMap<>();
     
     public Invocation(Method method, Object[] args, Class interfaceClass) {
         this.method = method;
@@ -46,11 +45,4 @@ public class Invocation {
         this.interfaceClass = interfaceClass;
     }
     
-    public Map<String, Object> getAttach() {
-        return attach;
-    }
-    
-    public void setAttach(Map<String, Object> attach) {
-        this.attach = attach;
-    }
 }

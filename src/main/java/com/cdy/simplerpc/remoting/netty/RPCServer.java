@@ -73,7 +73,7 @@ public class RPCServer implements Server {
                                     .addLast(new LengthFieldPrepender(4))
                                     .addLast("encoder", new ObjectEncoder())
                                     .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                    .addLast(new RPCHandler(handlerMap));
+                                    .addLast(new RPCServerHandler(handlerMap));
                     
                         }
                     })

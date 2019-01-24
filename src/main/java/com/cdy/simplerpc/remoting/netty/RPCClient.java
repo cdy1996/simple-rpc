@@ -19,12 +19,11 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.cdy.simplerpc.remoting.netty.RPCProxyHandler.responseConcurrentHashMap;
+import static com.cdy.simplerpc.remoting.netty.RPCClientHandler.responseConcurrentHashMap;
 
 /**
  * 客户端
@@ -38,8 +37,6 @@ public class RPCClient implements Client {
     private EventLoopGroup boss;
     private AtomicInteger requestId = new AtomicInteger(0);
     public static final AttributeKey<String> ATTRIBUTE_KEY_ADDRESS = AttributeKey.valueOf("address");
-    public static final AttributeKey<Map<String, Object>> ATTRIBUTE_KEY_ATTACH = AttributeKey.valueOf("attach");
-    
     
     private ConcurrentHashMap<String, Channel> concurrentHashMap = new ConcurrentHashMap<>();
     
@@ -56,7 +53,7 @@ public class RPCClient implements Client {
                                 .addLast(new LengthFieldPrepender(4))
                                 .addLast("encoder", new ObjectEncoder())
                                 .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast(new RPCProxyHandler(concurrentHashMap));
+                                .addLast(new RPCClientHandler(concurrentHashMap));
                     }
                 })
                 .option(ChannelOption.TCP_NODELAY, true);
@@ -99,20 +96,19 @@ public class RPCClient implements Client {
         Channel channel = concurrentHashMap.getOrDefault(serviceName, connect(serviceName));
         concurrentHashMap.put(serviceName, channel);
         // 隐式传递参数
-        Attribute<Map<String, Object>> attr = channel.attr(ATTRIBUTE_KEY_ATTACH);
-        attr.set(invocation.getAttach());
+        RPCContext rpcContext1 = RPCContext.local.get();
+        rpcRequest.setAttach(rpcContext1.getMap());
         
-        RPCFuture rpcResponse = new RPCFuture();
-        responseConcurrentHashMap.put(rpcRequest.getRequestId(), rpcResponse);
+        RPCFuture future = new RPCFuture();
+        responseConcurrentHashMap.put(rpcRequest.getRequestId(), future);
     
         
         channel.writeAndFlush(rpcRequest);
         try {
-            Object result = rpcResponse.get();
+            Object result = future.get();
             // 隐式接受参数
-            attr = channel.attr(ATTRIBUTE_KEY_ATTACH);
             RPCContext rpcContext = RPCContext.local.get();
-            rpcContext.setMap(attr.get());
+            rpcContext.setMap(future.getAttach());
             return result;
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();

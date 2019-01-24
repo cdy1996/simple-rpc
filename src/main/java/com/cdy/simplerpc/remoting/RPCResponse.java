@@ -1,6 +1,8 @@
 package com.cdy.simplerpc.remoting;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 传输对象
@@ -14,6 +16,15 @@ public class RPCResponse implements Serializable{
     
     private String requestId;
     private Object resultData;
+    private Map<String, Object> attach = new HashMap<>();
+    
+    public Map<String, Object> getAttach() {
+        return attach;
+    }
+    
+    public void setAttach(Map<String, Object> attach) {
+        this.attach = attach;
+    }
     
     public String getRequestId() {
         return requestId;

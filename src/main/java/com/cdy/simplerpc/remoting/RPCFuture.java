@@ -1,6 +1,8 @@
 package com.cdy.simplerpc.remoting;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +18,7 @@ public class RPCFuture implements Serializable, Future<Object> {
     private static final long serialVersionUID = -3577840344928082441L;
     
     private Object resultData;
+    private Map<String, Object> attach = new HashMap<>();
     private final Object lock;
     
     public RPCFuture() {
@@ -31,6 +34,14 @@ public class RPCFuture implements Serializable, Future<Object> {
             this.resultData = resultData;
             lock.notifyAll();
         }
+    }
+    
+    public Map<String, Object> getAttach() {
+        return attach;
+    }
+    
+    public void setAttach(Map<String, Object> attach) {
+        this.attach = attach;
     }
     
     @Override

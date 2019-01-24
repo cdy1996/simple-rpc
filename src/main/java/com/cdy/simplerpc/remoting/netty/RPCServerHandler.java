@@ -13,10 +13,10 @@ import java.util.HashMap;
  * Created by 陈东一
  * 2018/9/1 22:00
  */
-public class RPCHandler extends SimpleChannelInboundHandler<RPCRequest> {
+public class RPCServerHandler extends SimpleChannelInboundHandler<RPCRequest> {
     private HashMap<String, Object> handlerMap;
     
-    public RPCHandler(HashMap<String, Object> handlerMap) {
+    public RPCServerHandler(HashMap<String, Object> handlerMap) {
         this.handlerMap = handlerMap;
     }
     
@@ -33,6 +33,7 @@ public class RPCHandler extends SimpleChannelInboundHandler<RPCRequest> {
             result = method.invoke(o, msg1.getParams());
             System.out.println("执行结果" + result);
         }
+        rpcResponse.setAttach(msg1.getAttach());
         rpcResponse.setRequestId(msg1.getRequestId());
         rpcResponse.setResultData(result);
         ctx.writeAndFlush(rpcResponse);
