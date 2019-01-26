@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.remoting;
 
 import com.cdy.simplerpc.proxy.Invocation;
+import io.netty.channel.Channel;
 
 /**
  * 客户端接口
@@ -9,6 +10,11 @@ import com.cdy.simplerpc.proxy.Invocation;
  */
 public interface Client {
     
+    void init();
     
-    <T> Object invoke(Invocation invocation);
+    Object invoke(Invocation invocation) throws Exception;
+    
+    Channel connect(String serviceName);
+    
+    void close();
 }

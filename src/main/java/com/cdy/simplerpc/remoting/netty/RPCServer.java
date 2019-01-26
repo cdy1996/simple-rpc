@@ -1,6 +1,9 @@
 package com.cdy.simplerpc.remoting.netty;
 
 import com.cdy.simplerpc.container.RPCService;
+import com.cdy.simplerpc.filter.FilterInvokerWrapper;
+import com.cdy.simplerpc.proxy.Invoker;
+import com.cdy.simplerpc.proxy.ProxyFactory;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.Server;
 import io.netty.bootstrap.ServerBootstrap;
@@ -32,7 +35,7 @@ public class RPCServer implements Server {
     private String address;
     
     //服务类和方法列表
-    private HashMap<String, Object> handlerMap = new HashMap<>();
+    private HashMap<String, Invoker> handlerMap = new HashMap<>();
     
     
     public RPCServer(IServiceRegistry registry, String address) {
@@ -46,7 +49,10 @@ public class RPCServer implements Server {
         for (Object service : services) {
             RPCService annotation = service.getClass().getAnnotation(RPCService.class);
             String serviceName = annotation.clazz().getName();
-            handlerMap.put(serviceName, service);
+    
+            Invoker objectInvoker = ProxyFactory.createWithInstance(service);
+    
+            handlerMap.put(serviceName, new FilterInvokerWrapper(objectInvoker));
         }
     }
     

@@ -1,7 +1,8 @@
 package com.cdy.simplerpc.config;
 
 /**
- * todo
+ * 远程通信配置
+ *
  * Created by 陈东一
  * 2018/11/26 0026 19:11
  */

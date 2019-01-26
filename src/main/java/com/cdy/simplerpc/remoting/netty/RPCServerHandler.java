@@ -1,11 +1,13 @@
 package com.cdy.simplerpc.remoting.netty;
 
+import com.cdy.simplerpc.proxy.Invocation;
+import com.cdy.simplerpc.proxy.Invoker;
+import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 
 /**
@@ -14,9 +16,9 @@ import java.util.HashMap;
  * 2018/9/1 22:00
  */
 public class RPCServerHandler extends SimpleChannelInboundHandler<RPCRequest> {
-    private HashMap<String, Object> handlerMap;
+    private HashMap<String, Invoker> handlerMap;
     
-    public RPCServerHandler(HashMap<String, Object> handlerMap) {
+    public RPCServerHandler(HashMap<String, Invoker> handlerMap) {
         this.handlerMap = handlerMap;
     }
     
@@ -28,12 +30,15 @@ public class RPCServerHandler extends SimpleChannelInboundHandler<RPCRequest> {
         Object result = null;
         RPCResponse rpcResponse = new RPCResponse();
         if(handlerMap.containsKey(className)){
-            Object o = handlerMap.get(className);
-            Method method = o.getClass().getMethod(msg1.getMethodName(),msg1.getTypes());
-            result = method.invoke(o, msg1.getParams());
-            System.out.println("执行结果" + result);
+            Invoker o = handlerMap.get(className);
+            Invocation invocation = new Invocation(msg1.getMethodName(), msg1.getParams(), msg1.getTypes());
+            invocation.setAttach(msg1.getAttach());
+            result = o.invoke(invocation);
         }
-        rpcResponse.setAttach(msg1.getAttach());
+        RPCContext rpcContext = RPCContext.local.get();
+        if (rpcContext != null) {
+            rpcResponse.setAttach(RPCContext.local.get().getMap());
+        }
         rpcResponse.setRequestId(msg1.getRequestId());
         rpcResponse.setResultData(result);
         ctx.writeAndFlush(rpcResponse);

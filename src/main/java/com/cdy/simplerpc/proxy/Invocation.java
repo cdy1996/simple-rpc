@@ -12,13 +12,32 @@ import java.util.Map;
 public class Invocation {
     
     private Method method;
+    private String methodName;
     private Object[] args;
+    private Class<?>[] types;
     private Class interfaceClass;
+    private Map<String, Object> attach = new HashMap<>();
     
+    public Map<String, Object> getAttach() {
+        return attach;
+    }
+    
+    public void setAttach(Map<String, Object> attach) {
+        this.attach = attach;
+    }
+    
+    //用于构造代理对象
     public Invocation(Method method, Object[] args, Class interfaceClass) {
         this.method = method;
         this.args = args;
         this.interfaceClass = interfaceClass;
+    }
+    
+    //用于服务端的接受参数和调用
+    public Invocation(String methodName, Object[] params, Class<?>[] types) {
+        this.methodName = methodName;
+        this.args = params;
+        this.types = types;
     }
     
     public Method getMethod() {
@@ -45,4 +64,19 @@ public class Invocation {
         this.interfaceClass = interfaceClass;
     }
     
+    public Class<?>[] getTypes() {
+        return types;
+    }
+    
+    public void setTypes(Class<?>[] types) {
+        this.types = types;
+    }
+    
+    public String getMethodName() {
+        return methodName;
+    }
+    
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
 }

@@ -1,9 +1,5 @@
 package com.cdy.simplerpc.proxy;
 
-import com.cdy.simplerpc.remoting.Client;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 /**
@@ -13,21 +9,17 @@ import java.lang.reflect.Proxy;
  */
 public class ProxyFactory {
     
-    Client client;
     
-    public ProxyFactory(Client client) {
-        this.client = client;
+    //创建代理对象
+    public Object createProxy(Invoker invoker, Class clazz) {
+        return  Proxy.newProxyInstance(invoker.getClass().getClassLoader(),
+                new Class<?>[]{clazz}, new InvokerInvocationHandler(invoker, clazz));
+        
     }
     
-    public <T>T create(Class<T> interfaceClass) {
-        return (T) Proxy.newProxyInstance(interfaceClass.getClassLoader(),
-                new Class<?>[]{interfaceClass},
-                new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        return client.invoke(new Invocation(method, args, interfaceClass));
-                    }
-                });
-        
+    // 创建invoker
+    public static <T> Invoker createWithInstance(T t){
+        Invoker invoker = new LocalInvoker<T>(t);
+        return invoker;
     }
 }

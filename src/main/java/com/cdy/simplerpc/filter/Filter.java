@@ -9,7 +9,7 @@ import com.cdy.simplerpc.proxy.Invocation;
  */
 public interface Filter {
     
-    void doFilter(Invocation invocation) throws Exception;
+    Object doFilter(Invocation invocation) throws Exception;
+   
     
-    void setNext(Filter filter);
 }
