@@ -3,6 +3,7 @@ package com.cdy.simplerpc.remoting.netty;
 import com.cdy.simplerpc.remoting.RPCFuture;
 import com.cdy.simplerpc.remoting.RPCResponse;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.Attribute;
@@ -16,6 +17,7 @@ import static com.cdy.simplerpc.remoting.netty.RPCClient.addressChannel;
  * Created by 陈东一
  * 2018/9/1 22:24
  */
+@ChannelHandler.Sharable
 public class RPCClientHandler extends SimpleChannelInboundHandler<RPCResponse> {
     
     

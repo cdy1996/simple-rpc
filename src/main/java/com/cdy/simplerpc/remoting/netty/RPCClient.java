@@ -68,11 +68,7 @@ public class RPCClient implements Client {
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
-        RPCRequest rpcRequest = new RPCRequest();
-        rpcRequest.setClassName(invocation.getMethod().getDeclaringClass().getName());
-        rpcRequest.setMethodName(invocation.getMethod().getName());
-        rpcRequest.setTypes(invocation.getMethod().getParameterTypes());
-        rpcRequest.setParams(invocation.getArgs());
+        RPCRequest rpcRequest = invocation.toRequest();
         rpcRequest.setRequestId(requestId.getAndIncrement() + "");
         //服务发现
         String serviceName = invocation.getInterfaceClass().getName();
@@ -103,8 +99,7 @@ public class RPCClient implements Client {
         return null;
     }
     
-    @Override
-    public Channel connect(String serviceName) {
+    private Channel connect(String serviceName) {
         try {
             String address = serviceDiscovery.discovery(serviceName);
             String[] addres = address.split(":");
@@ -127,11 +122,4 @@ public class RPCClient implements Client {
         boss.shutdownGracefully();
     }
     
-    public IServiceDiscovery getServiceDiscovery() {
-        return serviceDiscovery;
-    }
-    
-    public ConcurrentHashMap<String, Channel> getConcurrentHashMap() {
-        return addressChannel;
-    }
 }

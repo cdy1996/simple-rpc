@@ -4,7 +4,7 @@ import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.proxy.LocalInvoker;
 import com.cdy.simplerpc.proxy.RemoteInvoker;
-import com.cdy.simplerpc.remoting.InvokerAdapter;
+import com.cdy.simplerpc.proxy.InvokerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,7 +1,4 @@
-package com.cdy.simplerpc.remoting;
-
-import com.cdy.simplerpc.proxy.Invocation;
-import com.cdy.simplerpc.proxy.Invoker;
+package com.cdy.simplerpc.proxy;
 
 /**
  * 客户端适配器

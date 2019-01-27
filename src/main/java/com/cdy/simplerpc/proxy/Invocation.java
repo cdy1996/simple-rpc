@@ -1,5 +1,7 @@
 package com.cdy.simplerpc.proxy;
 
+import com.cdy.simplerpc.remoting.RPCRequest;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +40,15 @@ public class Invocation {
         this.methodName = methodName;
         this.args = params;
         this.types = types;
+    }
+    
+    public RPCRequest toRequest(){
+        RPCRequest rpcRequest = new RPCRequest();
+        rpcRequest.setClassName(getMethod().getDeclaringClass().getName());
+        rpcRequest.setMethodName(getMethod().getName());
+        rpcRequest.setTypes(getMethod().getParameterTypes());
+        rpcRequest.setParams(getArgs());
+        return rpcRequest;
     }
     
     public Method getMethod() {

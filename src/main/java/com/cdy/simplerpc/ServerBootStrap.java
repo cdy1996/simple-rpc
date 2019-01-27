@@ -2,10 +2,13 @@ package com.cdy.simplerpc;
 
 import com.cdy.simplerpc.config.RegistryConfig;
 import com.cdy.simplerpc.config.RemotingConfig;
+import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.registry.simple.SimpleRegisteryImpl;
 import com.cdy.simplerpc.remoting.Server;
 import com.cdy.simplerpc.remoting.netty.RPCServer;
+
+import java.util.function.Function;
 
 /**
  * todo
@@ -29,10 +32,8 @@ public class ServerBootStrap {
         return this;
     }
     
-    public void bind(Object ...objects){
-        for (Object object : objects) {
-            server.bind(objects);
-        }
+    public void bind(Object object, Function<Invoker, Invoker> ... function){
+        server.bind(object, function);
         server.registerAndListen();
     }
 }
