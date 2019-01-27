@@ -6,7 +6,7 @@
 
 - config    配置
 - container 容器       之后用于整合spring
-- filter    过滤器     暂未实现
+- filter    过滤器     
 - protocol  协议       默认为java二进制协议
 - proxy     代理       默认jdk动态代理
 - registry  注册       默认zk
