@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.registry.zookeeper;
 
-import com.cdy.simplerpc.registry.IServiceDiscovery;
+import com.cdy.simplerpc.balance.IBalance;
+import com.cdy.simplerpc.registry.AbstractDiscovery;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
@@ -13,12 +14,18 @@ import java.util.List;
  * Created by 陈东一
  * 2018/9/1 21:31
  */
-public class ZKServiceDiscoveryImpl implements IServiceDiscovery {
+public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     
     CuratorFramework curatorFramework;
     List<String> list = new ArrayList<>();
     
-    public ZKServiceDiscoveryImpl() {
+    
+    public ZKServiceDiscoveryImpl(IBalance balance) {
+        super(balance);
+        init();
+    }
+    
+    public void init(){
         curatorFramework = CuratorFrameworkFactory.builder().connectString(ZKConfig.zkAddress)
                 .sessionTimeoutMs(4000)
                 .retryPolicy(new ExponentialBackoffRetry(10000, 5))
@@ -39,16 +46,5 @@ public class ZKServiceDiscoveryImpl implements IServiceDiscovery {
         return loadBalance(list);
     }
     
-    private String loadBalance(List<String> list) {
-        System.out.println("可用地址"+list);
-        if (list == null || list.isEmpty()) {
-            throw new RuntimeException("没有可用的地址");
-        }
-        if (list.size() == 1) {
-            return list.get(0);
-        } else {
-            double v = Math.random() * list.size();
-            return list.get((int) v);
-        }
-    }
+   
 }
