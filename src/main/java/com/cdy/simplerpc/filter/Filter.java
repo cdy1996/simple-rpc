@@ -10,6 +10,8 @@ import com.cdy.simplerpc.proxy.Invocation;
 public interface Filter {
     
     Object doFilter(Invocation invocation) throws Exception;
-   
     
+    default void setServer(Boolean server){}
+    
+    default void setNext(Filter last){}
 }

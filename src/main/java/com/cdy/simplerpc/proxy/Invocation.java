@@ -13,11 +13,30 @@ import java.util.Map;
  */
 public class Invocation {
     
+    /**
+     * 客户端调用远程用的方法实例
+     */
     private Method method;
+    /**
+     * 服务端调用本地时的方法名
+     */
     private String methodName;
+    /**
+     * 客户端和服务端
+     *         调用时的参数
+     */
     private Object[] args;
+    /**
+     * 服务端调用本地时的参数类型
+     */
     private Class<?>[] types;
+    /**
+     * 客户端调用远程时的接口名
+     */
     private Class interfaceClass;
+    /**
+     * 附加属性
+     */
     private Map<String, Object> attach = new HashMap<>();
     
     public Map<String, Object> getAttach() {

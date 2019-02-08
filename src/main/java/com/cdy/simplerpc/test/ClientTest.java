@@ -2,7 +2,6 @@ package com.cdy.simplerpc.test;
 
 import com.cdy.simplerpc.ClientBootStrap;
 import com.cdy.simplerpc.container.RPCReference;
-import com.cdy.simplerpc.filter.FilterInvokerWrapper;
 
 import java.io.IOException;
 
@@ -26,7 +25,7 @@ public class ClientTest {
         ClientBootStrap clientBootStrap = new ClientBootStrap();
         clientBootStrap.start(null, null);
     
-        ClientTest inject = (ClientTest)clientBootStrap.inject(test, FilterInvokerWrapper::new);
+        ClientTest inject = (ClientTest)clientBootStrap.inject(test);
         inject.test();
     
         System.in.read();

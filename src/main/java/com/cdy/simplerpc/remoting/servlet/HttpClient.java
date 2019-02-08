@@ -25,7 +25,6 @@ public class HttpClient implements Client {
     
     private IServiceDiscovery serviceDiscovery;
     
-  
     
     @Override
     public void init() {
@@ -50,10 +49,9 @@ public class HttpClient implements Client {
         
         CloseableHttpClient client = getHttpClient();
         // 隐式传递参数
-        RPCContext rpcContext1 = RPCContext.local.get();
-        if (rpcContext1 != null) {
-            rpcRequest.setAttach(rpcContext1.getMap());
-        }
+        RPCContext rpcContext1 = RPCContext.current();
+        rpcRequest.setAttach(rpcContext1.getMap());
+        rpcRequest.getAttach().put("address", address);
         
         HttpPost httpPost = new HttpPost("http://" + ip + ":" + port + "/simpleRPC");
         setPostParams(httpPost, JsonUtil.toString(rpcRequest));
@@ -64,13 +62,11 @@ public class HttpClient implements Client {
         
         RPCResponse rpcResponse = JsonUtil.parseObject(result, RPCResponse.class);
         // 隐式接受参数
-        RPCContext rpcContext = RPCContext.local.get();
-        if (rpcContext != null) {
-            rpcContext.setMap(rpcResponse.getAttach());
-        }
+        RPCContext rpcContext = RPCContext.current();
+        rpcContext.setMap(rpcResponse.getAttach());
         return result;
     }
-  
+    
     
     @Override
     public void close() {

@@ -10,17 +10,43 @@ import com.cdy.simplerpc.proxy.Invocation;
 public abstract class FilterAdapter implements Filter {
     
     private Filter next;
-    
-    public Filter getNext() {
-        return next;
+    /**
+     * 是否用于服务端的过滤器
+     */
+    private Boolean isServer;
+ 
+    @Override
+    public Object doFilter(Invocation invocation) throws Exception {
+        if (isServer) {
+            beforeServerInvoke(invocation);
+        } else {
+            beforeClientInvoke(invocation);
+        }
+        Object o = next.doFilter(invocation);
+        if (isServer) {
+            afterServerInvoke(invocation, o);
+        } else {
+            afterClientInvoke(invocation, o);
+        }
+        return o;
     }
     
+    
+    public void beforeServerInvoke(Invocation invocation){}
+    public void afterServerInvoke(Invocation invocation, Object o){}
+    
+    public void beforeClientInvoke(Invocation invocation){}
+    public void afterClientInvoke(Invocation invocation, Object o){}
+    
+    
+    @Override
+    public void setServer(Boolean server) {
+        isServer = server;
+    }
+    
+    @Override
     public void setNext(Filter next) {
         this.next = next;
     }
     
-    @Override
-    public Object doFilter(Invocation invocation) throws Exception {
-        return next.doFilter(invocation);
-    }
 }

@@ -26,16 +26,16 @@ public class ServletHandler extends HttpServlet {
     
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    
+        
         String params = req.getParameter("params");
         RPCRequest msg1 = JsonUtil.parseObject(params, RPCRequest.class);
-    
-        System.out.println("接受到请求"+msg1);
-    
+        
+        System.out.println("接受到请求" + msg1);
+        
         String className = msg1.getClassName();
         Object result = null;
         RPCResponse rpcResponse = new RPCResponse();
-        if(handlerMap.containsKey(className)){
+        if (handlerMap.containsKey(className)) {
             Invoker o = handlerMap.get(className);
             Invocation invocation = new Invocation(msg1.getMethodName(), msg1.getParams(), msg1.getTypes());
             invocation.setAttach(msg1.getAttach());
@@ -45,14 +45,12 @@ public class ServletHandler extends HttpServlet {
                 e.printStackTrace();
             }
         }
-        RPCContext rpcContext = RPCContext.local.get();
-        if (rpcContext != null) {
-            rpcResponse.setAttach(RPCContext.local.get().getMap());
-        }
+        RPCContext rpcContext = RPCContext.current();
+        rpcResponse.setAttach(rpcContext.getMap());
         rpcResponse.setRequestId(msg1.getRequestId());
         rpcResponse.setResultData(result);
-    
-        try(PrintWriter writer = resp.getWriter()){
+        
+        try (PrintWriter writer = resp.getWriter()) {
             resp.setContentType("application/json");
             resp.setCharacterEncoding("UTF-8");
             String json = JsonUtil.toString(rpcResponse);

@@ -1,7 +1,9 @@
 package com.cdy.simplerpc.remoting;
 
+import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.proxy.Invoker;
 
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -11,7 +13,7 @@ import java.util.function.Function;
  */
 public interface Server {
     
-    void bind(Object services, Function<Invoker, Invoker>... functions);
+    void bind(Object services, List<Filter> filters, Function<Invoker, Invoker>... functions);
     
     void registerAndListen();
 }

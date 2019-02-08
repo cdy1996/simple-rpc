@@ -10,7 +10,26 @@ import java.util.Map;
  */
 public class RPCContext {
     
-    public static ThreadLocal<RPCContext> local = new ThreadLocal<>();
+    private static ThreadLocal<RPCContext> local = new ThreadLocal<>();
+    
+    public static RPCContext current(){
+        RPCContext rpcContext = local.get();
+        if (rpcContext != null) {
+            return rpcContext;
+        }
+    
+        rpcContext = new RPCContext();
+        local.set(rpcContext);
+        return rpcContext;
+    }
+    
+    public static RPCContext newContext(){
+        local.remove();
+        RPCContext rpcContext = new RPCContext();
+        local.set(rpcContext);
+        return rpcContext;
+    }
+    
     
     private Map<String, Object> map = new HashMap<>();
     

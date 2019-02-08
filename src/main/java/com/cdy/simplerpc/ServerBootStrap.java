@@ -2,12 +2,15 @@ package com.cdy.simplerpc;
 
 import com.cdy.simplerpc.config.RegistryConfig;
 import com.cdy.simplerpc.config.RemotingConfig;
+import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.registry.simple.SimpleRegisteryImpl;
 import com.cdy.simplerpc.remoting.Server;
 import com.cdy.simplerpc.remoting.netty.RPCServer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -21,6 +24,8 @@ public class ServerBootStrap {
     
     private Server server;
     
+    private List<Filter> filters = new ArrayList<>();
+    
 
     public ServerBootStrap start(RegistryConfig registryConfig, RemotingConfig remotingConfig){
     
@@ -33,7 +38,7 @@ public class ServerBootStrap {
     }
     
     public void bind(Object object, Function<Invoker, Invoker> ... function){
-        server.bind(object, function);
+        server.bind(object, filters , function);
         server.registerAndListen();
     }
 }

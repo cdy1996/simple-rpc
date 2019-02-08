@@ -73,14 +73,13 @@ public class RPCClient implements Client {
         //服务发现
         String serviceName = invocation.getInterfaceClass().getName();
         //netty 连接
-        Channel channel = addressChannel.getOrDefault(serviceName, connect(serviceName));
+        String address = serviceDiscovery.discovery(serviceName);
+        Channel channel = addressChannel.getOrDefault(serviceName, connect(address));
         addressChannel.put(serviceName, channel);
         // 隐式传递参数
-        RPCContext rpcContext1 = RPCContext.local.get();
-        if (rpcContext1 != null) {
-            rpcRequest.setAttach(rpcContext1.getMap());
-        }
-        
+        RPCContext rpcContext1 = RPCContext.current();
+        rpcRequest.setAttach(rpcContext1.getMap());
+        rpcRequest.getAttach().put("address", address);
         RPCFuture future = new RPCFuture();
         responseFuture.put(rpcRequest.getRequestId(), future);
         
@@ -88,10 +87,8 @@ public class RPCClient implements Client {
         try {
             Object result = future.get();
             // 隐式接受参数
-            RPCContext rpcContext = RPCContext.local.get();
-            if (rpcContext != null) {
-                rpcContext.setMap(future.getAttach());
-            }
+            RPCContext rpcContext = RPCContext.current();
+            rpcContext.setMap(future.getAttach());
             return result;
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
@@ -99,9 +96,8 @@ public class RPCClient implements Client {
         return null;
     }
     
-    private Channel connect(String serviceName) {
+    private Channel connect(String address) {
         try {
-            String address = serviceDiscovery.discovery(serviceName);
             String[] addres = address.split(":");
             String ip = addres[0];
             int port = Integer.parseInt(addres[1]);

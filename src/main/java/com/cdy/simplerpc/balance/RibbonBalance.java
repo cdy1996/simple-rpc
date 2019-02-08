@@ -29,8 +29,10 @@ public class RibbonBalance implements IBalance{
             return new Server(split[0], Integer.valueOf(split[1]));
         }).collect(Collectors.toList());
     
+        
         BaseLoadBalancer baseLoadBalancer = LoadBalancerBuilder.newBuilder()
                 .withRule(iRule)
+                .withPing(new DummyPing())
                 .buildFixedServerListLoadBalancer(collect);
         Server server = baseLoadBalancer.chooseServer();
     

@@ -1,12 +1,14 @@
 package com.cdy.simplerpc.remoting;
 
 import com.cdy.simplerpc.container.RPCService;
+import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterInvokerWrapper;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.proxy.ProxyFactory;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -27,7 +29,7 @@ public abstract class AbstractServer implements Server {
     }
     
     @Override
-    public void bind(Object service, Function<Invoker, Invoker>... functions) {
+    public void bind(Object service, List<Filter> filters, Function<Invoker, Invoker>... functions) {
         RPCService annotation = service.getClass().getAnnotation(RPCService.class);
         String serviceName = annotation.clazz().getName();
         Invoker objectInvoker = ProxyFactory.createWithInstance(service);
@@ -35,7 +37,7 @@ public abstract class AbstractServer implements Server {
             objectInvoker = function.apply(objectInvoker);
         }
         
-        handlerMap.put(serviceName, new FilterInvokerWrapper(objectInvoker));
+        handlerMap.put(serviceName, new FilterInvokerWrapper(objectInvoker, filters));
     }
     
     public void register(){

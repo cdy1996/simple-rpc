@@ -18,25 +18,23 @@ import static com.cdy.simplerpc.remoting.netty.RPCServer.handlerMap;
  */
 @ChannelHandler.Sharable
 public class RPCServerHandler extends SimpleChannelInboundHandler<RPCRequest> {
-  
+    
     
     @Override
     public void channelRead0(ChannelHandlerContext ctx, RPCRequest msg1) throws Exception {
-        System.out.println("接受到请求"+msg1);
-    
+        System.out.println("接受到请求" + msg1);
+        
         String className = msg1.getClassName();
         Object result = null;
         RPCResponse rpcResponse = new RPCResponse();
-        if(handlerMap.containsKey(className)){
+        if (handlerMap.containsKey(className)) {
             Invoker o = handlerMap.get(className);
             Invocation invocation = new Invocation(msg1.getMethodName(), msg1.getParams(), msg1.getTypes());
             invocation.setAttach(msg1.getAttach());
             result = o.invoke(invocation);
         }
-        RPCContext rpcContext = RPCContext.local.get();
-        if (rpcContext != null) {
-            rpcResponse.setAttach(RPCContext.local.get().getMap());
-        }
+        RPCContext rpcContext = RPCContext.current();
+        rpcResponse.setAttach(rpcContext.getMap());
         rpcResponse.setRequestId(msg1.getRequestId());
         rpcResponse.setResultData(result);
         ctx.writeAndFlush(rpcResponse);

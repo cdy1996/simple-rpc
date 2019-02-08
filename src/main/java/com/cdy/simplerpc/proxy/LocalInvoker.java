@@ -31,6 +31,10 @@ public class LocalInvoker<T> implements Invoker {
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
-        return invokeLocal(invocation);
+        Object invoke = invokeLocal(invocation);
+        if(invoke instanceof Exception){
+            throw new RuntimeException(((Exception) invoke).getMessage());
+        }
+        return invoke;
     }
 }
