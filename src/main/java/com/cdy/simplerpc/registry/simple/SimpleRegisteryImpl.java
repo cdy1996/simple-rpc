@@ -4,7 +4,6 @@ import com.cdy.simplerpc.registry.IServiceRegistry;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 
 /**
@@ -15,19 +14,11 @@ import java.util.Collections;
 public class SimpleRegisteryImpl implements IServiceRegistry {
     
     @Override
-    public void register(String name, String address) {
+    public void register(String name, String address) throws Exception{
         File file = new File("/simpleRPC-register-center.txt");
         if (!file.exists()) {
-            try {
                 file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
-        try {
             FileUtils.writeLines(file, "utf-8", Collections.singleton(name + " " + address));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 }

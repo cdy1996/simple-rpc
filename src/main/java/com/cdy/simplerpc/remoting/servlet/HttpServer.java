@@ -2,6 +2,7 @@ package com.cdy.simplerpc.remoting.servlet;
 
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.AbstractServer;
+import com.cdy.simplerpc.util.StringUtil;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.core.AprLifecycleListener;
@@ -16,8 +17,10 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import javax.servlet.http.HttpServlet;
 import java.io.File;
 
+import static com.cdy.simplerpc.util.StringUtil.getServer;
+
 /**
- * todo
+ * http服务端
  * Created by 陈东一
  * 2019/1/27 0027 0:35
  */
@@ -31,18 +34,16 @@ public class HttpServer extends AbstractServer {
     }
     
     @Override
-    public void registerAndListen() {
+    public void registerAndListen() throws Exception {
         register();
-        
-        String address = getAddress();
-        String[] split = address.split(":");
-        
+    
+        StringUtil.TwoResult<String, Integer> server = getServer(getAddress());
         //维持tomcat服务，否则tomcat一启动就会关闭
-        tomcatStart(split[0], Integer.valueOf(split[1]));
+        tomcatStart(server.getFirst(), server.getSecond());
     }
     
     
-    public void tomcatStart(String host, Integer port) {
+    public void tomcatStart(String host, Integer port) throws LifecycleException {
         Tomcat tomcat = new Tomcat();//创建tomcat实例，用来启动tomcat
 //        tomcat.setHostname(split[0]);//设置主机名
 //        tomcat.setPort(Integer.parseInt(split[1]));//设置端口
@@ -70,16 +71,12 @@ public class HttpServer extends AbstractServer {
         tomcat.addWebapp("", "webapp");
         
         
-        try {
-            tomcat.start();//启动tomcat
-        } catch (LifecycleException e) {
-            e.printStackTrace();
-        }
+        tomcat.start();//启动tomcat
         
         tomcat.getServer().await();
     }
     
-    public void jettyStart(String host, Integer port) {
+    public void jettyStart(String host, Integer port) throws Exception {
         Server server = new Server();// 创建jetty web容器
         server.setStopAtShutdown(true);// 在退出程序是关闭服务
         
@@ -100,11 +97,11 @@ public class HttpServer extends AbstractServer {
         context.setConfigurationDiscovered(true);
         context.setHandler(new AbstractHandler(){
             *//**
-             * @param target   request的目标，可以是一个url或者一个适配器。
-             * @param request  jetty可变的request对象，可以不封装。
-             * @param httpServletRequest   不可变的request对象，可以被封装。
-             * @param httpServletResponse   response对象，可以被封装
-             *//*
+         * @param target   request的目标，可以是一个url或者一个适配器。
+         * @param request  jetty可变的request对象，可以不封装。
+         * @param httpServletRequest   不可变的request对象，可以被封装。
+         * @param httpServletResponse   response对象，可以被封装
+         *//*
             @Override
             public void handle(String target, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
                 servlet.service(httpServletRequest, httpServletResponse);
@@ -116,20 +113,15 @@ public class HttpServer extends AbstractServer {
         // 指明服务描述文件，就是web.xml
         context.setResourceBase(System.getProperty("user.dir") + "/src/main/webapp/");// 指定服务的资源根路径，配置文件的相对路径与服务根路径有关
         server.setHandler(context);// 添加处理*/
-    
+        
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         server.setHandler(context);
-    
+        
         // http://localhost:8080/hello
         context.addServlet(new ServletHolder(servlet), "/**");
-    
-        try {
-            server.start();// 开启服务
-            server.join();
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
+        
+        server.start();// 开启服务
+        server.join();
     }
 }

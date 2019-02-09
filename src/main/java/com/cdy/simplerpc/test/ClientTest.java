@@ -3,10 +3,8 @@ package com.cdy.simplerpc.test;
 import com.cdy.simplerpc.ClientBootStrap;
 import com.cdy.simplerpc.container.RPCReference;
 
-import java.io.IOException;
-
 /**
- * todo
+ * 客户端测试
  * Created by 陈东一
  * 2019/1/22 0022 22:28
  */
@@ -19,11 +17,11 @@ public class ClientTest {
         testService.test("123");
     }
     
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         ClientTest test = new ClientTest();
     
         ClientBootStrap clientBootStrap = new ClientBootStrap();
-        clientBootStrap.start(null, null);
+        clientBootStrap.start();
     
         ClientTest inject = (ClientTest)clientBootStrap.inject(test);
         inject.test();

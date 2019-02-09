@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- * todo
+ * 服务端启动类
  * Created by 陈东一
  * 2019/1/22 0022 22:11
  */
@@ -37,7 +37,7 @@ public class ServerBootStrap {
         return this;
     }
     
-    public void bind(Object object, Function<Invoker, Invoker> ... function){
+    public void bind(Object object, Function<Invoker, Invoker> ... function) throws Exception {
         server.bind(object, filters , function);
         server.registerAndListen();
     }

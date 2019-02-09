@@ -30,6 +30,9 @@ public class RemoteInvoker implements Invoker{
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
+        
+        
+        // todo 熔断
         Object invoke = invokeRemote(invocation);
         if(invoke instanceof Exception){
             throw new RuntimeException(((Exception) invoke).getMessage());

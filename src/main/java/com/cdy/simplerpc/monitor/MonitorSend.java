@@ -7,5 +7,9 @@ package com.cdy.simplerpc.monitor;
  */
 public interface MonitorSend {
     
+    /**
+     * 监控信息发送
+     * @param monitorEntity
+     */
     void send(MonitorEntity monitorEntity);
 }

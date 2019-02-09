@@ -7,7 +7,6 @@ import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,7 +16,7 @@ import java.io.PrintWriter;
 import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
 
 /**
- * todo
+ * 服务端处理
  * Created by 陈东一
  * 2019/1/27 0027 14:47
  */
@@ -25,7 +24,7 @@ public class ServletHandler extends HttpServlet {
     
     
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         
         String params = req.getParameter("params");
         RPCRequest msg1 = JsonUtil.parseObject(params, RPCRequest.class);
@@ -42,7 +41,8 @@ public class ServletHandler extends HttpServlet {
             try {
                 result = o.invoke(invocation);
             } catch (Exception e) {
-                e.printStackTrace();
+                // 理论上不会抛异常 因为可能的异常都在异常过滤器中处理掉了
+                throw new RuntimeException(e);
             }
         }
         RPCContext rpcContext = RPCContext.current();

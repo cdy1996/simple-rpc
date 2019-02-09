@@ -10,7 +10,17 @@ import java.util.List;
 public class SimpleBalance implements IBalance{
     
     @Override
-    public String loadBalance(List<String> list) {
+    public void addServer(String serviceName, List<String> servers) {
+    
+    }
+    
+    @Override
+    public void deleteServer(String serviceName, List<String> servers) {
+    
+    }
+    
+    @Override
+    public String loadBalance(String serviceName, List<String> list) {
         System.out.println("可用地址"+list);
         if (list == null || list.isEmpty()) {
             throw new RuntimeException("没有可用的地址");

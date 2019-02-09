@@ -34,6 +34,9 @@ public class RPCClientHandler extends SimpleChannelInboundHandler<RPCResponse> {
     public void channelRead0(ChannelHandlerContext ctx, RPCResponse msg) throws Exception {
         System.out.println("接收到内容" + msg);
         RPCFuture rpcFuture = responseFuture.remove(msg.getRequestId());
+        if(rpcFuture == null){
+            return;
+        }
         rpcFuture.setAttach(msg.getAttach());
         rpcFuture.setResultData(msg.getResultData());
         

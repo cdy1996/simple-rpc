@@ -20,10 +20,11 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.cdy.simplerpc.proxy.RemoteInvoker.responseFuture;
+import static com.cdy.simplerpc.util.StringUtil.getServer;
+import static com.cdy.simplerpc.util.StringUtil.toSocketAddress;
 
 /**
  * 客户端
@@ -74,6 +75,7 @@ public class RPCClient implements Client {
         String serviceName = invocation.getInterfaceClass().getName();
         //netty 连接
         String address = serviceDiscovery.discovery(serviceName);
+        // 确保之前建立的连接断开后能再次开启连接
         Channel channel = addressChannel.getOrDefault(serviceName, connect(address));
         addressChannel.put(serviceName, channel);
         // 隐式传递参数
@@ -84,33 +86,20 @@ public class RPCClient implements Client {
         responseFuture.put(rpcRequest.getRequestId(), future);
         
         channel.writeAndFlush(rpcRequest);
-        try {
-            Object result = future.get();
-            // 隐式接受参数
-            RPCContext rpcContext = RPCContext.current();
-            rpcContext.setMap(future.getAttach());
-            return result;
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-        return null;
+        Object result = future.get();
+        // 隐式接受参数
+        RPCContext rpcContext = RPCContext.current();
+        rpcContext.setMap(future.getAttach());
+        return result;
     }
     
-    private Channel connect(String address) {
-        try {
-            String[] addres = address.split(":");
-            String ip = addres[0];
-            int port = Integer.parseInt(addres[1]);
-            ChannelFuture sync = bootstrap.connect(ip, port).sync();
-            Channel channel = sync.channel();
-            Attribute<String> attr = channel.attr(ATTRIBUTE_KEY_ADDRESS);
-            attr.set(address);
-            addressChannel.put(address, channel);
-            return channel;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return null;
+    private Channel connect(String address) throws Exception {
+        ChannelFuture sync = bootstrap.connect(toSocketAddress(getServer(address))).sync();
+        Channel channel = sync.channel();
+        Attribute<String> attr = channel.attr(ATTRIBUTE_KEY_ADDRESS);
+        attr.set(address);
+        addressChannel.put(address, channel);
+        return channel;
     }
     
     @Override

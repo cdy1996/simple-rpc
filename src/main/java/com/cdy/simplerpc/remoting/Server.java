@@ -13,7 +13,18 @@ import java.util.function.Function;
  */
 public interface Server {
     
-    void bind(Object services, List<Filter> filters, Function<Invoker, Invoker>... functions);
+    /**
+     * 绑定
+     * @param services
+     * @param filters
+     * @param functions
+     * @throws Exception
+     */
+    void bind(Object services, List<Filter> filters, Function<Invoker, Invoker>... functions) throws Exception;
     
-    void registerAndListen();
+    /**
+     * 注册和监听
+     * @throws Exception
+     */
+    void registerAndListen() throws Exception;
 }

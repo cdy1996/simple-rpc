@@ -29,7 +29,7 @@ public abstract class AbstractServer implements Server {
     }
     
     @Override
-    public void bind(Object service, List<Filter> filters, Function<Invoker, Invoker>... functions) {
+    public void bind(Object service, List<Filter> filters, Function<Invoker, Invoker>... functions) throws Exception{
         RPCService annotation = service.getClass().getAnnotation(RPCService.class);
         String serviceName = annotation.clazz().getName();
         Invoker objectInvoker = ProxyFactory.createWithInstance(service);
@@ -40,7 +40,7 @@ public abstract class AbstractServer implements Server {
         handlerMap.put(serviceName, new FilterInvokerWrapper(objectInvoker, filters));
     }
     
-    public void register(){
+    public void register() throws Exception {
         // 注册服务
         for (String s : handlerMap.keySet()) {
             //注册服务和地址

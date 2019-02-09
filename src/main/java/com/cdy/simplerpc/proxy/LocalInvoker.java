@@ -1,6 +1,5 @@
 package com.cdy.simplerpc.proxy;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -17,14 +16,10 @@ public class LocalInvoker<T> implements Invoker {
     }
     
     public Object invokeLocal(Invocation invocation) throws Exception {
-        Object result = null;
-        try {
-            Method method = t.getClass().getMethod(invocation.getMethodName(), invocation.getTypes());
-            result = method.invoke(t, invocation.getArgs());
-            System.out.println("执行结果" + result);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
+        Object result;
+        Method method = t.getClass().getMethod(invocation.getMethodName(), invocation.getTypes());
+        result = method.invoke(t, invocation.getArgs());
+        System.out.println("执行结果" + result);
         return result;
         
     }
@@ -32,7 +27,7 @@ public class LocalInvoker<T> implements Invoker {
     @Override
     public Object invoke(Invocation invocation) throws Exception {
         Object invoke = invokeLocal(invocation);
-        if(invoke instanceof Exception){
+        if (invoke instanceof Exception) {
             throw new RuntimeException(((Exception) invoke).getMessage());
         }
         return invoke;

@@ -3,10 +3,8 @@ package com.cdy.simplerpc.remoting;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 /**
  * 传输对象
@@ -20,6 +18,7 @@ public class RPCFuture implements Serializable, Future<Object> {
     private Object resultData;
     private Map<String, Object> attach = new HashMap<>();
     private final Object lock;
+    private long defaultTimeout = 5000L;
     
     public RPCFuture() {
         this.lock = new Object();
@@ -60,17 +59,17 @@ public class RPCFuture implements Serializable, Future<Object> {
     }
     
     @Override
-    public Object get() throws InterruptedException, ExecutionException {
+    public Object get() throws InterruptedException {
         synchronized (lock){
             if (resultData == null) {
-                lock.wait();
+                lock.wait(defaultTimeout);
             }
             return resultData;
         }
     }
     
     @Override
-    public Object get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public Object get(long timeout, TimeUnit unit) throws InterruptedException {
         synchronized (lock){
             if (resultData == null) {
                 lock.wait(timeout);

@@ -24,25 +24,21 @@ public class ZKServiceRegistryImpl implements IServiceRegistry {
     }
     
     @Override
-    public void register(String name, String address) {
+    public void register(String name, String address) throws Exception {
         String servicePath = ZKConfig.zkRegistryPath + "/" + name;
         
-        try {
-            if (curatorFramework.checkExists().forPath(servicePath) == null) {
-                curatorFramework.create().creatingParentContainersIfNeeded()
-                        .withMode(CreateMode.PERSISTENT)
-                        .forPath(servicePath, "0".getBytes());
-            }
-    
-            System.out.println("serviceName 创建成功"+servicePath);
-            
-            String addressPath = servicePath+"/"+address;
-            String addNode = curatorFramework.create().withMode(CreateMode.EPHEMERAL)
-                    .forPath(addressPath, "0".getBytes());
-            System.out.println("address 创建成功 "+addNode);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (curatorFramework.checkExists().forPath(servicePath) == null) {
+            curatorFramework.create().creatingParentContainersIfNeeded()
+                    .withMode(CreateMode.PERSISTENT)
+                    .forPath(servicePath, "0".getBytes());
         }
-    
+        
+        System.out.println("serviceName 创建成功" + servicePath);
+        
+        String addressPath = servicePath + "/" + address;
+        String addNode = curatorFramework.create().withMode(CreateMode.EPHEMERAL)
+                .forPath(addressPath, "0".getBytes());
+        System.out.println("address 创建成功 " + addNode);
+        
     }
 }

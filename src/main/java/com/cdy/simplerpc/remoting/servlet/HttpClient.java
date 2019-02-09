@@ -7,6 +7,7 @@ import com.cdy.simplerpc.remoting.Client;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
+import com.cdy.simplerpc.util.StringUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -14,7 +15,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import static com.cdy.simplerpc.remoting.servlet.HttpClientUtil.getHttpClient;
 import static com.cdy.simplerpc.remoting.servlet.HttpClientUtil.setPostParams;
-import static com.cdy.simplerpc.remoting.servlet.StringUtil.inputStreamToString;
+import static com.cdy.simplerpc.util.StringUtil.getServer;
+import static com.cdy.simplerpc.util.StringUtil.inputStreamToString;
 
 /**
  * 客户端
@@ -42,18 +44,16 @@ public class HttpClient implements Client {
         
         String serviceName = invocation.getInterfaceClass().getName();
         String address = serviceDiscovery.discovery(serviceName);
-        
-        String[] addres = address.split(":");
-        String ip = addres[0];
-        int port = Integer.parseInt(addres[1]);
-        
+    
+        StringUtil.TwoResult<String, Integer> server = getServer(address);
+
         CloseableHttpClient client = getHttpClient();
         // 隐式传递参数
         RPCContext rpcContext1 = RPCContext.current();
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
         
-        HttpPost httpPost = new HttpPost("http://" + ip + ":" + port + "/simpleRPC");
+        HttpPost httpPost = new HttpPost("http://" + server.getFirst() + ":" + server.getSecond() + "/simpleRPC");
         setPostParams(httpPost, JsonUtil.toString(rpcRequest));
         CloseableHttpResponse response = client.execute(httpPost);
         

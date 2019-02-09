@@ -20,7 +20,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
         this.clazz = clazz;
     }
     
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
         String methodName = method.getName();
         Class<?>[] parameterTypes = method.getParameterTypes();
         if (method.getDeclaringClass() == Object.class) {

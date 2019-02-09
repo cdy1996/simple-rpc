@@ -9,18 +9,14 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.ssl.TrustStrategy;
 
 import javax.net.ssl.SSLContext;
-import java.io.UnsupportedEncodingException;
-import java.security.GeneralSecurityException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * todo
+ * httpclient 工具类
+ *
  * Created by 陈东一
  * 2019/1/27 0027 14:43
  */
@@ -36,14 +32,11 @@ public class HttpClientUtil {
     /**
      * 设置post请求的参数
      */
-    public static void setPostParams(HttpPost httpPost, String json) {
+    public static void setPostParams(HttpPost httpPost, String json) throws Exception {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         nvps.add(new BasicNameValuePair("params", json));
-        try {
-            httpPost.setEntity(new UrlEncodedFormEntity(nvps, "utf-8"));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps, "utf-8"));
+        
     }
     
     public static CloseableHttpClient getHttpClient() {
@@ -55,7 +48,7 @@ public class HttpClientUtil {
      *
      * @return
      */
-    public static CloseableHttpClient getHttpsClient() {
+    public static CloseableHttpClient getHttpsClient() throws Exception {
         return getHttpsClient(createSSLConnSocketFactory());
     }
     
@@ -69,21 +62,13 @@ public class HttpClientUtil {
      *
      * @return
      */
-    private static SSLConnectionSocketFactory createSSLConnSocketFactory() {
+    private static SSLConnectionSocketFactory createSSLConnSocketFactory() throws Exception {
         SSLConnectionSocketFactory sslsf = null;
-        try {
-            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-                
-                public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                    // 信任所有
-                    return true;
-                }
-                
+            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, (chain, authType) -> {
+                // 信任所有
+                return true;
             }).build();
             sslsf = new SSLConnectionSocketFactory(sslContext);
-        } catch (GeneralSecurityException e) {
-            e.printStackTrace();
-        }
         return sslsf;
     }
     

@@ -18,8 +18,7 @@ public class ExceptionFilter extends FilterAdapter{
         try {
             o = super.doFilter(invocation);
         } catch (Exception e) {
-            e.printStackTrace();
-            return e;
+            return new RuntimeException(e);
         }
         return o;
     }

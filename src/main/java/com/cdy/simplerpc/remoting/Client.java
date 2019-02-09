@@ -9,9 +9,19 @@ import com.cdy.simplerpc.proxy.Invocation;
  */
 public interface Client {
     
+    /**
+     * 初始化
+     */
     void init();
     
+    /**
+     * 远程调用
+     * @param invocation
+     */
     Object invoke(Invocation invocation) throws Exception;
     
+    /**
+     * 关闭
+     */
     void close();
 }

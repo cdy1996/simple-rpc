@@ -1,7 +1,5 @@
 package com.cdy.simplerpc;
 
-import com.cdy.simplerpc.config.DiscoveryConfig;
-import com.cdy.simplerpc.config.RemotingConfig;
 import com.cdy.simplerpc.container.RPCReference;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterInvokerWrapper;
@@ -21,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
- * todo
+ * 客户端启动类
  * Created by 陈东一
  * 2019/1/22 0022 22:11
  */
@@ -37,20 +35,20 @@ public class ClientBootStrap {
     
     private List<Filter> filters = new ArrayList<>();
     
-    public ClientBootStrap start(DiscoveryConfig discoveryConfig, RemotingConfig remotingConfig) {
-    
+    public ClientBootStrap start() {
+        
         IServiceDiscovery discovery = new SimpleDiscoveryImpl();
         this.discovery = discovery;
         
         Client client = new RPCClient(discovery);
         this.client = client;
-    
+        
         this.proxyFactory = new ProxyFactory();
         
         return this;
     }
     
-    public Object inject(Object t, Function<Invoker, Invoker> ... function){
+    public Object inject(Object t, Function<Invoker, Invoker>... function) throws Exception {
         Field[] fields = t.getClass().getDeclaredFields();
         for (Field field : fields) {
             RPCReference annotation = field.getAnnotation(RPCReference.class);
@@ -59,21 +57,17 @@ public class ClientBootStrap {
                 synchronized (clazz.getName()) {
                     Invoker invoker = invokerMap.get(clazz.getName());
                     field.setAccessible(true);
-                    try {
-                        if (invoker != null) {
-                            field.set(t, invoker);
-                            continue;
-                        }
-                        invoker = new RemoteInvoker(client);
-                        for (Function<Invoker, Invoker> invokerInvokerFunction : function) {
-                            invoker = invokerInvokerFunction.apply(invoker);
-                        }
-                        invokerMap.put(clazz.getName(), invoker);
-                        Object proxy = proxyFactory.createProxy(new FilterInvokerWrapper(invoker, filters), clazz);
-                        field.set(t, proxy);
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
+                    if (invoker != null) {
+                        field.set(t, invoker);
+                        continue;
                     }
+                    invoker = new RemoteInvoker(client);
+                    for (Function<Invoker, Invoker> invokerInvokerFunction : function) {
+                        invoker = invokerInvokerFunction.apply(invoker);
+                    }
+                    invokerMap.put(clazz.getName(), invoker);
+                    Object proxy = proxyFactory.createProxy(new FilterInvokerWrapper(invoker, filters), clazz);
+                    field.set(t, proxy);
                 }
             }
         }

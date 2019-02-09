@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.registry.simple;
 
 import com.cdy.simplerpc.registry.IServiceDiscovery;
+import com.cdy.simplerpc.util.StringUtil;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -8,6 +9,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.cdy.simplerpc.util.StringUtil.splitWith;
 
 /**
  * 简单发现
@@ -24,11 +27,11 @@ public class SimpleDiscoveryImpl implements IServiceDiscovery {
             try {
                 List<String> strings = FileUtils.readLines(file, "utf-8");
                 strings.forEach(e->{
-                    String[] split = e.split(" ");
-                    map.put(split[0], split[1]);
+                    StringUtil.TwoResult<String, String> two = splitWith(e, " ");
+                    map.put(two.getFirst(), two.getSecond());
                 });
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
         }
     }

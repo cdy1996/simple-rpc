@@ -11,13 +11,17 @@ import java.util.List;
  */
 public abstract class AbstractDiscovery implements IServiceDiscovery{
     
-    IBalance balance;
+    private IBalance balance;
     
     public AbstractDiscovery(IBalance balance) {
         this.balance = balance;
     }
     
-    protected String loadBalance(List<String> list) {
-        return balance.loadBalance(list);
+    protected String loadBalance(String serviceName, List<String> list) {
+        return balance.loadBalance(serviceName, list);
+    }
+    
+    public IBalance getBalance() {
+        return balance;
     }
 }

@@ -7,5 +7,11 @@ package com.cdy.simplerpc.proxy;
  */
 public interface Invoker<T> {
     
+    /**
+     * 执行
+     * @param invocation
+     * @return
+     * @throws Exception
+     */
     Object invoke(Invocation invocation) throws Exception;
 }
