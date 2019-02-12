@@ -11,6 +11,9 @@ public interface IBalance {
     
     /**
      * 添加可用的实例
+     *
+     * 该方法存在线程安全问题,不要多线程并发调用
+     *
      * @param serviceName
      * @param servers
      */
@@ -18,6 +21,9 @@ public interface IBalance {
     
     /**
      * 删除实例
+     *
+     * 该方法存在线程安全问题,不要多线程并发调用
+     *
      * @param serviceName
      * @param servers
      */

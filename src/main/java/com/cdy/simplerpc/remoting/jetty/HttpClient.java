@@ -1,9 +1,8 @@
-package com.cdy.simplerpc.remoting.servlet;
+package com.cdy.simplerpc.remoting.jetty;
 
 import com.cdy.serialization.JsonUtil;
 import com.cdy.simplerpc.proxy.Invocation;
-import com.cdy.simplerpc.registry.IServiceDiscovery;
-import com.cdy.simplerpc.remoting.Client;
+import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
@@ -13,8 +12,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import static com.cdy.simplerpc.remoting.servlet.HttpClientUtil.getHttpClient;
-import static com.cdy.simplerpc.remoting.servlet.HttpClientUtil.setPostParams;
+import static com.cdy.simplerpc.remoting.jetty.HttpClientUtil.getHttpClient;
+import static com.cdy.simplerpc.remoting.jetty.HttpClientUtil.setPostParams;
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 import static com.cdy.simplerpc.util.StringUtil.inputStreamToString;
 
@@ -23,18 +22,13 @@ import static com.cdy.simplerpc.util.StringUtil.inputStreamToString;
  * Created by 陈东一
  * 2018/11/25 0025 14:28
  */
-public class HttpClient implements Client {
-    
-    private IServiceDiscovery serviceDiscovery;
+public class HttpClient extends AbstractClient {
     
     
     @Override
-    public void init() {
+    public void init() {}
     
-    }
-    
-    public HttpClient(IServiceDiscovery serviceDiscovery) {
-        this.serviceDiscovery = serviceDiscovery;
+    public HttpClient() {
         init();
     }
     
@@ -43,11 +37,11 @@ public class HttpClient implements Client {
         RPCRequest rpcRequest = invocation.toRequest();
         
         String serviceName = invocation.getInterfaceClass().getName();
-        String address = serviceDiscovery.discovery(serviceName);
+        String address = getServiceDiscovery().discovery(serviceName);
     
         StringUtil.TwoResult<String, Integer> server = getServer(address);
 
-        CloseableHttpClient client = getHttpClient();
+        CloseableHttpClient client = getHttpClient(Math.toIntExact(getClientBootStrap().getRemotingConfig().getInvokeTimeout()));
         // 隐式传递参数
         RPCContext rpcContext1 = RPCContext.current();
         rpcRequest.setAttach(rpcContext1.getMap());

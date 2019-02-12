@@ -23,8 +23,7 @@ public abstract class AbstractServer implements Server {
     private IServiceRegistry registry;
     private String address;
     
-    public AbstractServer(IServiceRegistry registry, String address) {
-        this.registry = registry;
+    public AbstractServer(String address) {
         this.address = address;
     }
     
@@ -52,6 +51,7 @@ public abstract class AbstractServer implements Server {
         return registry;
     }
     
+    @Override
     public void setRegistry(IServiceRegistry registry) {
         this.registry = registry;
     }

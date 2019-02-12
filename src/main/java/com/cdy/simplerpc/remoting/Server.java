@@ -2,6 +2,7 @@ package com.cdy.simplerpc.remoting;
 
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.proxy.Invoker;
+import com.cdy.simplerpc.registry.IServiceRegistry;
 
 import java.util.List;
 import java.util.function.Function;
@@ -27,4 +28,10 @@ public interface Server {
      * @throws Exception
      */
     void registerAndListen() throws Exception;
+    
+    /**
+     * 设置注册器
+     * @param registry
+     */
+    void setRegistry(IServiceRegistry registry);
 }

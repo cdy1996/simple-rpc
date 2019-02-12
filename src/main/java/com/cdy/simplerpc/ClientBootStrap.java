@@ -1,5 +1,6 @@
 package com.cdy.simplerpc;
 
+import com.cdy.simplerpc.config.RemotingConfig;
 import com.cdy.simplerpc.container.RPCReference;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterInvokerWrapper;
@@ -20,31 +21,45 @@ import java.util.function.Function;
 
 /**
  * 客户端启动类
+ * <p>
  * Created by 陈东一
  * 2019/1/22 0022 22:11
  */
 public class ClientBootStrap {
     
-    private IServiceDiscovery discovery;
+    private IServiceDiscovery discovery = new SimpleDiscoveryImpl();
     
-    private Client client;
+    private Client client = new RPCClient();
     
-    private ProxyFactory proxyFactory;
+    private ProxyFactory proxyFactory = new ProxyFactory();
     
     private Map<String, Invoker> invokerMap = new ConcurrentHashMap<>();
     
     private List<Filter> filters = new ArrayList<>();
     
-    public ClientBootStrap start() {
-        
-        IServiceDiscovery discovery = new SimpleDiscoveryImpl();
+    private RemotingConfig remotingConfig = new RemotingConfig();
+    
+    
+    public static ClientBootStrap build() {
+        return new ClientBootStrap();
+    }
+    
+    public ClientBootStrap discovery(IServiceDiscovery discovery) {
         this.discovery = discovery;
-        
-        Client client = new RPCClient(discovery);
+        return this;
+    }
+    
+    public ClientBootStrap client(Client client) {
         this.client = client;
-        
-        this.proxyFactory = new ProxyFactory();
-        
+        assert discovery != null;
+        client.setServiceDiscovery(discovery);
+        return this;
+    }
+    
+    public ClientBootStrap filters(Filter... filters) {
+        for (Filter filter : filters) {
+            this.filters.add(filter);
+        }
         return this;
     }
     
@@ -72,5 +87,14 @@ public class ClientBootStrap {
             }
         }
         return t;
+    }
+    
+    
+    public RemotingConfig getRemotingConfig() {
+        return remotingConfig;
+    }
+    
+    public void setRemotingConfig(RemotingConfig remotingConfig) {
+        this.remotingConfig = remotingConfig;
     }
 }

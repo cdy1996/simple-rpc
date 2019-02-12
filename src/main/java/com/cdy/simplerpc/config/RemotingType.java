@@ -6,5 +6,5 @@ package com.cdy.simplerpc.config;
  * 2019/1/22 0022 22:26
  */
 public enum RemotingType {
-    NETTY;
+    NETTY,JETTY;
 }

@@ -1,6 +1,7 @@
-package com.cdy.simplerpc.remoting.servlet;
+package com.cdy.simplerpc.remoting.jetty;
 
 import org.apache.http.NameValuePair;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -39,8 +40,14 @@ public class HttpClientUtil {
         
     }
     
-    public static CloseableHttpClient getHttpClient() {
-        return HttpClients.custom().setConnectionManager(manager).build();
+    public static CloseableHttpClient getHttpClient(Integer timeout) {
+        RequestConfig defaultRequestConfig = RequestConfig.custom()
+                .setSocketTimeout(timeout)
+                .setConnectTimeout(timeout)
+                .setConnectionRequestTimeout(timeout)
+                .setStaleConnectionCheckEnabled(true)
+                .build();
+        return HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).setConnectionManager(manager).build();
     }
     
     /**
@@ -48,11 +55,17 @@ public class HttpClientUtil {
      *
      * @return
      */
-    public static CloseableHttpClient getHttpsClient() throws Exception {
-        return getHttpsClient(createSSLConnSocketFactory());
+    public static CloseableHttpClient getHttpsClient(Integer timeout) throws Exception {
+        return getHttpsClient(timeout, createSSLConnSocketFactory());
     }
     
-    public static CloseableHttpClient getHttpsClient(SSLConnectionSocketFactory sslSocketFactory) {
+    public static CloseableHttpClient getHttpsClient(Integer timeout, SSLConnectionSocketFactory sslSocketFactory) {
+        RequestConfig defaultRequestConfig = RequestConfig.custom()
+                .setSocketTimeout(timeout)
+                .setConnectTimeout(timeout)
+                .setConnectionRequestTimeout(timeout)
+                .setStaleConnectionCheckEnabled(true)
+                .build();
         return HttpClients.custom().setSSLSocketFactory(sslSocketFactory).setConnectionManager(manager).build();
     }
     

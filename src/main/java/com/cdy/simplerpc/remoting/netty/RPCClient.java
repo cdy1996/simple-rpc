@@ -1,8 +1,7 @@
 package com.cdy.simplerpc.remoting.netty;
 
 import com.cdy.simplerpc.proxy.Invocation;
-import com.cdy.simplerpc.registry.IServiceDiscovery;
-import com.cdy.simplerpc.remoting.Client;
+import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCFuture;
 import com.cdy.simplerpc.remoting.RPCRequest;
@@ -31,20 +30,17 @@ import static com.cdy.simplerpc.util.StringUtil.toSocketAddress;
  * Created by 陈东一
  * 2018/11/25 0025 14:28
  */
-public class RPCClient implements Client {
+public class RPCClient extends AbstractClient {
     
-    private IServiceDiscovery serviceDiscovery;
-    private Bootstrap bootstrap;
-    private EventLoopGroup boss;
-    public static AtomicInteger requestId = new AtomicInteger(0);
+    private final Bootstrap bootstrap = new Bootstrap();
+    private final EventLoopGroup boss = new NioEventLoopGroup();
+    private static final AtomicInteger requestId = new AtomicInteger(0);
     public static final AttributeKey<String> ATTRIBUTE_KEY_ADDRESS = AttributeKey.valueOf("address");
-    public static ConcurrentHashMap<String, Channel> addressChannel = new ConcurrentHashMap<>();
+    public static final ConcurrentHashMap<String, Channel> addressChannel = new ConcurrentHashMap<>();
     
     
     @Override
     public void init() {
-        boss = new NioEventLoopGroup();
-        bootstrap = new Bootstrap();
         bootstrap.group(boss)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
@@ -62,8 +58,7 @@ public class RPCClient implements Client {
 //                                    .childOption(ChannelOption.SO_KEEPALIVE, true);
     }
     
-    public RPCClient(IServiceDiscovery serviceDiscovery) {
-        this.serviceDiscovery = serviceDiscovery;
+    public RPCClient() {
         init();
     }
     
@@ -74,15 +69,15 @@ public class RPCClient implements Client {
         //服务发现
         String serviceName = invocation.getInterfaceClass().getName();
         //netty 连接
-        String address = serviceDiscovery.discovery(serviceName);
+        String address = getServiceDiscovery().discovery(serviceName);
         // 确保之前建立的连接断开后能再次开启连接
-        Channel channel = addressChannel.getOrDefault(serviceName, connect(address));
+        Channel channel = addressChannel.putIfAbsent(serviceName, connect(address));
         addressChannel.put(serviceName, channel);
         // 隐式传递参数
         RPCContext rpcContext1 = RPCContext.current();
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
-        RPCFuture future = new RPCFuture();
+        RPCFuture future = new RPCFuture(getClientBootStrap().getRemotingConfig().getInvokeTimeout());
         responseFuture.put(rpcRequest.getRequestId(), future);
         
         channel.writeAndFlush(rpcRequest);

@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.remoting.servlet;
+package com.cdy.simplerpc.remoting.jetty;
 
 import com.cdy.serialization.JsonUtil;
 import com.cdy.simplerpc.proxy.Invocation;

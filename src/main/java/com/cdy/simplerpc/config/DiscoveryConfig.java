@@ -9,5 +9,7 @@ public class DiscoveryConfig {
     
     //注册中心类型
     private RegistryType type;
+    
+    
   
 }

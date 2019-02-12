@@ -1,5 +1,7 @@
 package com.cdy.simplerpc.remoting;
 
+import com.cdy.simplerpc.exception.InvokeTimeOutException;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +22,9 @@ public class RPCFuture implements Serializable, Future<Object> {
     private final Object lock;
     private long defaultTimeout = 5000L;
     
-    public RPCFuture() {
+    public RPCFuture(Long timeout) {
         this.lock = new Object();
+        defaultTimeout = timeout;
     }
     
     public Object getResultData() {
@@ -63,6 +66,7 @@ public class RPCFuture implements Serializable, Future<Object> {
         synchronized (lock){
             if (resultData == null) {
                 lock.wait(defaultTimeout);
+                throw new InvokeTimeOutException();
             }
             return resultData;
         }
@@ -72,7 +76,8 @@ public class RPCFuture implements Serializable, Future<Object> {
     public Object get(long timeout, TimeUnit unit) throws InterruptedException {
         synchronized (lock){
             if (resultData == null) {
-                lock.wait(timeout);
+                lock.wait(unit.toSeconds(timeout));
+                throw new InvokeTimeOutException();
             }
             return resultData;
         }

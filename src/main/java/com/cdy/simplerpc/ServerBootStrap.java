@@ -1,7 +1,5 @@
 package com.cdy.simplerpc;
 
-import com.cdy.simplerpc.config.RegistryConfig;
-import com.cdy.simplerpc.config.RemotingConfig;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.registry.IServiceRegistry;
@@ -20,25 +18,38 @@ import java.util.function.Function;
  */
 public class ServerBootStrap {
     
-    private IServiceRegistry registry;
+    private IServiceRegistry registry = new SimpleRegisteryImpl();
     
-    private Server server;
+    private Server server = new RPCServer("127.0.0.1:8899");
     
     private List<Filter> filters = new ArrayList<>();
     
-
-    public ServerBootStrap start(RegistryConfig registryConfig, RemotingConfig remotingConfig){
+    public static ServerBootStrap build() {
+        return new ServerBootStrap();
+    }
     
-        IServiceRegistry registry = new SimpleRegisteryImpl();
+    public ServerBootStrap registry(IServiceRegistry registry) {
         this.registry = registry;
-        
-        Server server = new RPCServer(registry, "127.0.0.1:8899");
-        this.server = server;
         return this;
     }
     
-    public void bind(Object object, Function<Invoker, Invoker> ... function) throws Exception {
-        server.bind(object, filters , function);
+    public ServerBootStrap server(Server server) {
+        this.server = server;
+        assert registry != null;
+        server.setRegistry(registry);
+        return this;
+    }
+    
+    public ServerBootStrap filters(Filter... filters) {
+        for (Filter filter : filters) {
+            this.filters.add(filter);
+        }
+        return this;
+    }
+    
+    
+    public void bind(Object object, Function<Invoker, Invoker>... function) throws Exception {
+        server.bind(object, filters, function);
         server.registerAndListen();
     }
 }

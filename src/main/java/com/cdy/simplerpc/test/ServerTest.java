@@ -10,8 +10,7 @@ import com.cdy.simplerpc.ServerBootStrap;
 public class ServerTest {
     
     public static void main(String[] args) throws Exception {
-        ServerBootStrap serverBootStrap = new ServerBootStrap();
-        serverBootStrap.start(null, null);
+        ServerBootStrap serverBootStrap = ServerBootStrap.build();
     
         serverBootStrap.bind(new TestServiceImpl());
         System.in.read();

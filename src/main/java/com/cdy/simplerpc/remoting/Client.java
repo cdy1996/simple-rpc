@@ -1,6 +1,8 @@
 package com.cdy.simplerpc.remoting;
 
+import com.cdy.simplerpc.ClientBootStrap;
 import com.cdy.simplerpc.proxy.Invocation;
+import com.cdy.simplerpc.registry.IServiceDiscovery;
 
 /**
  * 客户端接口
@@ -24,4 +26,16 @@ public interface Client {
      * 关闭
      */
     void close();
+    
+    /**
+     * 获取客户端引导类
+     * @return
+     */
+    ClientBootStrap getClientBootStrap();
+    
+    /**
+     * 设置发现器
+     * @param serviceDiscovery
+     */
+    void setServiceDiscovery(IServiceDiscovery serviceDiscovery);
 }

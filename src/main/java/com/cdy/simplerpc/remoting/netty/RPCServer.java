@@ -1,6 +1,5 @@
 package com.cdy.simplerpc.remoting.netty;
 
-import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.AbstractServer;
 import com.cdy.simplerpc.util.StringUtil;
 import io.netty.bootstrap.ServerBootstrap;
@@ -27,8 +26,8 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
 public class RPCServer extends AbstractServer {
     
     
-    public RPCServer(IServiceRegistry registry, String address) {
-        super(registry, address);
+    public RPCServer(String address) {
+        super(address);
     }
     
     @Override

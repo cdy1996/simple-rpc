@@ -20,8 +20,7 @@ public class ClientTest {
     public static void main(String[] args) throws Exception {
         ClientTest test = new ClientTest();
     
-        ClientBootStrap clientBootStrap = new ClientBootStrap();
-        clientBootStrap.start();
+        ClientBootStrap clientBootStrap = ClientBootStrap.build();
     
         ClientTest inject = (ClientTest)clientBootStrap.inject(test);
         inject.test();
