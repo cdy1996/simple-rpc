@@ -1,6 +1,6 @@
 package com.cdy.simplerpc.remoting;
 
-import com.cdy.simplerpc.container.RPCService;
+import com.cdy.simplerpc.annotation.RPCService;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterInvokerWrapper;
 import com.cdy.simplerpc.proxy.Invoker;

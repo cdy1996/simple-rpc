@@ -1,7 +1,10 @@
 package com.cdy.simplerpc.test;
 
 import com.cdy.simplerpc.ClientBootStrap;
-import com.cdy.simplerpc.container.RPCReference;
+import com.cdy.simplerpc.annotation.RPCReference;
+import com.cdy.simplerpc.balance.RibbonBalance;
+import com.cdy.simplerpc.registry.zookeeper.ZKServiceDiscoveryImpl;
+import com.cdy.simplerpc.remoting.netty.RPCClient;
 
 /**
  * 客户端测试
@@ -20,7 +23,10 @@ public class ClientTest {
     public static void main(String[] args) throws Exception {
         ClientTest test = new ClientTest();
     
-        ClientBootStrap clientBootStrap = ClientBootStrap.build();
+        ClientBootStrap clientBootStrap = ClientBootStrap.build()
+                .balance(new RibbonBalance())
+                .discovery(new ZKServiceDiscoveryImpl())
+                .client(new RPCClient());
     
         ClientTest inject = (ClientTest)clientBootStrap.inject(test);
         inject.test();

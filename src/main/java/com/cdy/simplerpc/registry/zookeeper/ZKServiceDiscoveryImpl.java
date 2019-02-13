@@ -1,6 +1,5 @@
 package com.cdy.simplerpc.registry.zookeeper;
 
-import com.cdy.simplerpc.balance.IBalance;
 import com.cdy.simplerpc.registry.AbstractDiscovery;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -8,6 +7,7 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,9 +21,13 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     List<String> list = new ArrayList<>();
     
     
-    public ZKServiceDiscoveryImpl(IBalance balance) {
-        super(balance);
+    public ZKServiceDiscoveryImpl() {
         init();
+        try {
+            listener();
+        } catch (Exception e) {
+            throw new RuntimeException("zookeeper 服务发现监听异常", e);
+        }
     }
     
     public void init() {
@@ -46,6 +50,7 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     
     public void listener() throws Exception {
         // 服务监听 更新负载均衡中的可用服务
+        rootListener();
     }
     
     public void rootListener() throws Exception{
@@ -53,18 +58,23 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
         //Normal--初始化为空  BUILD_INITIAL_CACHE--rebuild  POST_INITIALIZED_EVENT--初始化后发送事件
         pathChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
         pathChildrenCache.getListenable().addListener((curatorFramework1, pathChildrenCacheEvent) -> {
+            String path = pathChildrenCacheEvent.getData().getPath();
+            String[] split = path.split("/");
+            String serviceName = split[0];
+            String server = split[1];
             switch (pathChildrenCacheEvent.getType()) {
                 case CHILD_ADDED:
                     System.out.println("增加新的服务节点");
-                    //需要对新的路径进行 新的监听
-                    childListener(pathChildrenCacheEvent.getData().getPath());
+                    getBalance().addServer(serviceName, Collections.singletonList(server));
                     break;
                 case CHILD_REMOVED:
                     System.out.println("删除服务节点");
-                    //某个服务挂了
+                    pathChildrenCacheEvent.getType();
+                    getBalance().deleteServer(serviceName, null);
                     break;
                 case CHILD_UPDATED:
-                    //根节点不关心该事件
+                    getBalance().deleteServer(serviceName, null);
+                    getBalance().addServer(serviceName, Collections.singletonList(server));
                     break;
                 default:
                     break;
@@ -72,27 +82,5 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
         });
     }
     
-    public void childListener(String childPath) throws Exception{
-        PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, childPath, true);
-        //Normal--初始化为空  BUILD_INITIAL_CACHE--rebuild  POST_INITIALIZED_EVENT--初始化后发送事件
-        pathChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
-        pathChildrenCache.getListenable().addListener((curatorFramework1, pathChildrenCacheEvent) -> {
-            switch (pathChildrenCacheEvent.getType()) {
-                case CHILD_ADDED:
-                    System.out.println("增加节点");
-                    // 需要更新负载均衡中的机器数
-                    break;
-                case CHILD_REMOVED:
-                    System.out.println("删除节点");
-                    // 需要更新负载均衡中的机器数
-                    break;
-                case CHILD_UPDATED:
-                    System.out.println("更新节点");
-                    // 现在没用,以后如果有其他信息附加的话需要更新(例如 超时等熟悉)
-                    break;
-                default:
-                    break;
-            }
-        });
-    }
+    
 }

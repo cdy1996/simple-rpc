@@ -1,6 +1,6 @@
 package com.cdy.simplerpc.registry.simple;
 
-import com.cdy.simplerpc.registry.IServiceDiscovery;
+import com.cdy.simplerpc.registry.AbstractDiscovery;
 import com.cdy.simplerpc.util.StringUtil;
 import org.apache.commons.io.FileUtils;
 
@@ -17,7 +17,7 @@ import static com.cdy.simplerpc.util.StringUtil.splitWith;
  * Created by 陈东一
  * 2019/1/22 0022 21:57
  */
-public class SimpleDiscoveryImpl implements IServiceDiscovery {
+public class SimpleDiscoveryImpl extends AbstractDiscovery {
     
     private Map<String, String> map = new HashMap<>();
     

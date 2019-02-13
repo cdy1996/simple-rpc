@@ -13,12 +13,13 @@ public abstract class AbstractDiscovery implements IServiceDiscovery{
     
     private IBalance balance;
     
-    public AbstractDiscovery(IBalance balance) {
-        this.balance = balance;
-    }
-    
     protected String loadBalance(String serviceName, List<String> list) {
         return balance.loadBalance(serviceName, list);
+    }
+    
+    @Override
+    public void setBalance(IBalance balance) {
+        this.balance = balance;
     }
     
     public IBalance getBalance() {

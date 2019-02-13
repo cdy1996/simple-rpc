@@ -1,7 +1,8 @@
 package com.cdy.simplerpc;
 
+import com.cdy.simplerpc.balance.IBalance;
 import com.cdy.simplerpc.config.RemotingConfig;
-import com.cdy.simplerpc.container.RPCReference;
+import com.cdy.simplerpc.annotation.RPCReference;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterInvokerWrapper;
 import com.cdy.simplerpc.proxy.Invoker;
@@ -39,20 +40,27 @@ public class ClientBootStrap {
     
     private RemotingConfig remotingConfig = new RemotingConfig();
     
+    private IBalance iBalance;
+    
     
     public static ClientBootStrap build() {
         return new ClientBootStrap();
     }
     
+    public ClientBootStrap balance(IBalance iBalance){
+        this.iBalance = iBalance;
+        return this;
+    }
+    
     public ClientBootStrap discovery(IServiceDiscovery discovery) {
+        discovery.setBalance(iBalance);
         this.discovery = discovery;
         return this;
     }
     
     public ClientBootStrap client(Client client) {
-        this.client = client;
-        assert discovery != null;
         client.setServiceDiscovery(discovery);
+        this.client = client;
         return this;
     }
     
@@ -97,4 +105,6 @@ public class ClientBootStrap {
     public void setRemotingConfig(RemotingConfig remotingConfig) {
         this.remotingConfig = remotingConfig;
     }
+    
+    
 }

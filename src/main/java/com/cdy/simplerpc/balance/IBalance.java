@@ -1,5 +1,7 @@
 package com.cdy.simplerpc.balance;
 
+import com.netflix.loadbalancer.IRule;
+
 import java.util.List;
 
 /**
@@ -8,6 +10,8 @@ import java.util.List;
  * 2019/2/7 0007 20:09
  */
 public interface IBalance {
+    
+    void setiRule(IRule iRule);
     
     /**
      * 添加可用的实例

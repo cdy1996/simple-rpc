@@ -1,8 +1,10 @@
 package com.cdy.simplerpc.remoting.jetty;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -15,6 +17,8 @@ import javax.net.ssl.SSLContext;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.cdy.simplerpc.util.StringUtil.inputStreamToString;
+
 /**
  * httpclient 工具类
  *
@@ -23,6 +27,7 @@ import java.util.List;
  */
 public class HttpClientUtil {
     private static PoolingHttpClientConnectionManager manager;
+    
     
     static {
         manager = new PoolingHttpClientConnectionManager();
@@ -40,14 +45,8 @@ public class HttpClientUtil {
         
     }
     
-    public static CloseableHttpClient getHttpClient(Integer timeout) {
-        RequestConfig defaultRequestConfig = RequestConfig.custom()
-                .setSocketTimeout(timeout)
-                .setConnectTimeout(timeout)
-                .setConnectionRequestTimeout(timeout)
-                .setStaleConnectionCheckEnabled(true)
-                .build();
-        return HttpClients.custom().setDefaultRequestConfig(defaultRequestConfig).setConnectionManager(manager).build();
+    public static CloseableHttpClient getHttpClient() {
+        return HttpClients.custom().setConnectionManager(manager).build();
     }
     
     /**
@@ -55,17 +54,11 @@ public class HttpClientUtil {
      *
      * @return
      */
-    public static CloseableHttpClient getHttpsClient(Integer timeout) throws Exception {
-        return getHttpsClient(timeout, createSSLConnSocketFactory());
+    public static CloseableHttpClient getHttpsClient() throws Exception {
+        return getHttpsClient(createSSLConnSocketFactory());
     }
     
-    public static CloseableHttpClient getHttpsClient(Integer timeout, SSLConnectionSocketFactory sslSocketFactory) {
-        RequestConfig defaultRequestConfig = RequestConfig.custom()
-                .setSocketTimeout(timeout)
-                .setConnectTimeout(timeout)
-                .setConnectionRequestTimeout(timeout)
-                .setStaleConnectionCheckEnabled(true)
-                .build();
+    public static CloseableHttpClient getHttpsClient(SSLConnectionSocketFactory sslSocketFactory) {
         return HttpClients.custom().setSSLSocketFactory(sslSocketFactory).setConnectionManager(manager).build();
     }
     
@@ -87,5 +80,17 @@ public class HttpClientUtil {
     
     public static void close() {
         manager.close();
+    }
+    
+    public static String execute(CloseableHttpClient client, String uri, String params, Integer timeout) throws Exception {
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
+                .setSocketTimeout(timeout).build();
+        HttpPost httpPost = new HttpPost(uri);
+        httpPost.setConfig(requestConfig);
+        setPostParams(httpPost, params);
+        CloseableHttpResponse response = client.execute(httpPost);
+        HttpEntity entity = response.getEntity();
+        return inputStreamToString(entity.getContent());
     }
 }

@@ -1,5 +1,7 @@
 package com.cdy.simplerpc.registry;
 
+import com.cdy.simplerpc.balance.IBalance;
+
 /**
  * 服务搭建接口
  * Created by 陈东一
@@ -14,4 +16,6 @@ public interface IServiceDiscovery {
      * @throws Exception
      */
     String discovery(String serviceName) throws Exception;
+    
+    void setBalance(IBalance balance);
 }

@@ -1,5 +1,7 @@
 package com.cdy.simplerpc.balance;
 
+import com.netflix.loadbalancer.IRule;
+
 import java.util.List;
 
 /**
@@ -8,6 +10,9 @@ import java.util.List;
  * 2019/2/7 0007 20:13
  */
 public class SimpleBalance implements IBalance{
+    
+    @Override
+    public void setiRule(IRule iRule) {}
     
     @Override
     public void addServer(String serviceName, List<String> servers) {

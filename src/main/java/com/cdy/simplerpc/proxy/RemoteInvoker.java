@@ -31,9 +31,8 @@ public class RemoteInvoker implements Invoker{
     @Override
     public Object invoke(Invocation invocation) throws Exception {
     
-        Long breakTimeout = client.getClientBootStrap().getRemotingConfig().getBreakTimeout();
         Integer retryTime = client.getClientBootStrap().getRemotingConfig().getRetryTime();
-        // todo 熔断
+        // todo 重试
         Object invoke = invokeRemote(invocation);
         if(invoke instanceof Exception){
             throw new RuntimeException(((Exception) invoke).getMessage());

@@ -1,6 +1,6 @@
 package com.cdy.simplerpc.test;
 
-import com.cdy.simplerpc.container.RPCService;
+import com.cdy.simplerpc.annotation.RPCService;
 
 /**
  * 测试

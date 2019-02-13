@@ -19,12 +19,18 @@ import static com.cdy.simplerpc.util.StringUtil.toServer;
  */
 public class RibbonBalance implements IBalance {
     
-    private IRule iRule;
+    private IRule iRule = new RandomRule();
     
     private static ConcurrentHashMap<String, BaseLoadBalancer> loadBalancerMap
             = new ConcurrentHashMap<>();
     
-    public RibbonBalance(IRule iRule) {
+    
+    public IRule getiRule() {
+        return iRule;
+    }
+    
+    @Override
+    public void setiRule(IRule iRule) {
         this.iRule = iRule;
     }
     
@@ -38,10 +44,16 @@ public class RibbonBalance implements IBalance {
     
     @Override
     public void deleteServer(String serviceName, List<String> servers) {
-        loadBalancerMap.computeIfPresent(serviceName, (k, v) -> {
-            servers.forEach(e -> v.markServerDown(toServer(getServer(e))));
-            return v;
-        });
+        if (servers == null) {
+            loadBalancerMap.remove(serviceName);
+        } else {
+            loadBalancerMap.computeIfPresent(serviceName, (k, v) -> {
+                servers.forEach(e -> v.markServerDown(toServer(getServer(e))));
+                return v;
+            });
+        }
+        
+        
     }
     
     @Override
