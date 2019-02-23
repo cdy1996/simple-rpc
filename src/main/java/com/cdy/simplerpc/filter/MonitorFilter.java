@@ -22,14 +22,14 @@ public class MonitorFilter extends FilterAdapter {
     }
     
     @Override
-    public void beforeServerInvoke(Invocation invocation) {
+    protected void beforeServerInvoke(Invocation invocation) {
         // 记录来自客户端的调用的信息
         // 客户端的ip 调用的方法名称和参数
         MonitorEntity.start((String)invocation.getAttach().get("address"), new Date(), invocation.getMethodName(), invocation.getArgs());
     }
     
     @Override
-    public void beforeClientInvoke(Invocation invocation) {
+    protected void beforeClientInvoke(Invocation invocation) {
         // 记录调用服务端的调用信息
         // 记录服务端的地址 调用的方法名称和参数
         MonitorEntity.start((String)invocation.getAttach().get("address"), new Date(), invocation.getMethodName(), invocation.getArgs());
@@ -37,13 +37,13 @@ public class MonitorFilter extends FilterAdapter {
     }
     
     @Override
-    public void afterServerInvoke(Invocation invocation, Object o) {
+    protected void afterServerInvoke(Invocation invocation, Object o) {
         MonitorEntity end = MonitorEntity.end(new Date(), o);
         monitorSend.send(end);
     }
     
     @Override
-    public void afterClientInvoke(Invocation invocation, Object o) {
+    protected void afterClientInvoke(Invocation invocation, Object o) {
         MonitorEntity end = MonitorEntity.end(new Date(), o);
         monitorSend.send(end);
     }

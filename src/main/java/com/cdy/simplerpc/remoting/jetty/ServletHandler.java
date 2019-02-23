@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.remoting.jetty;
 
 import com.cdy.serialization.JsonUtil;
+import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.remoting.RPCContext;
@@ -42,7 +43,7 @@ public class ServletHandler extends HttpServlet {
                 result = o.invoke(invocation);
             } catch (Exception e) {
                 // 理论上不会抛异常 因为可能的异常都在异常过滤器中处理掉了
-                throw new RuntimeException(e);
+                throw new RPCException(e);
             }
         }
         RPCContext rpcContext = RPCContext.current();

@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.balance;
 
+import com.cdy.simplerpc.exception.DiscoveryException;
 import com.netflix.loadbalancer.IRule;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class SimpleBalance implements IBalance{
     public String loadBalance(String serviceName, List<String> list) {
         System.out.println("可用地址"+list);
         if (list == null || list.isEmpty()) {
-            throw new RuntimeException("没有可用的地址");
+            throw new DiscoveryException("没有可用的地址");
         }
         if (list.size() == 1) {
             return list.get(0);

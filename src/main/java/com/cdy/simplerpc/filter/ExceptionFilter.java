@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.filter;
 
 import com.cdy.simplerpc.annotation.Order;
+import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
 
 /**
@@ -18,7 +19,7 @@ public class ExceptionFilter extends FilterAdapter{
         try {
             o = super.doFilter(invocation);
         } catch (Exception e) {
-            return new RuntimeException(e);
+            return new RPCException(e);
         }
         return o;
     }

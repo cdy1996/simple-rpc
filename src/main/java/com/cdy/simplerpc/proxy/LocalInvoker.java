@@ -1,5 +1,7 @@
 package com.cdy.simplerpc.proxy;
 
+import com.cdy.simplerpc.exception.RPCException;
+
 import java.lang.reflect.Method;
 
 /**
@@ -28,7 +30,7 @@ public class LocalInvoker<T> implements Invoker {
     public Object invoke(Invocation invocation) throws Exception {
         Object invoke = invokeLocal(invocation);
         if (invoke instanceof Exception) {
-            throw new RuntimeException(((Exception) invoke).getMessage());
+            throw new RPCException(((Exception) invoke).getMessage());
         }
         return invoke;
     }

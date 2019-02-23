@@ -2,7 +2,7 @@ package com.cdy.simplerpc.remoting;
 
 import com.cdy.simplerpc.annotation.RPCService;
 import com.cdy.simplerpc.filter.Filter;
-import com.cdy.simplerpc.filter.FilterInvokerWrapper;
+import com.cdy.simplerpc.filter.FilterChain;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.proxy.ProxyFactory;
 import com.cdy.simplerpc.registry.IServiceRegistry;
@@ -36,7 +36,7 @@ public abstract class AbstractServer implements Server {
             objectInvoker = function.apply(objectInvoker);
         }
         
-        handlerMap.put(serviceName, new FilterInvokerWrapper(objectInvoker, filters));
+        handlerMap.put(serviceName, new FilterChain(objectInvoker, filters));
     }
     
     public void register() throws Exception {

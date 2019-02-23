@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.proxy;
 
+import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.remoting.Client;
 import com.cdy.simplerpc.remoting.RPCFuture;
 
@@ -35,7 +36,7 @@ public class RemoteInvoker implements Invoker{
         // todo 重试
         Object invoke = invokeRemote(invocation);
         if(invoke instanceof Exception){
-            throw new RuntimeException(((Exception) invoke).getMessage());
+            throw new RPCException(((Exception) invoke).getMessage());
         }
         return invoke;
     }

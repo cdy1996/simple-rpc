@@ -19,4 +19,11 @@ public abstract class InvokerAdapter implements Invoker{
         return invoker.invoke(invocation);
     }
     
+    public Invoker<?> getInvoker() {
+        return invoker;
+    }
+    
+    public void setInvoker(Invoker<?> invoker) {
+        this.invoker = invoker;
+    }
 }

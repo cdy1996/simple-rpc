@@ -32,11 +32,11 @@ public abstract class FilterAdapter implements Filter {
     }
     
     
-    public void beforeServerInvoke(Invocation invocation){}
-    public void afterServerInvoke(Invocation invocation, Object o){}
+    protected void beforeServerInvoke(Invocation invocation){}
+    protected void afterServerInvoke(Invocation invocation, Object o){}
     
-    public void beforeClientInvoke(Invocation invocation){}
-    public void afterClientInvoke(Invocation invocation, Object o){}
+    protected void beforeClientInvoke(Invocation invocation){}
+    protected void afterClientInvoke(Invocation invocation, Object o){}
     
     
     @Override

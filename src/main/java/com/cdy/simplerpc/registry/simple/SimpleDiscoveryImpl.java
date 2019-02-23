@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.registry.simple;
 
+import com.cdy.simplerpc.exception.DiscoveryException;
 import com.cdy.simplerpc.registry.AbstractDiscovery;
 import com.cdy.simplerpc.util.StringUtil;
 import org.apache.commons.io.FileUtils;
@@ -31,7 +32,7 @@ public class SimpleDiscoveryImpl extends AbstractDiscovery {
                     map.put(two.getFirst(), two.getSecond());
                 });
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new DiscoveryException(e);
             }
         }
     }

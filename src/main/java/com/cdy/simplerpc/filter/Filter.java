@@ -21,11 +21,11 @@ public interface Filter {
      * 设置是否为服务端使用过滤器
      * @param server
      */
-    default void setServer(Boolean server){}
+    void setServer(Boolean server);
     
     /**
      * 设置下一个过滤器
      * @param last
      */
-    default void setNext(Filter last){}
+    void setNext(Filter last);
 }

@@ -4,7 +4,7 @@ import com.cdy.simplerpc.balance.IBalance;
 import com.cdy.simplerpc.config.RemotingConfig;
 import com.cdy.simplerpc.annotation.RPCReference;
 import com.cdy.simplerpc.filter.Filter;
-import com.cdy.simplerpc.filter.FilterInvokerWrapper;
+import com.cdy.simplerpc.filter.FilterChain;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.proxy.ProxyFactory;
 import com.cdy.simplerpc.proxy.RemoteInvoker;
@@ -89,7 +89,7 @@ public class ClientBootStrap {
                         invoker = invokerInvokerFunction.apply(invoker);
                     }
                     invokerMap.put(clazz.getName(), invoker);
-                    Object proxy = proxyFactory.createProxy(new FilterInvokerWrapper(invoker, filters), clazz);
+                    Object proxy = proxyFactory.createProxy(new FilterChain(invoker, filters), clazz);
                     field.set(t, proxy);
                 }
             }

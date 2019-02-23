@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.registry.zookeeper;
 
+import com.cdy.simplerpc.exception.DiscoveryException;
 import com.cdy.simplerpc.registry.AbstractDiscovery;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -26,7 +27,7 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
         try {
             listener();
         } catch (Exception e) {
-            throw new RuntimeException("zookeeper 服务发现监听异常", e);
+            throw new DiscoveryException("zookeeper 服务发现监听异常", e);
         }
     }
     
