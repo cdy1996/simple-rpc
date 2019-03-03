@@ -7,6 +7,7 @@ import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -21,6 +22,7 @@ import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
  * Created by 陈东一
  * 2019/1/27 0027 14:47
  */
+@Slf4j
 public class ServletHandler extends HttpServlet {
     
     
@@ -29,8 +31,8 @@ public class ServletHandler extends HttpServlet {
         
         String params = req.getParameter("params");
         RPCRequest msg1 = JsonUtil.parseObject(params, RPCRequest.class);
-        
-        System.out.println("接受到请求" + msg1);
+    
+        log.debug("接受到请求" + msg1);
         
         String className = msg1.getClassName();
         Object result = null;

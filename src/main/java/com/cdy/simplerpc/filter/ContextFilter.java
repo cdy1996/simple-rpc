@@ -3,6 +3,7 @@ package com.cdy.simplerpc.filter;
 import com.cdy.simplerpc.annotation.Order;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.remoting.RPCContext;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 过滤器
@@ -10,6 +11,7 @@ import com.cdy.simplerpc.remoting.RPCContext;
  * 2018/11/25 0025 14:50
  */
 @Order(-1)
+@Slf4j
 public class ContextFilter extends FilterAdapter {
     
     
@@ -23,13 +25,13 @@ public class ContextFilter extends FilterAdapter {
     protected void beforeServerInvoke(Invocation invocation) {
         RPCContext rpcContext = RPCContext.newContext();
         rpcContext.setMap(invocation.getAttach());
-        System.out.println("服务端过滤器将客户端传过来的隐式传参放在threadlocal中");
+        log.debug("服务端过滤器将客户端传过来的隐式传参放在threadlocal中");
     }
     
     @Override
     protected void beforeClientInvoke(Invocation invocation) {
         RPCContext rpcContext = RPCContext.current();
         invocation.setAttach(rpcContext.getMap());
-        System.out.println("客户端过滤器将threadlocal传递到服务端");
+        log.debug("客户端过滤器将threadlocal传递到服务端");
     }
 }

@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,5 +42,11 @@ public class SimpleDiscoveryImpl extends AbstractDiscovery {
     public String discovery(String serviceName) {
         String address = map.get(serviceName);
         return address;
+    }
+    
+    @Override
+    public List<String> listServer(String serviceName) throws Exception {
+        String address = map.get(serviceName);
+        return Collections.singletonList(address);
     }
 }

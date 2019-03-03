@@ -1,5 +1,6 @@
-package com.cdy.simplerpc.remoting.jetty;
+package com.cdy.simplerpc.remoting.jetty.httpClient;
 
+import com.cdy.simplerpc.exception.RPCException;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
@@ -8,12 +9,14 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContextBuilder;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +49,10 @@ public class HttpClientUtil {
     }
     
     public static CloseableHttpClient getHttpClient() {
-        return HttpClients.custom().setConnectionManager(manager).build();
+        return HttpClients.custom()
+                .setConnectionManager(manager)
+                .setRetryHandler(new DefaultHttpRequestRetryHandler(0,false))
+                .build();
     }
     
     /**
@@ -59,7 +65,10 @@ public class HttpClientUtil {
     }
     
     public static CloseableHttpClient getHttpsClient(SSLConnectionSocketFactory sslSocketFactory) {
-        return HttpClients.custom().setSSLSocketFactory(sslSocketFactory).setConnectionManager(manager).build();
+        return HttpClients.custom().setSSLSocketFactory(sslSocketFactory)
+                .setConnectionManager(manager)
+                .setRetryHandler(new DefaultHttpRequestRetryHandler(0,false))
+                .build();
     }
     
     
@@ -84,13 +93,27 @@ public class HttpClientUtil {
     
     public static String execute(CloseableHttpClient client, String uri, String params, Integer timeout) throws Exception {
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
-                .setSocketTimeout(timeout).build();
+                .setConnectTimeout(timeout)  //连接时间
+                .setConnectionRequestTimeout(timeout) //connect Manager(连接池)获取Connection 超时时间
+                .setSocketTimeout(timeout) //请求获取数据的超时时间(即响应时间)
+                .build();
         HttpPost httpPost = new HttpPost(uri);
         httpPost.setConfig(requestConfig);
         setPostParams(httpPost, params);
-        CloseableHttpResponse response = client.execute(httpPost);
+        CloseableHttpResponse response = null;
+        try {
+            response = client.execute(httpPost);
+        } catch (IOException e) {
+            throw new RPCException(e);
+        }
+    
         HttpEntity entity = response.getEntity();
-        return inputStreamToString(entity.getContent());
+        if (response.getStatusLine().getStatusCode() == 200) {
+            return inputStreamToString(entity.getContent());
+        } else {
+            throw new RPCException("调用失败 ==> " + response.getStatusLine().getStatusCode());
+        }
+        
+       
     }
 }

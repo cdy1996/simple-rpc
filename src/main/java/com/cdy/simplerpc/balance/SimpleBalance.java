@@ -1,7 +1,7 @@
 package com.cdy.simplerpc.balance;
 
 import com.cdy.simplerpc.exception.DiscoveryException;
-import com.netflix.loadbalancer.IRule;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
@@ -10,10 +10,9 @@ import java.util.List;
  * Created by 陈东一
  * 2019/2/7 0007 20:13
  */
+@Slf4j
 public class SimpleBalance implements IBalance{
-    
-    @Override
-    public void setiRule(IRule iRule) {}
+
     
     @Override
     public void addServer(String serviceName, List<String> servers) {
@@ -27,7 +26,7 @@ public class SimpleBalance implements IBalance{
     
     @Override
     public String loadBalance(String serviceName, List<String> list) {
-        System.out.println("可用地址"+list);
+        log.debug("可用地址"+list);
         if (list == null || list.isEmpty()) {
             throw new DiscoveryException("没有可用的地址");
         }

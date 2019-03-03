@@ -1,8 +1,8 @@
 package com.cdy.simplerpc;
 
+import com.cdy.simplerpc.annotation.RPCReference;
 import com.cdy.simplerpc.balance.IBalance;
 import com.cdy.simplerpc.config.RemotingConfig;
-import com.cdy.simplerpc.annotation.RPCReference;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterChain;
 import com.cdy.simplerpc.proxy.Invoker;
@@ -41,7 +41,6 @@ public class ClientBootStrap {
     private RemotingConfig remotingConfig = new RemotingConfig();
     
     private IBalance iBalance;
-    
     
     public static ClientBootStrap build() {
         return new ClientBootStrap();

@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.remoting.jetty;
+package com.cdy.simplerpc.remoting.jetty.httpClient;
 
 import com.cdy.serialization.JsonUtil;
 import com.cdy.simplerpc.proxy.Invocation;
@@ -9,7 +9,7 @@ import com.cdy.simplerpc.remoting.RPCResponse;
 import com.cdy.simplerpc.util.StringUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import static com.cdy.simplerpc.remoting.jetty.HttpClientUtil.getHttpClient;
+import static com.cdy.simplerpc.remoting.jetty.httpClient.HttpClientUtil.getHttpClient;
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
 /**
@@ -54,7 +54,7 @@ public class HttpClient extends AbstractClient {
         // 隐式接受参数
         RPCContext rpcContext = RPCContext.current();
         rpcContext.setMap(rpcResponse.getAttach());
-        return result;
+        return rpcResponse;
     }
     
     

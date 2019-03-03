@@ -1,9 +1,6 @@
 package com.cdy.simplerpc.balance;
 
-import com.netflix.client.DefaultLoadBalancerRetryHandler;
 import com.netflix.loadbalancer.*;
-import com.netflix.loadbalancer.reactive.LoadBalancerCommand;
-import rx.Observable;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,18 +16,13 @@ import static com.cdy.simplerpc.util.StringUtil.toServer;
  */
 public class RibbonBalance implements IBalance {
     
-    private IRule iRule = new RandomRule();
+    private IRule iRule;
     
     private static ConcurrentHashMap<String, BaseLoadBalancer> loadBalancerMap
             = new ConcurrentHashMap<>();
     
     
-    public IRule getiRule() {
-        return iRule;
-    }
-    
-    @Override
-    public void setiRule(IRule iRule) {
+    public RibbonBalance(IRule iRule) {
         this.iRule = iRule;
     }
     
@@ -73,14 +65,12 @@ public class RibbonBalance implements IBalance {
                 .buildFixedServerListLoadBalancer(collect);
     }
     
-    public String call(BaseLoadBalancer baseLoadBalancer) {
-        
-        LoadBalancerCommand<String> command = LoadBalancerCommand.<String>builder()
-                .withLoadBalancer(baseLoadBalancer)
-                .withRetryHandler(new DefaultLoadBalancerRetryHandler(0, 1, true))
-                .build();
-        
-        return command.submit(server -> Observable.just(server.getHost() + ":" + server.getPort()))
-                .toBlocking().first();
+    
+    public IRule getiRule() {
+        return iRule;
+    }
+    
+    public void setiRule(IRule iRule) {
+        this.iRule = iRule;
     }
 }

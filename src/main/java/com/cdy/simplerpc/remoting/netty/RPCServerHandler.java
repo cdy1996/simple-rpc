@@ -8,6 +8,7 @@ import com.cdy.simplerpc.remoting.RPCResponse;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.cdy.simplerpc.remoting.netty.RPCServer.handlerMap;
 
@@ -17,12 +18,13 @@ import static com.cdy.simplerpc.remoting.netty.RPCServer.handlerMap;
  * 2018/9/1 22:00
  */
 @ChannelHandler.Sharable
+@Slf4j
 public class RPCServerHandler extends SimpleChannelInboundHandler<RPCRequest> {
     
     
     @Override
     public void channelRead0(ChannelHandlerContext ctx, RPCRequest msg1) throws Exception {
-        System.out.println("接受到请求" + msg1);
+        log.debug("接受到请求" + msg1);
         
         String className = msg1.getClassName();
         Object result = null;

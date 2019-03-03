@@ -7,6 +7,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.Attribute;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.cdy.simplerpc.proxy.RemoteInvoker.responseFuture;
 import static com.cdy.simplerpc.remoting.netty.RPCClient.ATTRIBUTE_KEY_ADDRESS;
@@ -18,6 +19,7 @@ import static com.cdy.simplerpc.remoting.netty.RPCClient.addressChannel;
  * 2018/9/1 22:24
  */
 @ChannelHandler.Sharable
+@Slf4j
 public class RPCClientHandler extends SimpleChannelInboundHandler<RPCResponse> {
     
     
@@ -32,7 +34,7 @@ public class RPCClientHandler extends SimpleChannelInboundHandler<RPCResponse> {
     
     @Override
     public void channelRead0(ChannelHandlerContext ctx, RPCResponse msg) throws Exception {
-        System.out.println("接收到内容" + msg);
+        log.debug("接收到内容" + msg);
         RPCFuture rpcFuture = responseFuture.remove(msg.getRequestId());
         if(rpcFuture == null){
             return;

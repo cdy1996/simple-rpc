@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.proxy;
 
 import com.cdy.simplerpc.exception.RPCException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
 
@@ -9,6 +10,7 @@ import java.lang.reflect.Method;
  * Created by 陈东一
  * 2019/1/24 0024 23:27
  */
+@Slf4j
 public class LocalInvoker<T> implements Invoker {
     
     private T t;
@@ -21,7 +23,7 @@ public class LocalInvoker<T> implements Invoker {
         Object result;
         Method method = t.getClass().getMethod(invocation.getMethodName(), invocation.getTypes());
         result = method.invoke(t, invocation.getArgs());
-        System.out.println("执行结果" + result);
+        log.debug("执行结果" + result);
         return result;
         
     }

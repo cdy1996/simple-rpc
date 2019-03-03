@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.registry.zookeeper;
 
 import com.cdy.simplerpc.registry.IServiceRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
@@ -11,6 +12,7 @@ import org.apache.zookeeper.CreateMode;
  * Created by 陈东一
  * 2018/9/1 21:19
  */
+@Slf4j
 public class ZKServiceRegistryImpl implements IServiceRegistry {
     
     CuratorFramework curatorFramework;
@@ -32,13 +34,13 @@ public class ZKServiceRegistryImpl implements IServiceRegistry {
                     .withMode(CreateMode.PERSISTENT)
                     .forPath(servicePath, "0".getBytes());
         }
-        
-        System.out.println("serviceName 创建成功" + servicePath);
+    
+        log.debug("serviceName 创建成功" + servicePath);
         
         String addressPath = servicePath + "/" + address;
         String addNode = curatorFramework.create().withMode(CreateMode.EPHEMERAL)
                 .forPath(addressPath, "0".getBytes());
-        System.out.println("address 创建成功 " + addNode);
+        log.debug("address 创建成功 " + addNode);
         
     }
 }
