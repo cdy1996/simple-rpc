@@ -12,6 +12,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RPCReference {
     // version
-    // async
+    boolean async() default false;
     // timeout
 }

@@ -10,11 +10,7 @@ import com.cdy.simplerpc.registry.IServiceDiscovery;
  * 2018/11/25 0025 14:41
  */
 public interface Client {
-    
-    /**
-     * 初始化
-     */
-    void init();
+
     
     /**
      * 远程调用

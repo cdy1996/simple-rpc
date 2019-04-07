@@ -36,11 +36,11 @@ public class RPCClient extends AbstractClient {
     private final EventLoopGroup boss = new NioEventLoopGroup();
     private static final AtomicInteger requestId = new AtomicInteger(0);
     public static final AttributeKey<String> ATTRIBUTE_KEY_ADDRESS = AttributeKey.valueOf("address");
+    //todo 一个service 只对应一个远程的 所以可以不用map来缓存
     public static final ConcurrentHashMap<String, Channel> addressChannel = new ConcurrentHashMap<>();
     
     
-    @Override
-    public void init() {
+    private void init() {
         bootstrap.group(boss)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
@@ -79,9 +79,10 @@ public class RPCClient extends AbstractClient {
         rpcRequest.getAttach().put("address", address);
         RPCFuture future = new RPCFuture(getClientBootStrap().getRemotingConfig().getInvokeTimeout());
         responseFuture.put(rpcRequest.getRequestId(), future);
-        
         channel.writeAndFlush(rpcRequest);
+        // todo 发送事件
         Object result = future.get();
+        // todo 结果返回事件
         // 隐式接受参数
         RPCContext rpcContext = RPCContext.current();
         rpcContext.setMap(future.getAttach());

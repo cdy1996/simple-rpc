@@ -1,7 +1,5 @@
 package com.cdy.simplerpc.registry;
 
-import com.cdy.simplerpc.balance.IBalance;
-
 import java.util.List;
 
 /**
@@ -19,7 +17,12 @@ public interface IServiceDiscovery {
      */
     String discovery(String serviceName) throws Exception;
     
+    /**
+     * 服务对应的所有实例地址
+     * @param serviceName
+     * @return
+     * @throws Exception
+     */
     List<String> listServer(String serviceName) throws  Exception;
     
-    void setBalance(IBalance balance);
 }

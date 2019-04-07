@@ -26,31 +26,10 @@ public class RibbonBalance implements IBalance {
         this.iRule = iRule;
     }
     
-    @Override
-    public void addServer(String serviceName, List<String> servers) {
-        loadBalancerMap.computeIfPresent(serviceName, (k, v) -> {
-            servers.forEach(e -> v.addServer(toServer(getServer(e))));
-            return v;
-        });
-    }
-    
-    @Override
-    public void deleteServer(String serviceName, List<String> servers) {
-        if (servers == null) {
-            loadBalancerMap.remove(serviceName);
-        } else {
-            loadBalancerMap.computeIfPresent(serviceName, (k, v) -> {
-                servers.forEach(e -> v.markServerDown(toServer(getServer(e))));
-                return v;
-            });
-        }
-        
-        
-    }
     
     @Override
     public String loadBalance(String serviceName, List<String> list) {
-        BaseLoadBalancer baseLoadBalancer = loadBalancerMap.getOrDefault(serviceName, generateBalancer(list));
+        BaseLoadBalancer baseLoadBalancer = loadBalancerMap.putIfAbsent(serviceName, generateBalancer(list));
         Server server = baseLoadBalancer.chooseServer();
         return server.getHost() + ":" + server.getPort();
     }
@@ -72,5 +51,51 @@ public class RibbonBalance implements IBalance {
     
     public void setiRule(IRule iRule) {
         this.iRule = iRule;
+    }
+    
+    
+    
+    /**
+     * 添加可用的实例
+     *
+     * 该方法存在线程安全问题,不要多线程并发调用
+     *
+     * @param serviceName
+     * @param servers
+     */
+    public void addServer(String serviceName, List<String> servers) {
+        loadBalancerMap.computeIfPresent(serviceName, (k, v) -> {
+            servers.forEach(e -> v.addServer(toServer(getServer(e))));
+            return v;
+        });
+    }
+    
+    
+    /**
+     * 删除实例
+     *
+     * 该方法存在线程安全问题,不要多线程并发调用
+     *
+     * @param serviceName
+     * @param servers
+     */
+    public void deleteServer(String serviceName, List<String> servers) {
+        if (servers == null) {
+            loadBalancerMap.remove(serviceName);
+        } else {
+            loadBalancerMap.computeIfPresent(serviceName, (k, v) -> {
+                servers.forEach(e -> v.markServerDown(toServer(getServer(e))));
+                return v;
+            });
+        }
+    }
+    
+    class RibbonServerRenewTask implements Runnable {
+    
+    
+        @Override
+        public void run() {
+            //todo
+        }
     }
 }

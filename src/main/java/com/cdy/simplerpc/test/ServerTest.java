@@ -12,10 +12,10 @@ import com.cdy.simplerpc.remoting.netty.RPCServer;
 public class ServerTest {
     
     public static void main(String[] args) throws Exception {
-        ServerBootStrap serverBootStrap = ServerBootStrap.build()
-                .registry(new ZKServiceRegistryImpl())
-                .server(new RPCServer("127.0.0.1:8080"));
-    
+        ServerBootStrap serverBootStrap = new ServerBootStrap();
+        serverBootStrap.setRegistry((new ZKServiceRegistryImpl()));
+        serverBootStrap.setServer(new RPCServer("127.0.0.1:8080"));
+        
         serverBootStrap.bind(new TestServiceImpl());
         System.in.read();
         

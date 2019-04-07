@@ -21,14 +21,6 @@ public class HttpClient extends AbstractClient {
     
     
     @Override
-    public void init() {
-    }
-    
-    public HttpClient() {
-        init();
-    }
-    
-    @Override
     public Object invoke(Invocation invocation) throws Exception {
         RPCRequest rpcRequest = invocation.toRequest();
         

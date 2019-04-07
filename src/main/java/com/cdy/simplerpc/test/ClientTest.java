@@ -2,10 +2,8 @@ package com.cdy.simplerpc.test;
 
 import com.cdy.simplerpc.ClientBootStrap;
 import com.cdy.simplerpc.annotation.RPCReference;
-import com.cdy.simplerpc.balance.RibbonBalance;
 import com.cdy.simplerpc.registry.zookeeper.ZKServiceDiscoveryImpl;
 import com.cdy.simplerpc.remoting.netty.RPCClient;
-import com.netflix.loadbalancer.RandomRule;
 
 /**
  * 客户端测试
@@ -23,13 +21,10 @@ public class ClientTest {
     
     public static void main(String[] args) throws Exception {
         ClientTest test = new ClientTest();
-        
-        ClientBootStrap clientBootStrap = ClientBootStrap.build()
-                .balance(new RibbonBalance(new RandomRule()))
-                .discovery(new ZKServiceDiscoveryImpl())
-                .client(new RPCClient());
-        
-        ClientTest inject = (ClientTest) clientBootStrap.inject(test);
+        ClientBootStrap clientBootStrap = new ClientBootStrap();
+        clientBootStrap.setDiscovery((new ZKServiceDiscoveryImpl()));
+        clientBootStrap.setClient(new RPCClient());
+        ClientTest inject = clientBootStrap.inject(test);
         inject.test();
         
         System.in.read();

@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.proxy;
 
+import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
 import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.remoting.Client;
 import com.cdy.simplerpc.remoting.RPCFuture;
@@ -15,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RemoteInvoker implements Invoker{
     
     public static ConcurrentHashMap<String, RPCFuture> responseFuture = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, ReferenceMetaInfo> metaInfoMap = new ConcurrentHashMap<>();
     
     private Client client;
     
@@ -39,5 +41,10 @@ public class RemoteInvoker implements Invoker{
             throw new RPCException(((Exception) invoke).getMessage());
         }
         return invoke;
+    }
+    
+    @Override
+    public void addMetaInfo(String s, ReferenceMetaInfo data) {
+        metaInfoMap.putIfAbsent(s, data);
     }
 }

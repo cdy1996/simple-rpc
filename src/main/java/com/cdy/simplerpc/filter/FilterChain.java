@@ -24,17 +24,17 @@ public class FilterChain extends InvokerAdapter {
             e.setServer(invoker.getClass().isAssignableFrom(LocalInvoker.class));
             filters.add(e);
         });
-    }
-    
-    
-    @Override
-    public Object invoke(Invocation invocation) throws Exception {
-        
+        //构建链
         Filter last = new DefaultFilter();
         for (int i = filters.size() - 1; i >= 0; i--) {
             filters.get(i).setNext(last);
             last = filters.get(i);
         }
+    }
+    
+    
+    @Override
+    public Object invoke(Invocation invocation) throws Exception {
         return filters.get(0).doFilter(invocation);
     }
     

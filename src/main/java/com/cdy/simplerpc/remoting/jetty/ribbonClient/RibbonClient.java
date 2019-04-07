@@ -30,8 +30,6 @@ import static com.cdy.simplerpc.util.StringUtil.toServer;
  */
 public class RibbonClient extends AbstractClient {
     
-    @Override
-    public void init() {}
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {

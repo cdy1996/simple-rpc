@@ -1,7 +1,7 @@
 package com.cdy.simplerpc;
 
 import com.cdy.simplerpc.annotation.RPCReference;
-import com.cdy.simplerpc.balance.IBalance;
+import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
 import com.cdy.simplerpc.config.RemotingConfig;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterChain;
@@ -15,6 +15,7 @@ import com.cdy.simplerpc.remoting.netty.RPCClient;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,49 +41,38 @@ public class ClientBootStrap {
     
     private RemotingConfig remotingConfig = new RemotingConfig();
     
-    private IBalance iBalance;
     
-    public static ClientBootStrap build() {
-        return new ClientBootStrap();
-    }
-    
-    public ClientBootStrap balance(IBalance iBalance){
-        this.iBalance = iBalance;
-        return this;
-    }
-    
-    public ClientBootStrap discovery(IServiceDiscovery discovery) {
-        discovery.setBalance(iBalance);
+    public void setDiscovery(IServiceDiscovery discovery) {
         this.discovery = discovery;
-        return this;
     }
     
-    public ClientBootStrap client(Client client) {
-        client.setServiceDiscovery(discovery);
+    public void setClient(Client client) {
+        client.setServiceDiscovery(this.discovery);
         this.client = client;
-        return this;
     }
     
     public ClientBootStrap filters(Filter... filters) {
-        for (Filter filter : filters) {
-            this.filters.add(filter);
-        }
+        this.filters.addAll(Arrays.asList(filters));
         return this;
     }
     
-    public Object inject(Object t, Function<Invoker, Invoker>... function) throws Exception {
+    @SafeVarargs
+    public final <T> T inject(T t, Function<Invoker, Invoker>... function) throws Exception {
         Field[] fields = t.getClass().getDeclaredFields();
         for (Field field : fields) {
             RPCReference annotation = field.getAnnotation(RPCReference.class);
             if (annotation != null) {
                 Class<?> clazz = field.getType();
                 synchronized (clazz.getName()) {
-                    Invoker invoker = invokerMap.get(clazz.getName());
+                    Invoker invoker = invokerMap.get(t.getClass().getName()+"#"+clazz.getName());
+                    ReferenceMetaInfo data = new ReferenceMetaInfo(annotation);
                     field.setAccessible(true);
                     if (invoker != null) {
+                        invoker.addMetaInfo(t.getClass().getName() + "#" + clazz.getName(), data);
                         field.set(t, invoker);
                         continue;
                     }
+                   
                     invoker = new RemoteInvoker(client);
                     for (Function<Invoker, Invoker> invokerInvokerFunction : function) {
                         invoker = invokerInvokerFunction.apply(invoker);

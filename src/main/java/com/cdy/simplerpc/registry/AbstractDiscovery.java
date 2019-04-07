@@ -3,6 +3,8 @@ package com.cdy.simplerpc.registry;
 import com.cdy.simplerpc.balance.IBalance;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 服务发现 负载均衡抽象层
@@ -13,16 +15,19 @@ public abstract class AbstractDiscovery implements IServiceDiscovery{
     
     private IBalance balance;
     
+    //缓存所有的服务对应的地址列表
+    Map<String, List<String>> cache = new ConcurrentHashMap<>();
+    
     protected String loadBalance(String serviceName, List<String> list) {
         return balance.loadBalance(serviceName, list);
     }
     
-    @Override
-    public void setBalance(IBalance balance) {
-        this.balance = balance;
-    }
     
     public IBalance getBalance() {
         return balance;
+    }
+    
+    public Map<String, List<String>> getCache() {
+        return cache;
     }
 }

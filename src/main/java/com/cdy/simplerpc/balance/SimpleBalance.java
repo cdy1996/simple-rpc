@@ -15,16 +15,6 @@ public class SimpleBalance implements IBalance{
 
     
     @Override
-    public void addServer(String serviceName, List<String> servers) {
-    
-    }
-    
-    @Override
-    public void deleteServer(String serviceName, List<String> servers) {
-    
-    }
-    
-    @Override
     public String loadBalance(String serviceName, List<String> list) {
         log.debug("可用地址"+list);
         if (list == null || list.isEmpty()) {

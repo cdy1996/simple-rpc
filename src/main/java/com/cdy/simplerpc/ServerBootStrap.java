@@ -8,6 +8,7 @@ import com.cdy.simplerpc.remoting.Server;
 import com.cdy.simplerpc.remoting.netty.RPCServer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -28,27 +29,22 @@ public class ServerBootStrap {
         return new ServerBootStrap();
     }
     
-    public ServerBootStrap registry(IServiceRegistry registry) {
+    public void setRegistry(IServiceRegistry registry) {
         this.registry = registry;
-        return this;
     }
     
-    public ServerBootStrap server(Server server) {
-        this.server = server;
-        assert registry != null;
+    public void setServer(Server server) {
         server.setRegistry(registry);
-        return this;
+        this.server = server;
     }
     
     public ServerBootStrap filters(Filter... filters) {
-        for (Filter filter : filters) {
-            this.filters.add(filter);
-        }
+        this.filters.addAll(Arrays.asList(filters));
         return this;
     }
     
-    
-    public void bind(Object object, Function<Invoker, Invoker>... function) throws Exception {
+    @SafeVarargs
+    public final <T> void bind(T object, Function<Invoker, Invoker>... function) throws Exception {
         server.bind(object, filters, function);
         server.registerAndListen();
     }

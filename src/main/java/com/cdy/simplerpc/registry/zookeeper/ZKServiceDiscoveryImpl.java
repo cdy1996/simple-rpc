@@ -8,10 +8,7 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 服务发现
@@ -22,8 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     
     CuratorFramework curatorFramework;
-    
-    Map<String, List<String>> cache = new ConcurrentHashMap<>();
+  
     
     public ZKServiceDiscoveryImpl() {
         init();
@@ -46,7 +42,7 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     public String discovery(String serviceName) throws Exception {
         String path = ZKConfig.zkRegistryPath + "/" + serviceName;
         //发现地址
-        List<String> list = cache.putIfAbsent(serviceName, curatorFramework.getChildren().forPath(path));
+        List<String> list = getCache().putIfAbsent(serviceName, curatorFramework.getChildren().forPath(path));
         //负载均衡
         return loadBalance(serviceName, list);
     }
@@ -56,13 +52,15 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     public List<String> listServer(String serviceName) throws Exception {
         String path = ZKConfig.zkRegistryPath + "/" + serviceName;
         //发现地址
-        return cache.putIfAbsent(serviceName, curatorFramework.getChildren().forPath(path));
+        return getCache().putIfAbsent(serviceName, curatorFramework.getChildren().forPath(path));
     }
+    
     
     public void listener() throws Exception {
         // 服务监听 更新负载均衡中的可用服务
         rootListener();
     }
+    
     
     public void rootListener() throws Exception{
         PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, ZKConfig.zkRegistryPath, true);
@@ -76,14 +74,15 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
             switch (pathChildrenCacheEvent.getType()) {
                 case CHILD_ADDED:
                     log.debug("增加新的服务节点");
-                    cache.remove(serviceName);
-                    getBalance().addServer(serviceName, Collections.singletonList(server));
+                    getCache().remove(serviceName);
+                    //todo 更新这里的cache即可 ,不用更新ribbon中的list
+//                    getBalance().addServer(serviceName, Collections.singletonList(server));
                     break;
                 case CHILD_REMOVED:
                     log.debug("删除服务节点");
-                    cache.remove(serviceName);
-                    pathChildrenCacheEvent.getType();
-                    getBalance().deleteServer(serviceName, null);
+                    getCache().remove(serviceName);
+//                    pathChildrenCacheEvent.getType();
+//                    getBalance().deleteServer(serviceName, null);
                     break;
                 case CHILD_UPDATED:
                     // 暂时没有节点更新的操作

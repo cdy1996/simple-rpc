@@ -1,5 +1,7 @@
 package com.cdy.simplerpc.proxy;
 
+import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
+
 /**
  * 客户端适配器
  *
@@ -26,4 +28,7 @@ public abstract class InvokerAdapter implements Invoker{
     public void setInvoker(Invoker<?> invoker) {
         this.invoker = invoker;
     }
+    
+    @Override
+    public void addMetaInfo(String s, ReferenceMetaInfo data) {}
 }

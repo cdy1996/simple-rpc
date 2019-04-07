@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.proxy;
 
+import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
 import com.cdy.simplerpc.exception.RPCException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,5 +36,10 @@ public class LocalInvoker<T> implements Invoker {
             throw new RPCException(((Exception) invoke).getMessage());
         }
         return invoke;
+    }
+    
+    @Override
+    public void addMetaInfo(String s, ReferenceMetaInfo data) {
+    
     }
 }
