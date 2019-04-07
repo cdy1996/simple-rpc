@@ -47,4 +47,9 @@ public class RemoteInvoker implements Invoker{
     public void addMetaInfo(String s, ReferenceMetaInfo data) {
         metaInfoMap.putIfAbsent(s, data);
     }
+    
+    @Override
+    public ReferenceMetaInfo getMetaInfo(String s) {
+        return metaInfoMap.get(s);
+    }
 }

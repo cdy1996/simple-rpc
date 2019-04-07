@@ -5,6 +5,7 @@ import com.cdy.simplerpc.exception.RPCException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 服务端本地执行器
@@ -15,6 +16,7 @@ import java.lang.reflect.Method;
 public class LocalInvoker<T> implements Invoker {
     
     private T t;
+    public static ConcurrentHashMap<String, ReferenceMetaInfo> metaInfoMap = new ConcurrentHashMap<>();
     
     public LocalInvoker(T t) {
         this.t = t;
@@ -40,6 +42,11 @@ public class LocalInvoker<T> implements Invoker {
     
     @Override
     public void addMetaInfo(String s, ReferenceMetaInfo data) {
+        metaInfoMap.putIfAbsent(s, data);
+    }
     
+    @Override
+    public ReferenceMetaInfo getMetaInfo(String s) {
+        return metaInfoMap.get(s);
     }
 }

@@ -30,5 +30,12 @@ public abstract class InvokerAdapter implements Invoker{
     }
     
     @Override
-    public void addMetaInfo(String s, ReferenceMetaInfo data) {}
+    public void addMetaInfo(String s, ReferenceMetaInfo data) {
+        invoker.addMetaInfo(s, data);
+    }
+    
+    @Override
+    public ReferenceMetaInfo getMetaInfo(String s) {
+        return invoker.getMetaInfo(s);
+    }
 }

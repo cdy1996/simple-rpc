@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.remoting.netty;
 
+import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
@@ -19,6 +20,8 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.cdy.simplerpc.proxy.RemoteInvoker.responseFuture;
@@ -39,6 +42,7 @@ public class RPCClient extends AbstractClient {
     //todo 一个service 只对应一个远程的 所以可以不用map来缓存
     public static final ConcurrentHashMap<String, Channel> addressChannel = new ConcurrentHashMap<>();
     
+    public static ExecutorService executorService = Executors.newCachedThreadPool();
     
     private void init() {
         bootstrap.group(boss)
@@ -77,8 +81,21 @@ public class RPCClient extends AbstractClient {
         RPCContext rpcContext1 = RPCContext.current();
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
-        RPCFuture future = new RPCFuture(getClientBootStrap().getRemotingConfig().getInvokeTimeout());
+    
+        ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo(serviceName);
+        
+    
+        RPCFuture future = new RPCFuture(referenceMetaInfo.getTimeout());
         responseFuture.put(rpcRequest.getRequestId(), future);
+        
+        if (referenceMetaInfo.isAsync()) {
+            return executorService.submit(() -> send(rpcRequest, channel, future));
+        } else {
+            return send(rpcRequest, channel, future);
+        }
+    }
+    
+    private Object send(RPCRequest rpcRequest, Channel channel, RPCFuture future) throws InterruptedException {
         channel.writeAndFlush(rpcRequest);
         // todo 发送事件
         Object result = future.get();
@@ -88,7 +105,7 @@ public class RPCClient extends AbstractClient {
         rpcContext.setMap(future.getAttach());
         return result;
     }
-    
+
     private Channel connect(String address) throws Exception {
         ChannelFuture sync = bootstrap.connect(toSocketAddress(getServer(address))).sync();
         Channel channel = sync.channel();

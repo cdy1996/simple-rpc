@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.remoting.jetty.httpClient;
 
 import com.cdy.serialization.JsonUtil;
+import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
@@ -8,6 +9,10 @@ import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
 import com.cdy.simplerpc.util.StringUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static com.cdy.simplerpc.remoting.jetty.httpClient.HttpClientUtil.getHttpClient;
 import static com.cdy.simplerpc.util.StringUtil.getServer;
@@ -19,6 +24,7 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
  */
 public class HttpClient extends AbstractClient {
     
+    public static ExecutorService executorService = Executors.newCachedThreadPool();
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
@@ -34,19 +40,31 @@ public class HttpClient extends AbstractClient {
         RPCContext rpcContext1 = RPCContext.current();
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
-        
-        
+    
+    
+        ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo(serviceName);
+    
+        if (referenceMetaInfo.isAsync()) {
+            Future<?> submit = executorService.submit(() -> send(rpcRequest, server, client, referenceMetaInfo));
+            return submit;
+        } else {
+            return send(rpcRequest, server, client, referenceMetaInfo);
+        }
+       
+    }
+    
+    private Object send(RPCRequest rpcRequest, StringUtil.TwoResult<String, Integer> server, CloseableHttpClient client, ReferenceMetaInfo referenceMetaInfo) throws Exception {
         String result = HttpClientUtil.execute(client,
                 "http://" + server.getFirst() + ":" + server.getSecond() + "/simpleRPC",
                 JsonUtil.toString(rpcRequest),
-                Math.toIntExact(getClientBootStrap().getRemotingConfig().getInvokeTimeout()));
+                Math.toIntExact(referenceMetaInfo.getTimeout()));
         
         
         RPCResponse rpcResponse = JsonUtil.parseObject(result, RPCResponse.class);
         // 隐式接受参数
         RPCContext rpcContext = RPCContext.current();
         rpcContext.setMap(rpcResponse.getAttach());
-        return rpcResponse;
+        return rpcResponse.getResultData();
     }
     
     

@@ -11,7 +11,10 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RPCReference {
+    
+    String value() default "default";
     // version
     boolean async() default false;
     // timeout
+    long timeout() default 5000L;
 }

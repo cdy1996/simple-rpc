@@ -19,4 +19,6 @@ public interface Invoker<T> {
     
     void addMetaInfo(String s, ReferenceMetaInfo data);
     
+    ReferenceMetaInfo getMetaInfo(String s);
+    
 }

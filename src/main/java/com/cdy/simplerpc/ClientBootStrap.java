@@ -67,12 +67,12 @@ public class ClientBootStrap {
                     Invoker invoker = invokerMap.get(t.getClass().getName()+"#"+clazz.getName());
                     ReferenceMetaInfo data = new ReferenceMetaInfo(annotation);
                     field.setAccessible(true);
+                    //相同的invoker但是可以配置不同的策略
                     if (invoker != null) {
                         invoker.addMetaInfo(t.getClass().getName() + "#" + clazz.getName(), data);
                         field.set(t, invoker);
                         continue;
                     }
-                   
                     invoker = new RemoteInvoker(client);
                     for (Function<Invoker, Invoker> invokerInvokerFunction : function) {
                         invoker = invokerInvokerFunction.apply(invoker);
@@ -86,6 +86,9 @@ public class ClientBootStrap {
         return t;
     }
     
+    public ReferenceMetaInfo getReferenceMetaInfo(String serviceName) {
+        return invokerMap.get(serviceName).getMetaInfo(serviceName);
+    }
     
     public RemotingConfig getRemotingConfig() {
         return remotingConfig;
