@@ -4,6 +4,7 @@ import com.cdy.serialization.JsonUtil;
 import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
 import com.cdy.simplerpc.balance.IBalance;
 import com.cdy.simplerpc.balance.RibbonBalance;
+import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.registry.AbstractDiscovery;
 import com.cdy.simplerpc.remoting.AbstractClient;
@@ -18,6 +19,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import rx.Observable;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import static com.cdy.simplerpc.remoting.jetty.httpClient.HttpClientUtil.getHttpClient;
@@ -49,7 +51,15 @@ public class RibbonClient extends AbstractClient {
         ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo(serviceName);
         
         if (referenceMetaInfo.isAsync()) {
-            return call(rpcRequest, baseLoadBalancer, referenceMetaInfo).toBlocking().toFuture();
+          
+            CompletableFuture<Object> uCompletableFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return call(rpcRequest, baseLoadBalancer, referenceMetaInfo).toBlocking().toFuture().get();
+                } catch (Exception e) {
+                    throw new RPCException(e);
+                }
+            });
+            return uCompletableFuture;
         } else {
             return call(rpcRequest, baseLoadBalancer, referenceMetaInfo).toBlocking().first();
         }

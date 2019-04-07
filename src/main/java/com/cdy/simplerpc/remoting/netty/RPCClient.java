@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.remoting.netty;
 
 import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
+import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
@@ -19,6 +20,7 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,7 +44,6 @@ public class RPCClient extends AbstractClient {
     //todo 一个service 只对应一个远程的 所以可以不用map来缓存
     public static final ConcurrentHashMap<String, Channel> addressChannel = new ConcurrentHashMap<>();
     
-    public static ExecutorService executorService = Executors.newCachedThreadPool();
     
     private void init() {
         bootstrap.group(boss)
@@ -89,7 +90,14 @@ public class RPCClient extends AbstractClient {
         responseFuture.put(rpcRequest.getRequestId(), future);
         
         if (referenceMetaInfo.isAsync()) {
-            return executorService.submit(() -> send(rpcRequest, channel, future));
+            CompletableFuture<Object> uCompletableFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return send(rpcRequest, channel, future);
+                } catch (Exception e) {
+                    throw new RPCException(e);
+                }
+            });
+            return uCompletableFuture;
         } else {
             return send(rpcRequest, channel, future);
         }

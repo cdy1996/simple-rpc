@@ -2,6 +2,7 @@ package com.cdy.simplerpc.remoting.jetty.httpClient;
 
 import com.cdy.serialization.JsonUtil;
 import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
+import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
@@ -10,9 +11,7 @@ import com.cdy.simplerpc.remoting.RPCResponse;
 import com.cdy.simplerpc.util.StringUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 import static com.cdy.simplerpc.remoting.jetty.httpClient.HttpClientUtil.getHttpClient;
 import static com.cdy.simplerpc.util.StringUtil.getServer;
@@ -23,8 +22,6 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
  * 2018/11/25 0025 14:28
  */
 public class HttpClient extends AbstractClient {
-    
-    public static ExecutorService executorService = Executors.newCachedThreadPool();
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
@@ -45,8 +42,14 @@ public class HttpClient extends AbstractClient {
         ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo(serviceName);
     
         if (referenceMetaInfo.isAsync()) {
-            Future<?> submit = executorService.submit(() -> send(rpcRequest, server, client, referenceMetaInfo));
-            return submit;
+            CompletableFuture<Object> uCompletableFuture = CompletableFuture.supplyAsync(() -> {
+                try {
+                    return send(rpcRequest, server, client, referenceMetaInfo);
+                } catch (Exception e) {
+                    throw new RPCException(e);
+                }
+            });
+            return uCompletableFuture;
         } else {
             return send(rpcRequest, server, client, referenceMetaInfo);
         }

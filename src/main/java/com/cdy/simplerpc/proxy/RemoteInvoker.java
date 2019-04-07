@@ -34,7 +34,8 @@ public class RemoteInvoker implements Invoker{
     @Override
     public Object invoke(Invocation invocation) throws Exception {
     
-        Integer retryTime = client.getClientBootStrap().getRemotingConfig().getRetryTime();
+        ReferenceMetaInfo referenceMetaInfo = client.getClientBootStrap().getReferenceMetaInfo(invocation.getInterfaceClass().getName());
+        
         // todo 重试
         Object invoke = invokeRemote(invocation);
         if(invoke instanceof Exception){
