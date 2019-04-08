@@ -29,7 +29,11 @@ public class RibbonBalance implements IBalance {
     
     @Override
     public String loadBalance(String serviceName, List<String> list) {
-        BaseLoadBalancer baseLoadBalancer = loadBalancerMap.putIfAbsent(serviceName, generateBalancer(list));
+        BaseLoadBalancer baseLoadBalancer = null;
+        if ((baseLoadBalancer=loadBalancerMap.get(serviceName))==null) {
+            baseLoadBalancer =  generateBalancer(list);
+            loadBalancerMap.putIfAbsent(serviceName, baseLoadBalancer);
+        }
         Server server = baseLoadBalancer.chooseServer();
         return server.getHost() + ":" + server.getPort();
     }

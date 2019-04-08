@@ -9,6 +9,7 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 服务发现
@@ -19,7 +20,7 @@ import java.util.List;
 public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     
     CuratorFramework curatorFramework;
-  
+    
     
     public ZKServiceDiscoveryImpl() {
         init();
@@ -42,17 +43,34 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     public String discovery(String serviceName) throws Exception {
         String path = ZKConfig.zkRegistryPath + "/" + serviceName;
         //发现地址
-        List<String> list = getCache().putIfAbsent(serviceName, curatorFramework.getChildren().forPath(path));
+        Map<String, List<String>> cache = getCache();
+        List<String> list = null;
+        if ((list = cache.get(serviceName)) == null) {
+            list = curatorFramework.getChildren().forPath(path);
+            cache.put(serviceName, list);
+        }
         //负载均衡
         return loadBalance(serviceName, list);
     }
     
     
     @Override
-    public List<String> listServer(String serviceName) throws Exception {
+    public List<String> listServer(String serviceName) {
         String path = ZKConfig.zkRegistryPath + "/" + serviceName;
         //发现地址
-        return getCache().putIfAbsent(serviceName, curatorFramework.getChildren().forPath(path));
+        Map<String, List<String>> cache = getCache();
+        List<String> servers = null;
+        if ((servers = cache.get(serviceName)) == null) {
+            try {
+                servers = curatorFramework.getChildren().forPath(path);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+                //如果创建失败可能是被其他线程先创建了,所以尝试直接返回
+                return cache.get(serviceName);
+            }
+            cache.putIfAbsent(serviceName, servers);
+        }
+        return servers;
     }
     
     
@@ -62,7 +80,7 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     }
     
     
-    public void rootListener() throws Exception{
+    public void rootListener() throws Exception {
         PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, ZKConfig.zkRegistryPath, true);
         //Normal--初始化为空  BUILD_INITIAL_CACHE--rebuild  POST_INITIALIZED_EVENT--初始化后发送事件
         pathChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);

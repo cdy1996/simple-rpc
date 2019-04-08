@@ -45,7 +45,7 @@ public class SimpleDiscoveryImpl extends AbstractDiscovery {
     }
     
     @Override
-    public List<String> listServer(String serviceName) throws Exception {
+    public List<String> listServer(String serviceName) {
         String address = map.get(serviceName);
         return Collections.singletonList(address);
     }

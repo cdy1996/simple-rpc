@@ -28,7 +28,7 @@ public abstract class AbstractServer implements Server {
     }
     
     @Override
-    public void bind(Object service, List<Filter> filters, Function<Invoker, Invoker>... functions) throws Exception{
+    public void bind(Object service, List<Filter> filters, Function<Invoker, Invoker>... functions) {
         RPCService annotation = service.getClass().getAnnotation(RPCService.class);
         String serviceName = annotation.clazz().getName();
         Invoker objectInvoker = ProxyFactory.createWithInstance(service);

@@ -23,6 +23,6 @@ public interface IServiceDiscovery {
      * @return
      * @throws Exception
      */
-    List<String> listServer(String serviceName) throws  Exception;
+    List<String> listServer(String serviceName);
     
 }

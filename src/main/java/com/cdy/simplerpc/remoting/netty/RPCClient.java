@@ -22,8 +22,6 @@ import io.netty.util.AttributeKey;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.cdy.simplerpc.proxy.RemoteInvoker.responseFuture;
@@ -76,13 +74,16 @@ public class RPCClient extends AbstractClient {
         //netty 连接
         String address = getServiceDiscovery().discovery(serviceName);
         // 确保之前建立的连接断开后能再次开启连接
-        Channel channel = addressChannel.putIfAbsent(serviceName, connect(address));
-        addressChannel.put(serviceName, channel);
+        Channel channel = null;
+        if (( channel= addressChannel.get(serviceName))==null) {
+            channel = connect(address);
+            addressChannel.putIfAbsent(serviceName, channel);
+        }
         // 隐式传递参数
         RPCContext rpcContext1 = RPCContext.current();
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
-    
+        
         ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo(serviceName);
         
     
@@ -90,9 +91,10 @@ public class RPCClient extends AbstractClient {
         responseFuture.put(rpcRequest.getRequestId(), future);
         
         if (referenceMetaInfo.isAsync()) {
+            Channel finalChannel = channel;
             CompletableFuture<Object> uCompletableFuture = CompletableFuture.supplyAsync(() -> {
                 try {
-                    return send(rpcRequest, channel, future);
+                    return send(rpcRequest, finalChannel, future);
                 } catch (Exception e) {
                     throw new RPCException(e);
                 }
