@@ -2,6 +2,7 @@ package com.cdy.simplerpc.remoting.jetty;
 
 import com.cdy.simplerpc.remoting.AbstractServer;
 import com.cdy.simplerpc.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -9,6 +10,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import javax.servlet.http.HttpServlet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
@@ -17,29 +19,44 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
  * Created by 陈东一
  * 2019/1/27 0027 0:35
  */
+@Slf4j
 public class HttpServer extends AbstractServer {
     
-    private HttpServlet servlet;
+    public static ConcurrentHashMap<String, HttpServer> servers = new ConcurrentHashMap<>();
+    private HttpServlet servlet = new ServletHandler();
+    private Server server;
     
-    public HttpServer(String address, HttpServlet servlet) {
+    public HttpServer(String address) {
         super(address);
-        this.servlet = servlet;
     }
     
     @Override
     public void registerAndListen() throws Exception {
         register();
     
+    
+        HttpServer rpcServer = servers.get(getAddress());
+        if (rpcServer != null) {
+            return;
+        }
+    
         StringUtil.TwoResult<String, Integer> server = getServer(getAddress());
         //维持tomcat服务，否则tomcat一启动就会关闭
         jettyStart(server.getFirst(), server.getSecond());
     }
     
+    @Override
+    public void close() {
+        try {
+            server.stop();
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+        }
+    }
     
-
     
     public void jettyStart(String host, Integer port) throws Exception {
-        Server server = new Server();// 创建jetty web容器
+        server = new Server();// 创建jetty web容器
         server.setStopAtShutdown(true);// 在退出程序是关闭服务
         
         // 创建连接器，每个连接器都是由IP地址和端口号组成，连接到连接器的连接将会被jetty处理
@@ -84,7 +101,9 @@ public class HttpServer extends AbstractServer {
         context.addServlet(new ServletHolder(servlet), "/**");
         
         server.start();// 开启服务
-        server.join();
+    
+        servers.putIfAbsent(host + ":" + port, this);
+//        server.join();
     }
     
     

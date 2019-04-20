@@ -14,15 +14,13 @@ import com.cdy.simplerpc.remoting.Client;
 import com.cdy.simplerpc.remoting.netty.RPCClient;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
  * 客户端启动类
+ * 单例使用, 给都可实例注入
  * <p>
  * Created by 陈东一
  * 2019/1/22 0022 22:11
@@ -41,15 +39,7 @@ public class ClientBootStrap {
     
     private RemotingConfig remotingConfig = new RemotingConfig();
     
-    
-    public void setDiscovery(IServiceDiscovery discovery) {
-        this.discovery = discovery;
-    }
-    
-    public void setClient(Client client) {
-        client.setServiceDiscovery(this.discovery);
-        this.client = client;
-    }
+    private Set<Client> clients = new HashSet<>();
     
     public ClientBootStrap filters(Filter... filters) {
         this.filters.addAll(Arrays.asList(filters));
@@ -57,7 +47,8 @@ public class ClientBootStrap {
     }
     
     @SafeVarargs
-    public final <T> T inject(T t, Function<Invoker, Invoker>... function) throws Exception {
+    public final <T> T inject(Client client, List<Filter> filters, T t, Function<Invoker, Invoker>... function) throws Exception {
+        clients.add(client);
         Field[] fields = t.getClass().getDeclaredFields();
         for (Field field : fields) {
             RPCReference annotation = field.getAnnotation(RPCReference.class);
@@ -78,6 +69,7 @@ public class ClientBootStrap {
                         invoker = invokerInvokerFunction.apply(invoker);
                     }
                     invokerMap.put(clazz.getName(), invoker);
+                    filters.addAll(this.filters);
                     Object proxy = proxyFactory.createProxy(new FilterChain(invoker, filters), clazz);
                     field.set(t, proxy);
                 }

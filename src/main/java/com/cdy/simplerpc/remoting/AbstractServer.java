@@ -7,6 +7,7 @@ import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.proxy.ProxyFactory;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 
+import java.io.Closeable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
@@ -16,7 +17,7 @@ import java.util.function.Function;
  * Created by 陈东一
  * 2018/9/1 21:41
  */
-public abstract class AbstractServer implements Server {
+public abstract class AbstractServer implements Server , Closeable {
     
     //服务类和方法列表
     public static HashMap<String, Invoker> handlerMap = new HashMap<>();
@@ -63,4 +64,7 @@ public abstract class AbstractServer implements Server {
     public void setAddress(String address) {
         this.address = address;
     }
+    
+    
+   
 }

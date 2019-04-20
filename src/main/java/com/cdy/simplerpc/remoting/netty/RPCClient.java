@@ -39,7 +39,6 @@ public class RPCClient extends AbstractClient {
     private final EventLoopGroup boss = new NioEventLoopGroup();
     private static final AtomicInteger requestId = new AtomicInteger(0);
     public static final AttributeKey<String> ATTRIBUTE_KEY_ADDRESS = AttributeKey.valueOf("address");
-    //todo 一个service 只对应一个远程的 所以可以不用map来缓存
     public static final ConcurrentHashMap<String, Channel> addressChannel = new ConcurrentHashMap<>();
     
     

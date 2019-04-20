@@ -3,10 +3,7 @@ package com.cdy.simplerpc.remoting.netty;
 import com.cdy.simplerpc.remoting.AbstractServer;
 import com.cdy.simplerpc.util.StringUtil;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -15,6 +12,9 @@ import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
@@ -23,8 +23,13 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
  * Created by 陈东一
  * 2018/9/1 21:41
  */
+@Slf4j
 public class RPCServer extends AbstractServer {
     
+    public static ConcurrentHashMap<String, RPCServer> servers = new ConcurrentHashMap<>();
+    private Channel channel;
+    private EventLoopGroup boss = new NioEventLoopGroup();
+    private EventLoopGroup work = new NioEventLoopGroup();
     
     public RPCServer(String address) {
         super(address);
@@ -33,11 +38,13 @@ public class RPCServer extends AbstractServer {
     @Override
     public void registerAndListen() throws Exception {
         register();
+    
+        RPCServer rpcServer = servers.get(getAddress());
+        if (rpcServer != null) {
+            return;
+        }
         
         // 监听端口 并通讯
-        EventLoopGroup boss = new NioEventLoopGroup();
-        EventLoopGroup work = new NioEventLoopGroup();
-        
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(boss, work)
                 .channel(NioServerSocketChannel.class)
@@ -59,9 +66,32 @@ public class RPCServer extends AbstractServer {
         StringUtil.TwoResult<String, Integer> server = getServer(getAddress());
         String ip = server.getFirst();
         int port = server.getSecond();
-        ChannelFuture sync = bootstrap.bind(ip, port).sync();
-        sync.channel().closeFuture().sync();
-        
-        
+        ChannelFuture channelFuture = bootstrap.bind(ip, port);
+        channelFuture.syncUninterruptibly();
+        channel = channelFuture.channel();
+    
+        servers.putIfAbsent(getAddress(), this);
     }
+    
+    @Override
+    public void close()  {
+        try {
+            if (channel != null) {
+                // unbind.
+                channel.close();
+            }
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+        }
+        
+        try {
+            if (boss != null) {
+                boss.shutdownGracefully();
+                work.shutdownGracefully();
+            }
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+        }
+    }
+    
 }

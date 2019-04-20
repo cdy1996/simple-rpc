@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.remoting;
 
 import com.cdy.simplerpc.ClientBootStrap;
+import com.cdy.simplerpc.event.Publisher;
 import com.cdy.simplerpc.registry.IServiceDiscovery;
 
 /**
@@ -11,7 +12,14 @@ import com.cdy.simplerpc.registry.IServiceDiscovery;
 public abstract class AbstractClient implements Client {
     private IServiceDiscovery serviceDiscovery;
     private ClientBootStrap clientBootStrap;
+    private Publisher publisher;
     
+    public void invokeBefore(){
+    
+    }
+    public void invokeAfter(){
+    
+    }
     
     @Override
     public ClientBootStrap getClientBootStrap() {

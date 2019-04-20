@@ -5,11 +5,13 @@ import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.registry.simple.SimpleRegisteryImpl;
 import com.cdy.simplerpc.remoting.Server;
+import com.cdy.simplerpc.remoting.jetty.HttpServer;
 import com.cdy.simplerpc.remoting.netty.RPCServer;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Function;
 
 /**
@@ -17,6 +19,7 @@ import java.util.function.Function;
  * Created by 陈东一
  * 2019/1/22 0022 22:11
  */
+@Slf4j
 public class ServerBootStrap {
     
     private IServiceRegistry registry = new SimpleRegisteryImpl();
@@ -25,27 +28,33 @@ public class ServerBootStrap {
     
     private List<Filter> filters = new ArrayList<>();
     
-    public static ServerBootStrap build() {
-        return new ServerBootStrap();
-    }
+    private Set<Server> servers = new HashSet<>();
     
-    public void setRegistry(IServiceRegistry registry) {
-        this.registry = registry;
-    }
+    private ExecutorService executor = Executors.newCachedThreadPool();
     
-    public void setServer(Server server) {
-        server.setRegistry(registry);
-        this.server = server;
-    }
-    
+   //通用filter
     public ServerBootStrap filters(Filter... filters) {
         this.filters.addAll(Arrays.asList(filters));
         return this;
     }
     
     @SafeVarargs
-    public final <T> void bind(T object, Function<Invoker, Invoker>... function) throws Exception {
-        server.bind(object, filters, function);
-        server.registerAndListen();
+    public final <T> void bind(Server server, List<Filter> filters, T object, Function<Invoker, Invoker>... function) throws Exception {
+        servers.add(server);
+        executor.execute(() -> {
+            filters.addAll(this.filters);
+            server.bind(object, filters, function);
+            try {
+                server.registerAndListen();
+            } catch (Exception e) {
+                log.error(e.getMessage(),e);
+            }
+        });
+    
+    }
+    
+    public void closeAll(){
+        RPCServer.servers.forEach((k,v)->v.close());
+        HttpServer.servers.forEach((k, v)->v.close());
     }
 }

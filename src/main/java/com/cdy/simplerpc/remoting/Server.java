@@ -34,4 +34,6 @@ public interface Server {
      * @param registry
      */
     void setRegistry(IServiceRegistry registry);
+    
+ 
 }
