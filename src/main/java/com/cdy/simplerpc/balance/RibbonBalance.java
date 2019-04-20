@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.balance;
 
 import com.netflix.loadbalancer.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,6 +15,7 @@ import static com.cdy.simplerpc.util.StringUtil.toServer;
  * Created by 陈东一
  * 2019/2/7 0007 20:14
  */
+@Slf4j
 public class RibbonBalance implements IBalance {
     
     private IRule iRule;

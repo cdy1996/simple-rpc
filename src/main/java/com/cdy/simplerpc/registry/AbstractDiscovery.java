@@ -27,7 +27,13 @@ public abstract class AbstractDiscovery implements IServiceDiscovery{
         return balance;
     }
     
-    public Map<String, List<String>> getCache() {
+    @Override
+    public void setBalance(IBalance iBalance) {
+        this.balance = iBalance;
+    }
+    
+    protected Map<String, List<String>> getCache() {
         return cache;
     }
+    
 }

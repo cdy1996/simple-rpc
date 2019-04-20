@@ -40,9 +40,9 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     }
     
     @Override
-    public String discovery(String serviceName) throws Exception {
+    public String discovery(String serviceName, String type) throws Exception {
         String path = ZKConfig.zkRegistryPath + "/" + serviceName;
-        //发现地址
+        // 第一次初始化缓存或者是为空需要重新获取
         Map<String, List<String>> cache = getCache();
         List<String> list = null;
         if ((list = cache.get(serviceName)) == null) {
@@ -50,7 +50,7 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
             cache.put(serviceName, list);
         }
         //负载均衡
-        return loadBalance(serviceName, list);
+        return loadBalance(serviceName, cacheList);
     }
     
     

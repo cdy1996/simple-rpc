@@ -11,9 +11,9 @@ public class ProxyFactory {
     
     
     //创建代理对象
-    public Object createProxy(Invoker invoker, Class clazz) {
+    public Object createProxy(Invoker invoker, Class clazz, String key) {
         return  Proxy.newProxyInstance(invoker.getClass().getClassLoader(),
-                new Class<?>[]{clazz}, new InvokerInvocationHandler(invoker, clazz));
+                new Class<?>[]{clazz}, new InvokerInvocationHandler(invoker, clazz, key));
         
     }
     

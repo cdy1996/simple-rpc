@@ -15,10 +15,10 @@ public class SimpleRegisteryImpl implements IServiceRegistry {
     
     @Override
     public void register(String name, String address) throws Exception{
-        File file = new File("/simpleRPC-register-center.txt");
+        File file = new File("/simple-rpc/"+name+".rpc");
         if (!file.exists()) {
                 file.createNewFile();
         }
-            FileUtils.writeLines(file, "utf-8", Collections.singleton(name + " " + address));
+        FileUtils.writeLines(file, "utf-8", Collections.singleton(address), true);
     }
 }

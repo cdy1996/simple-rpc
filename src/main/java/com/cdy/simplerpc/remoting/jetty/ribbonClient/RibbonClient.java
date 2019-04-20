@@ -6,7 +6,6 @@ import com.cdy.simplerpc.balance.IBalance;
 import com.cdy.simplerpc.balance.RibbonBalance;
 import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
-import com.cdy.simplerpc.registry.AbstractDiscovery;
 import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
@@ -40,7 +39,8 @@ public class RibbonClient extends AbstractClient {
         
         String serviceName = invocation.getInterfaceClass().getName();
         List<String> address = getServiceDiscovery().listServer(serviceName);
-        
+        address.removeIf(e -> !e.startsWith("http"));
+        address.replaceAll(e->e=e.replace("http-",""));
         BaseLoadBalancer baseLoadBalancer = generateBalancer(address);
         
         // 隐式传递参数
@@ -48,7 +48,7 @@ public class RibbonClient extends AbstractClient {
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
         
-        ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo(serviceName);
+        ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo((String) invocation.getAttach().get("metaInfoKey"));
         
         if (referenceMetaInfo.isAsync()) {
           
@@ -107,7 +107,7 @@ public class RibbonClient extends AbstractClient {
         
         IRule iRule;
         try {
-            IBalance balance = ((AbstractDiscovery) getServiceDiscovery()).getBalance();
+            IBalance balance = getServiceDiscovery().getBalance();
             iRule = ((RibbonBalance) balance).getiRule();
         } catch (Exception e) {
             iRule = new RandomRule();

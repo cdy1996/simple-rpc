@@ -71,7 +71,7 @@ public class RPCClient extends AbstractClient {
         //服务发现
         String serviceName = invocation.getInterfaceClass().getName();
         //netty 连接
-        String address = getServiceDiscovery().discovery(serviceName);
+        String address = getServiceDiscovery().discovery(serviceName, "rpc");
         // 确保之前建立的连接断开后能再次开启连接
         Channel channel = null;
         if (( channel= addressChannel.get(serviceName))==null) {

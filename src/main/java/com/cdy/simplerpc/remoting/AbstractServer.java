@@ -58,7 +58,8 @@ public abstract class AbstractServer implements Server , Closeable {
     }
     
     public String getAddress() {
-        return address;
+        // rpc-127.0.0.1:8080
+        return address.split("-")[1];
     }
     
     public void setAddress(String address) {

@@ -28,7 +28,7 @@ public class HttpClient extends AbstractClient {
         RPCRequest rpcRequest = invocation.toRequest();
         
         String serviceName = invocation.getInterfaceClass().getName();
-        String address = getServiceDiscovery().discovery(serviceName);
+        String address = getServiceDiscovery().discovery(serviceName, "http");
         
         StringUtil.TwoResult<String, Integer> server = getServer(address);
         
@@ -39,7 +39,7 @@ public class HttpClient extends AbstractClient {
         rpcRequest.getAttach().put("address", address);
     
     
-        ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo(serviceName);
+        ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo((String) invocation.getAttach().get("metaInfoKey"));
     
         if (referenceMetaInfo.isAsync()) {
             CompletableFuture<Object> uCompletableFuture = CompletableFuture.supplyAsync(() -> {

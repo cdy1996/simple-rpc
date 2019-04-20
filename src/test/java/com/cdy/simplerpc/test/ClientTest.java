@@ -2,7 +2,9 @@ package com.cdy.simplerpc.test;
 
 import com.cdy.simplerpc.ClientBootStrap;
 import com.cdy.simplerpc.annotation.RPCReference;
+import com.cdy.simplerpc.balance.SimpleBalance;
 import com.cdy.simplerpc.registry.simple.SimpleDiscoveryImpl;
+import com.cdy.simplerpc.remoting.jetty.httpClient.HttpClient;
 import com.cdy.simplerpc.remoting.netty.RPCClient;
 
 import java.util.Collections;
@@ -28,13 +30,18 @@ public class ClientTest {
         ClientBootStrap clientBootStrap = new ClientBootStrap();
 //        ZKServiceDiscoveryImpl discovery = new ZKServiceDiscoveryImpl();
         SimpleDiscoveryImpl discovery = new SimpleDiscoveryImpl();
-        RPCClient rpcClient = new RPCClient();
-        rpcClient.setServiceDiscovery(discovery);
-        rpcClient.setClientBootStrap(clientBootStrap);
+        discovery.setBalance(new SimpleBalance());
         
-        ClientTest inject = clientBootStrap.inject(rpcClient, Collections.EMPTY_LIST, test);
+        RPCClient rpcClient = new RPCClient();
+        HttpClient httpClient = new HttpClient();
+        rpcClient.setServiceDiscovery(discovery);
+        httpClient.setServiceDiscovery(discovery);
+        rpcClient.setClientBootStrap(clientBootStrap);
+        httpClient.setClientBootStrap(clientBootStrap);
+        
+        ClientTest inject1 = clientBootStrap.inject(httpClient, Collections.EMPTY_LIST, test);
         ClientTest2 inject2 = clientBootStrap.inject(rpcClient, Collections.EMPTY_LIST, test2);
-        inject.test();
+        inject1.test();
         inject2.test2();
         System.in.read();
         

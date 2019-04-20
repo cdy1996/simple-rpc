@@ -31,7 +31,7 @@ public class ContextFilter extends FilterAdapter {
     @Override
     protected void beforeClientInvoke(Invocation invocation) {
         RPCContext rpcContext = RPCContext.current();
-        invocation.setAttach(rpcContext.getMap());
+        invocation.getAttach().putAll(rpcContext.getMap());
         log.debug("客户端过滤器将threadlocal传递到服务端");
     }
 }

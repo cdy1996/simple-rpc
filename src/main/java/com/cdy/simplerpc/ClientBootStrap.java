@@ -8,10 +8,7 @@ import com.cdy.simplerpc.filter.FilterChain;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.proxy.ProxyFactory;
 import com.cdy.simplerpc.proxy.RemoteInvoker;
-import com.cdy.simplerpc.registry.IServiceDiscovery;
-import com.cdy.simplerpc.registry.simple.SimpleDiscoveryImpl;
 import com.cdy.simplerpc.remoting.Client;
-import com.cdy.simplerpc.remoting.netty.RPCClient;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -27,9 +24,6 @@ import java.util.function.Function;
  */
 public class ClientBootStrap {
     
-    private IServiceDiscovery discovery = new SimpleDiscoveryImpl();
-    
-    private Client client = new RPCClient();
     
     private ProxyFactory proxyFactory = new ProxyFactory();
     
@@ -55,22 +49,25 @@ public class ClientBootStrap {
             if (annotation != null) {
                 Class<?> clazz = field.getType();
                 synchronized (clazz.getName()) {
-                    Invoker invoker = invokerMap.get(t.getClass().getName()+"#"+clazz.getName());
+                    String key = t.getClass().getName() + "#" + clazz.getName();
+                    Invoker invoker = invokerMap.get(key);
                     ReferenceMetaInfo data = new ReferenceMetaInfo(annotation);
                     field.setAccessible(true);
                     //相同的invoker但是可以配置不同的策略
                     if (invoker != null) {
-                        invoker.addMetaInfo(t.getClass().getName() + "#" + clazz.getName(), data);
-                        field.set(t, invoker);
+                        invoker.addMetaInfo(key, data);
+                        Object proxy = proxyFactory.createProxy(new FilterChain(invoker, filters), clazz, key);
+                        field.set(t, proxy);
                         continue;
                     }
                     invoker = new RemoteInvoker(client);
+                    invoker.addMetaInfo(key, data);
                     for (Function<Invoker, Invoker> invokerInvokerFunction : function) {
                         invoker = invokerInvokerFunction.apply(invoker);
                     }
-                    invokerMap.put(clazz.getName(), invoker);
+                    invokerMap.put(key, invoker);
                     filters.addAll(this.filters);
-                    Object proxy = proxyFactory.createProxy(new FilterChain(invoker, filters), clazz);
+                    Object proxy = proxyFactory.createProxy(new FilterChain(invoker, filters), clazz, key);
                     field.set(t, proxy);
                 }
             }

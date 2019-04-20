@@ -16,7 +16,7 @@ import java.util.List;
 public class FilterChain extends InvokerAdapter {
     
     private List<Filter> filters = new ArrayList<>();
-    
+    private Filter last = new DefaultFilter();
     
     public FilterChain(Invoker invoker, List<Filter> filterList) {
         super(invoker);
@@ -25,7 +25,7 @@ public class FilterChain extends InvokerAdapter {
             filters.add(e);
         });
         //构建链
-        Filter last = new DefaultFilter();
+     
         for (int i = filters.size() - 1; i >= 0; i--) {
             filters.get(i).setNext(last);
             last = filters.get(i);
@@ -35,7 +35,7 @@ public class FilterChain extends InvokerAdapter {
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
-        return filters.get(0).doFilter(invocation);
+        return filters.isEmpty()?last.doFilter(invocation):filters.get(0).doFilter(invocation);
     }
     
     class DefaultFilter implements Filter {

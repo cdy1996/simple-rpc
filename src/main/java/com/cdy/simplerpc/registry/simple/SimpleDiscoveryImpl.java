@@ -2,17 +2,11 @@ package com.cdy.simplerpc.registry.simple;
 
 import com.cdy.simplerpc.exception.DiscoveryException;
 import com.cdy.simplerpc.registry.AbstractDiscovery;
-import com.cdy.simplerpc.util.StringUtil;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.cdy.simplerpc.util.StringUtil.splitWith;
+import java.util.*;
 
 /**
  * 简单发现
@@ -21,32 +15,46 @@ import static com.cdy.simplerpc.util.StringUtil.splitWith;
  */
 public class SimpleDiscoveryImpl extends AbstractDiscovery {
     
-    private Map<String, String> map = new HashMap<>();
+    private Map<String, List<String>> map = new HashMap<>();
     
     public SimpleDiscoveryImpl() {
-        File file = new File("/simpleRPC-register-center.txt");
-        if (file.exists()) {
-            try {
-                List<String> strings = FileUtils.readLines(file, "utf-8");
-                strings.forEach(e->{
-                    StringUtil.TwoResult<String, String> two = splitWith(e, " ");
-                    map.put(two.getFirst(), two.getSecond());
-                });
-            } catch (IOException e) {
-                throw new DiscoveryException(e);
+        File file = new File("/simple-rpc");
+    
+        if (file.isDirectory()) {
+            for (File listFile : Objects.requireNonNull(file.listFiles())) {
+                String name = listFile.getName();
+                String seriviceName = name.substring(0, name.length() - 4);
+                if (name.endsWith(".rpc")) {
+                    List<String> urls;
+                    try {
+                        urls = FileUtils.readLines(listFile, "utf-8");
+                    } catch (IOException e) {
+                        throw new DiscoveryException(e);
+                    }
+                    List<String> cacheUrls = map.get(seriviceName);
+                    if (cacheUrls == null) {
+                        cacheUrls = new ArrayList<>(urls);
+                        map.put(seriviceName, cacheUrls);
+                    } else {
+                        cacheUrls.addAll(urls);
+                    }
+                }
+                
             }
         }
     }
     
     @Override
-    public String discovery(String serviceName) {
-        String address = map.get(serviceName);
-        return address;
+    public String discovery(String serviceName, String type) {
+        List<String> urls = map.get(serviceName);
+        urls.removeIf(e -> !e.startsWith(type));
+        urls.replaceAll(e-> e.replace(type+"-",""));
+        return loadBalance(serviceName, urls);
     }
     
     @Override
-    public List<String> listServer(String serviceName) {
-        String address = map.get(serviceName);
-        return Collections.singletonList(address);
+    public List<String> listServer(String serviceName) throws Exception {
+        return map.get(serviceName) ;
     }
+    
 }

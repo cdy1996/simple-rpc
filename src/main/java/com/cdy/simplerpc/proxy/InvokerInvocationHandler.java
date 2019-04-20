@@ -14,10 +14,12 @@ public class InvokerInvocationHandler implements InvocationHandler {
     
     private final Invoker<?> invoker;
     private Class<?> clazz;
+    private String key; //元信息所属的key
     
-    public InvokerInvocationHandler(Invoker<?> handler, Class<?> clazz) {
+    public InvokerInvocationHandler(Invoker<?> handler, Class<?> clazz, String key) {
         this.invoker = handler;
         this.clazz = clazz;
+        this.key = key;
     }
     
     public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
@@ -35,7 +37,9 @@ public class InvokerInvocationHandler implements InvocationHandler {
         if ("equals".equals(methodName) && parameterTypes.length == 1) {
             return invoker.equals(args[0]);
         }
-        return invoker.invoke(new Invocation(method, args, clazz));
+        Invocation invocation = new Invocation(method, args, clazz);
+        invocation.getAttach().put("metaInfoKey", key);
+        return invoker.invoke(invocation);
     }
     
 }

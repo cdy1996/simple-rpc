@@ -34,7 +34,7 @@ public class RemoteInvoker implements Invoker{
     @Override
     public Object invoke(Invocation invocation) throws Exception {
     
-        ReferenceMetaInfo referenceMetaInfo = client.getClientBootStrap().getReferenceMetaInfo(invocation.getInterfaceClass().getName());
+        ReferenceMetaInfo referenceMetaInfo = client.getClientBootStrap().getReferenceMetaInfo((String) invocation.getAttach().get("metaInfoKey"));
         
         // todo 重试
         Object invoke = invokeRemote(invocation);

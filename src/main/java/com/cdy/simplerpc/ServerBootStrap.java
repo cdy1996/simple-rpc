@@ -2,8 +2,6 @@ package com.cdy.simplerpc;
 
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.proxy.Invoker;
-import com.cdy.simplerpc.registry.IServiceRegistry;
-import com.cdy.simplerpc.registry.simple.SimpleRegisteryImpl;
 import com.cdy.simplerpc.remoting.Server;
 import com.cdy.simplerpc.remoting.jetty.HttpServer;
 import com.cdy.simplerpc.remoting.netty.RPCServer;
@@ -22,10 +20,6 @@ import java.util.function.Function;
 @Slf4j
 public class ServerBootStrap {
     
-    private IServiceRegistry registry = new SimpleRegisteryImpl();
-    
-    private Server server = new RPCServer("127.0.0.1:8899");
-    
     private List<Filter> filters = new ArrayList<>();
     
     private Set<Server> servers = new HashSet<>();
@@ -43,8 +37,8 @@ public class ServerBootStrap {
         servers.add(server);
         executor.execute(() -> {
             filters.addAll(this.filters);
-            server.bind(object, filters, function);
             try {
+                server.bind(object, filters, function);
                 server.registerAndListen();
             } catch (Exception e) {
                 log.error(e.getMessage(),e);
