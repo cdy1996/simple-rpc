@@ -20,7 +20,7 @@ import java.util.Map;
 public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     
     CuratorFramework curatorFramework;
-    
+  
     
     public ZKServiceDiscoveryImpl() {
         init();
@@ -44,33 +44,30 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
         String path = ZKConfig.zkRegistryPath + "/" + serviceName;
         // 第一次初始化缓存或者是为空需要重新获取
         Map<String, List<String>> cache = getCache();
-        List<String> list = null;
-        if ((list = cache.get(serviceName)) == null) {
-            list = curatorFramework.getChildren().forPath(path);
-            cache.put(serviceName, list);
+        List<String> cacheList = cache.get(serviceName);
+        if (cacheList == null) {
+            List<String> value = curatorFramework.getChildren().forPath(path);
+            value.removeIf(e -> !e.startsWith(type));
+            value.replaceAll(e->e=e.replace(type+"-",""));
+            cacheList = cache.putIfAbsent(serviceName, value);
         }
+    
         //负载均衡
         return loadBalance(serviceName, cacheList);
     }
     
     
     @Override
-    public List<String> listServer(String serviceName) {
+    public List<String> listServer(String serviceName) throws Exception {
         String path = ZKConfig.zkRegistryPath + "/" + serviceName;
         //发现地址
         Map<String, List<String>> cache = getCache();
-        List<String> servers = null;
-        if ((servers = cache.get(serviceName)) == null) {
-            try {
-                servers = curatorFramework.getChildren().forPath(path);
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-                //如果创建失败可能是被其他线程先创建了,所以尝试直接返回
-                return cache.get(serviceName);
-            }
-            cache.putIfAbsent(serviceName, servers);
+        List<String> cacheList = cache.get(serviceName);
+        if (cacheList == null) {
+            List<String> value = curatorFramework.getChildren().forPath(path);
+            cacheList = cache.putIfAbsent(serviceName, value);
         }
-        return servers;
+        return cacheList;
     }
     
     
@@ -80,7 +77,7 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     }
     
     
-    public void rootListener() throws Exception {
+    public void rootListener() throws Exception{
         PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, ZKConfig.zkRegistryPath, true);
         //Normal--初始化为空  BUILD_INITIAL_CACHE--rebuild  POST_INITIALIZED_EVENT--初始化后发送事件
         pathChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);

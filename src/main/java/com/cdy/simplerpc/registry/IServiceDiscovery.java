@@ -28,6 +28,10 @@ public interface IServiceDiscovery {
      * @return rpc-127.0.0.1:8080  http-127.0.0.1:8082
      * @throws Exception
      */
-    List<String> listServer(String serviceName);
+    List<String> listServer(String serviceName) throws Exception;
+    
+    void setBalance(IBalance iBalance);
+    
+    IBalance getBalance();
     
 }

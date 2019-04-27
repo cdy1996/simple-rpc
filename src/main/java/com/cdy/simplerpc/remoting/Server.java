@@ -21,7 +21,7 @@ public interface Server {
      * @param functions
      * @throws Exception
      */
-    void bind(Object services, List<Filter> filters, Function<Invoker, Invoker>... functions);
+    void bind(Object services, List<Filter> filters, Function<Invoker, Invoker>... functions) throws Exception;
     
     /**
      * 注册和监听

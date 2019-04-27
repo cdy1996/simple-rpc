@@ -29,7 +29,7 @@ public abstract class AbstractServer implements Server , Closeable {
     }
     
     @Override
-    public void bind(Object service, List<Filter> filters, Function<Invoker, Invoker>... functions) {
+    public void bind(Object service, List<Filter> filters, Function<Invoker, Invoker>... functions) throws Exception{
         RPCService annotation = service.getClass().getAnnotation(RPCService.class);
         String serviceName = annotation.clazz().getName();
         Invoker objectInvoker = ProxyFactory.createWithInstance(service);

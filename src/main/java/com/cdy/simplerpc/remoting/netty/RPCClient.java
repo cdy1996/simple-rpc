@@ -73,17 +73,20 @@ public class RPCClient extends AbstractClient {
         //netty 连接
         String address = getServiceDiscovery().discovery(serviceName, "rpc");
         // 确保之前建立的连接断开后能再次开启连接
-        Channel channel = null;
-        if (( channel= addressChannel.get(serviceName))==null) {
+    
+        Channel channel = addressChannel.get(serviceName);
+        if (channel == null) {
             channel = connect(address);
             addressChannel.putIfAbsent(serviceName, channel);
         }
+    
+        addressChannel.put(serviceName, channel);
         // 隐式传递参数
         RPCContext rpcContext1 = RPCContext.current();
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
-        
-        ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo(serviceName);
+    
+        ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo((String) invocation.getAttach().get("metaInfoKey"));
         
     
         RPCFuture future = new RPCFuture(referenceMetaInfo.getTimeout());
