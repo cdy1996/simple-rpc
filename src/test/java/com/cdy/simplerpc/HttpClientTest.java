@@ -1,5 +1,6 @@
 package com.cdy.simplerpc;
 
+import com.cdy.simplerpc.remoting.ClusterClient;
 import com.cdy.simplerpc.remoting.http.httpClient.HttpClientUtil;
 import org.junit.Test;
 
@@ -15,5 +16,9 @@ public class HttpClientTest {
     public void test() throws Exception {
         String execute = HttpClientUtil.execute(HttpClientUtil.getHttpClient(), "http://localhost:80/gradle/count", null, 1000);
         System.out.println(execute);
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(ClusterClient.class.getName().replace(ClusterClient.class.getSimpleName(), ""));
     }
 }

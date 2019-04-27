@@ -9,6 +9,8 @@ import com.cdy.simplerpc.remoting.RPCFuture;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.cdy.simplerpc.annotation.ReferenceMetaInfo.METAINFO_KEY;
+
 /**
  * 远程执行器
  *
@@ -35,8 +37,8 @@ public class RemoteInvoker implements Invoker{
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
-        ReferenceMetaInfo referenceMetaInfo = clientBootStrap.getReferenceMetaInfo((String) invocation.getAttach().get("metaInfoKey"));
-        invocation.getAttach().put("metaInfoKey", referenceMetaInfo);
+        ReferenceMetaInfo referenceMetaInfo = clientBootStrap.getReferenceMetaInfo((String) invocation.getAttach().get(METAINFO_KEY));
+        invocation.getAttach().put(METAINFO_KEY, referenceMetaInfo);
         
         Object invoke = invokeRemote(invocation);
         if(invoke instanceof Exception){

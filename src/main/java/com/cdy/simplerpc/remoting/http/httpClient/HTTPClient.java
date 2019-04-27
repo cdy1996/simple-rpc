@@ -13,6 +13,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.concurrent.CompletableFuture;
 
+import static com.cdy.simplerpc.annotation.ReferenceMetaInfo.METAINFO_KEY;
 import static com.cdy.simplerpc.remoting.http.httpClient.HttpClientUtil.getHttpClient;
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
@@ -36,7 +37,7 @@ public class HTTPClient extends AbstractClient {
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
     
-        ReferenceMetaInfo referenceMetaInfo = (ReferenceMetaInfo) invocation.getAttach().get("metaInfoKey");
+        ReferenceMetaInfo referenceMetaInfo = (ReferenceMetaInfo) invocation.getAttach().get(METAINFO_KEY);
     
         if (referenceMetaInfo.isAsync()) {
             return CompletableFuture.supplyAsync(() -> {

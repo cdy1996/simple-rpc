@@ -10,6 +10,8 @@ import lombok.Data;
 @Data
 public class ReferenceMetaInfo {
     
+    public static final String METAINFO_KEY = "metaInfoKey";
+    
     private boolean async = false;
     
     private long timeout = 5000L;

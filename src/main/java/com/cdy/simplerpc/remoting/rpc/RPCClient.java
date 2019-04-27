@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.cdy.simplerpc.annotation.ReferenceMetaInfo.METAINFO_KEY;
 import static com.cdy.simplerpc.proxy.RemoteInvoker.responseFuture;
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 import static com.cdy.simplerpc.util.StringUtil.toSocketAddress;
@@ -83,7 +84,7 @@ public class RPCClient extends AbstractClient {
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
         
-        ReferenceMetaInfo referenceMetaInfo = (ReferenceMetaInfo) invocation.getAttach().get("metaInfoKey");
+        ReferenceMetaInfo referenceMetaInfo = (ReferenceMetaInfo) invocation.getAttach().get(METAINFO_KEY);
         RPCFuture future = new RPCFuture(referenceMetaInfo.getTimeout());
         responseFuture.put(rpcRequest.getRequestId(), future);
         

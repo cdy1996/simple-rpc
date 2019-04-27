@@ -8,6 +8,8 @@ import com.cdy.simplerpc.registry.IServiceDiscovery;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.cdy.simplerpc.annotation.ReferenceMetaInfo.METAINFO_KEY;
+
 /**
  * 集群的装饰层
  *
@@ -25,7 +27,7 @@ public class ClusterClient extends AbstractClient {
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
-        ReferenceMetaInfo referenceMetaInfo = (ReferenceMetaInfo) invocation.getAttach().get("metaInfoKey");
+        ReferenceMetaInfo referenceMetaInfo = (ReferenceMetaInfo) invocation.getAttach().get(METAINFO_KEY);
         
         //服务发现
         String serviceName = invocation.getInterfaceClass().getName();
@@ -35,10 +37,11 @@ public class ClusterClient extends AbstractClient {
         Client client = clientMap.get(serviceName + protocol);
         if (client == null) {
             try {
-                Class<?> clazz = Class.forName("com.cdy.simplerpc.remoting." + protocol.toLowerCase() + "." + protocol.toUpperCase() + "Client");
+                String replace = ClusterClient.class.getName().replace(ClusterClient.class.getSimpleName(), "");
+                Class<?> clazz = Class.forName(replace + protocol.toLowerCase() + "." + protocol.toUpperCase() + "Client");
                 client = (Client) clazz.getConstructor().newInstance();
             } catch (ClassNotFoundException e) {
-                throw new RPCException("不支持的协议");
+                throw new RPCException("不支持的协议"+protocol);
             }
             clientMap.putIfAbsent(serviceName + protocol, client);
         }

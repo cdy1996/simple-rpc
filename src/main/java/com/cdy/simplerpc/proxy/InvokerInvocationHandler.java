@@ -4,6 +4,8 @@ package com.cdy.simplerpc.proxy;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+import static com.cdy.simplerpc.annotation.ReferenceMetaInfo.METAINFO_KEY;
+
 /**
  * 执行处理
  *
@@ -40,7 +42,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
         Invocation invocation = new Invocation(method, args, clazz);
         
         //方便后续获取对应的元信息
-        invocation.getAttach().put("metaInfoKey", key);
+        invocation.getAttach().put(METAINFO_KEY, key);
         return invoker.invoke(invocation);
     }
     
