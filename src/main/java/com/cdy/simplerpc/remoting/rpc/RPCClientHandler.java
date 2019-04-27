@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.remoting.netty;
+package com.cdy.simplerpc.remoting.rpc;
 
 import com.cdy.simplerpc.remoting.RPCFuture;
 import com.cdy.simplerpc.remoting.RPCResponse;
@@ -10,8 +10,8 @@ import io.netty.util.Attribute;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.cdy.simplerpc.proxy.RemoteInvoker.responseFuture;
-import static com.cdy.simplerpc.remoting.netty.RPCClient.ATTRIBUTE_KEY_ADDRESS;
-import static com.cdy.simplerpc.remoting.netty.RPCClient.addressChannel;
+import static com.cdy.simplerpc.remoting.rpc.RPCClient.ATTRIBUTE_KEY_ADDRESS;
+import static com.cdy.simplerpc.remoting.rpc.RPCClient.addressChannel;
 
 /**
  * 客户端消息处理

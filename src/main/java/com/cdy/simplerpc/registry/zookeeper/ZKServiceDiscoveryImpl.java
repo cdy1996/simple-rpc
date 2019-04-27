@@ -8,8 +8,10 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 服务发现
@@ -40,31 +42,23 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     }
     
     @Override
-    public String discovery(String serviceName, String type) throws Exception {
+    public String discovery(String serviceName, String ...protocols) throws Exception {
+        //负载均衡
+        return loadBalance(serviceName, listServer(serviceName, protocols));
+    }
+    
+    
+    @Override
+    public List<String> listServer(String serviceName, String ...protocols) throws Exception {
         String path = ZKConfig.zkRegistryPath + "/" + serviceName;
         // 第一次初始化缓存或者是为空需要重新获取
         Map<String, List<String>> cache = getCache();
         List<String> cacheList = cache.get(serviceName);
         if (cacheList == null) {
             List<String> value = curatorFramework.getChildren().forPath(path);
-            value.removeIf(e -> !e.startsWith(type));
-            value.replaceAll(e->e=e.replace(type+"-",""));
-            cacheList = cache.putIfAbsent(serviceName, value);
-        }
-    
-        //负载均衡
-        return loadBalance(serviceName, cacheList);
-    }
-    
-    
-    @Override
-    public List<String> listServer(String serviceName) throws Exception {
-        String path = ZKConfig.zkRegistryPath + "/" + serviceName;
-        //发现地址
-        Map<String, List<String>> cache = getCache();
-        List<String> cacheList = cache.get(serviceName);
-        if (cacheList == null) {
-            List<String> value = curatorFramework.getChildren().forPath(path);
+            if (!(protocols == null || protocols.length==0)) {
+                value = value.stream().filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith)).collect(Collectors.toList());
+            }
             cacheList = cache.putIfAbsent(serviceName, value);
         }
         return cacheList;

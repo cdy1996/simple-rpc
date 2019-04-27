@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.remoting.jetty.httpClient;
+package com.cdy.simplerpc.remoting.http.httpClient;
 
 import com.cdy.serialization.JsonUtil;
 import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
@@ -13,7 +13,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.cdy.simplerpc.remoting.jetty.httpClient.HttpClientUtil.getHttpClient;
+import static com.cdy.simplerpc.remoting.http.httpClient.HttpClientUtil.getHttpClient;
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
 /**
@@ -21,15 +21,13 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
  * Created by 陈东一
  * 2018/11/25 0025 14:28
  */
-public class HttpClient extends AbstractClient {
+public class HTTPClient extends AbstractClient {
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
         RPCRequest rpcRequest = invocation.toRequest();
         
-        String serviceName = invocation.getInterfaceClass().getName();
-        String address = getServiceDiscovery().discovery(serviceName, "http");
-        
+        String address = invocation.getAddress();
         StringUtil.TwoResult<String, Integer> server = getServer(address);
         
         CloseableHttpClient client = getHttpClient();
@@ -38,18 +36,16 @@ public class HttpClient extends AbstractClient {
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
     
-    
-        ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo((String) invocation.getAttach().get("metaInfoKey"));
+        ReferenceMetaInfo referenceMetaInfo = (ReferenceMetaInfo) invocation.getAttach().get("metaInfoKey");
     
         if (referenceMetaInfo.isAsync()) {
-            CompletableFuture<Object> uCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            return CompletableFuture.supplyAsync(() -> {
                 try {
                     return send(rpcRequest, server, client, referenceMetaInfo);
                 } catch (Exception e) {
                     throw new RPCException(e);
                 }
             });
-            return uCompletableFuture;
         } else {
             return send(rpcRequest, server, client, referenceMetaInfo);
         }

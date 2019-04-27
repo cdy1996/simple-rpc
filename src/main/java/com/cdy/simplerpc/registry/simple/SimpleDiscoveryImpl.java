@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 简单发现
@@ -45,16 +46,17 @@ public class SimpleDiscoveryImpl extends AbstractDiscovery {
     }
     
     @Override
-    public String discovery(String serviceName, String type) {
-        List<String> urls = map.get(serviceName);
-        urls.removeIf(e -> !e.startsWith(type));
-        urls.replaceAll(e-> e.replace(type+"-",""));
-        return loadBalance(serviceName, urls);
+    public String discovery(String serviceName, String ...protocols) throws Exception {
+        return loadBalance(serviceName, listServer(serviceName, protocols));
     }
     
     @Override
-    public List<String> listServer(String serviceName) throws Exception {
-        return map.get(serviceName) ;
+    public List<String> listServer(String serviceName, String ...protocols) throws Exception {
+        List<String> value = map.get(serviceName);
+        if (!(protocols == null || protocols.length==0)) {
+            value = value.stream().filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith)).collect(Collectors.toList());
+        }
+        return  value;
     }
     
 }

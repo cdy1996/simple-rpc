@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.remoting.netty;
+package com.cdy.simplerpc.remoting.rpc;
 
 import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
 import com.cdy.simplerpc.exception.RPCException;
@@ -68,40 +68,34 @@ public class RPCClient extends AbstractClient {
     public Object invoke(Invocation invocation) throws Exception {
         RPCRequest rpcRequest = invocation.toRequest();
         rpcRequest.setRequestId(requestId.getAndIncrement() + "");
-        //服务发现
-        String serviceName = invocation.getInterfaceClass().getName();
+        
         //netty 连接
-        String address = getServiceDiscovery().discovery(serviceName, "rpc");
-        // 确保之前建立的连接断开后能再次开启连接
-    
-        Channel channel = addressChannel.get(serviceName);
+        String address = invocation.getAddress();
+        Channel channel = addressChannel.get(address);
         if (channel == null) {
             channel = connect(address);
-            addressChannel.putIfAbsent(serviceName, channel);
+            addressChannel.putIfAbsent(address, channel);
         }
     
-        addressChannel.put(serviceName, channel);
+        addressChannel.put(address, channel);
         // 隐式传递参数
         RPCContext rpcContext1 = RPCContext.current();
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
-    
-        ReferenceMetaInfo referenceMetaInfo = getClientBootStrap().getReferenceMetaInfo((String) invocation.getAttach().get("metaInfoKey"));
         
-    
+        ReferenceMetaInfo referenceMetaInfo = (ReferenceMetaInfo) invocation.getAttach().get("metaInfoKey");
         RPCFuture future = new RPCFuture(referenceMetaInfo.getTimeout());
         responseFuture.put(rpcRequest.getRequestId(), future);
         
         if (referenceMetaInfo.isAsync()) {
             Channel finalChannel = channel;
-            CompletableFuture<Object> uCompletableFuture = CompletableFuture.supplyAsync(() -> {
+            return CompletableFuture.supplyAsync(() -> {
                 try {
                     return send(rpcRequest, finalChannel, future);
                 } catch (Exception e) {
                     throw new RPCException(e);
                 }
             });
-            return uCompletableFuture;
         } else {
             return send(rpcRequest, channel, future);
         }
@@ -109,9 +103,7 @@ public class RPCClient extends AbstractClient {
     
     private Object send(RPCRequest rpcRequest, Channel channel, RPCFuture future) throws InterruptedException {
         channel.writeAndFlush(rpcRequest);
-        // todo 发送事件
         Object result = future.get();
-        // todo 结果返回事件
         // 隐式接受参数
         RPCContext rpcContext = RPCContext.current();
         rpcContext.setMap(future.getAttach());

@@ -17,4 +17,6 @@ public @interface RPCReference {
     boolean async() default false;
     // timeout
     long timeout() default 5000L;
+    
+    String[] protocols() default {"rpc","http"};
 }

@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.remoting.jetty.httpClient;
+package com.cdy.simplerpc.remoting.http.httpClient;
 
 import com.cdy.simplerpc.exception.RPCException;
 import org.apache.http.HttpEntity;

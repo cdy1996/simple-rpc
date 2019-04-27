@@ -38,6 +38,8 @@ public class InvokerInvocationHandler implements InvocationHandler {
             return invoker.equals(args[0]);
         }
         Invocation invocation = new Invocation(method, args, clazz);
+        
+        //方便后续获取对应的元信息
         invocation.getAttach().put("metaInfoKey", key);
         return invoker.invoke(invocation);
     }

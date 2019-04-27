@@ -14,10 +14,16 @@ public class ReferenceMetaInfo {
     
     private long timeout = 5000L;
     
+    private String[] protocols;
+    
     public ReferenceMetaInfo(RPCReference annotation) {
-    
-    
+        ReferenceMetaInfo referenceMetaInfo = new ReferenceMetaInfo();
+        referenceMetaInfo.setAsync(annotation.async());
+        referenceMetaInfo.setTimeout(annotation.timeout());
+        referenceMetaInfo.setProtocols(annotation.protocols());
     }
     
     
+    private ReferenceMetaInfo() {
+    }
 }

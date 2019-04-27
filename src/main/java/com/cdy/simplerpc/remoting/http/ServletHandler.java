@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.remoting.jetty;
+package com.cdy.simplerpc.remoting.http;
 
 import com.cdy.serialization.JsonUtil;
 import com.cdy.simplerpc.exception.RPCException;

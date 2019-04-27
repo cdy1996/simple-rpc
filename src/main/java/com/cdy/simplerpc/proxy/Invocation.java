@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.proxy;
 
 import com.cdy.simplerpc.remoting.RPCRequest;
+import lombok.Data;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Map;
  * Created by 陈东一
  * 2019/1/23 0023 23:03
  */
+@Data
 public class Invocation {
     
     /**
@@ -34,6 +36,12 @@ public class Invocation {
      * 客户端调用远程时的接口名
      */
     private Class interfaceClass;
+    
+    /**
+     * 远程服务地址
+     */
+    private String address;
+    
     /**
      * 附加属性
      */
@@ -70,43 +78,4 @@ public class Invocation {
         return rpcRequest;
     }
     
-    public Method getMethod() {
-        return method;
-    }
-    
-    public void setMethod(Method method) {
-        this.method = method;
-    }
-    
-    public Object[] getArgs() {
-        return args;
-    }
-    
-    public void setArgs(Object[] args) {
-        this.args = args;
-    }
-    
-    public Class getInterfaceClass() {
-        return interfaceClass;
-    }
-    
-    public void setInterfaceClass(Class interfaceClass) {
-        this.interfaceClass = interfaceClass;
-    }
-    
-    public Class<?>[] getTypes() {
-        return types;
-    }
-    
-    public void setTypes(Class<?>[] types) {
-        this.types = types;
-    }
-    
-    public String getMethodName() {
-        return methodName;
-    }
-    
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
-    }
 }

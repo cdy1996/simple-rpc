@@ -3,8 +3,8 @@ package com.cdy.simplerpc;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.remoting.Server;
-import com.cdy.simplerpc.remoting.jetty.HttpServer;
-import com.cdy.simplerpc.remoting.netty.RPCServer;
+import com.cdy.simplerpc.remoting.http.HttpServer;
+import com.cdy.simplerpc.remoting.rpc.RPCServer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;

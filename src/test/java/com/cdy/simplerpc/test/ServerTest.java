@@ -4,8 +4,8 @@ import com.cdy.simplerpc.ServerBootStrap;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.registry.simple.SimpleRegisteryImpl;
 import com.cdy.simplerpc.remoting.Server;
-import com.cdy.simplerpc.remoting.jetty.HttpServer;
-import com.cdy.simplerpc.remoting.netty.RPCServer;
+import com.cdy.simplerpc.remoting.http.HttpServer;
+import com.cdy.simplerpc.remoting.rpc.RPCServer;
 
 import java.util.Collections;
 

@@ -1,6 +1,6 @@
 package com.cdy.simplerpc;
 
-import com.cdy.simplerpc.remoting.jetty.httpClient.HttpClientUtil;
+import com.cdy.simplerpc.remoting.http.httpClient.HttpClientUtil;
 import org.junit.Test;
 
 /**

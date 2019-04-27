@@ -15,11 +15,11 @@ public interface IServiceDiscovery {
      * 发现服务
      *
      * @param serviceName
-     * @param prefix      协议前缀
-     * @return 127.0.0.1:8080
+     * @param protocol
+     * @return rpc-127.0.0.1:8080
      * @throws Exception
      */
-    String discovery(String serviceName, String prefix) throws Exception;
+    String discovery(String serviceName, String ...protocol) throws Exception;
     
     /**
      * 服务对应的所有实例地址
@@ -28,7 +28,7 @@ public interface IServiceDiscovery {
      * @return rpc-127.0.0.1:8080  http-127.0.0.1:8082
      * @throws Exception
      */
-    List<String> listServer(String serviceName) throws Exception;
+    List<String> listServer(String serviceName,  String ...protocols) throws Exception;
     
     void setBalance(IBalance iBalance);
     

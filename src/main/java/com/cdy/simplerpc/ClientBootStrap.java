@@ -8,10 +8,14 @@ import com.cdy.simplerpc.filter.FilterChain;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.proxy.ProxyFactory;
 import com.cdy.simplerpc.proxy.RemoteInvoker;
-import com.cdy.simplerpc.remoting.Client;
+import com.cdy.simplerpc.registry.IServiceDiscovery;
+import lombok.Data;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -22,6 +26,7 @@ import java.util.function.Function;
  * Created by 陈东一
  * 2019/1/22 0022 22:11
  */
+@Data
 public class ClientBootStrap {
     
     
@@ -33,7 +38,7 @@ public class ClientBootStrap {
     
     private RemotingConfig remotingConfig = new RemotingConfig();
     
-    private Set<Client> clients = new HashSet<>();
+    private IServiceDiscovery serviceDiscovery;
     
     public ClientBootStrap filters(Filter... filters) {
         this.filters.addAll(Arrays.asList(filters));
@@ -41,8 +46,7 @@ public class ClientBootStrap {
     }
     
     @SafeVarargs
-    public final <T> T inject(Client client, List<Filter> filters, T t, Function<Invoker, Invoker>... function) throws Exception {
-        clients.add(client);
+    public final <T> T inject(List<Filter> filters, T t, Function<Invoker, Invoker>... function) throws Exception {
         Field[] fields = t.getClass().getDeclaredFields();
         for (Field field : fields) {
             RPCReference annotation = field.getAnnotation(RPCReference.class);
@@ -60,7 +64,7 @@ public class ClientBootStrap {
                         field.set(t, proxy);
                         continue;
                     }
-                    invoker = new RemoteInvoker(client);
+                    invoker = new RemoteInvoker(this);
                     invoker.addMetaInfo(key, data);
                     for (Function<Invoker, Invoker> invokerInvokerFunction : function) {
                         invoker = invokerInvokerFunction.apply(invoker);
@@ -79,13 +83,5 @@ public class ClientBootStrap {
         return invokerMap.get(serviceName).getMetaInfo(serviceName);
     }
     
-    public RemotingConfig getRemotingConfig() {
-        return remotingConfig;
-    }
-    
-    public void setRemotingConfig(RemotingConfig remotingConfig) {
-        this.remotingConfig = remotingConfig;
-    }
-    
-    
+
 }

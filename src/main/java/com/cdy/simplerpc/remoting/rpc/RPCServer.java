@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.remoting.netty;
+package com.cdy.simplerpc.remoting.rpc;
 
 import com.cdy.simplerpc.remoting.AbstractServer;
 import com.cdy.simplerpc.util.StringUtil;

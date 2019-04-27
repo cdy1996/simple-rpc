@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LocalInvoker<T> implements Invoker {
     
     private T t;
+    
     public static ConcurrentHashMap<String, ReferenceMetaInfo> metaInfoMap = new ConcurrentHashMap<>();
     
     public LocalInvoker(T t) {

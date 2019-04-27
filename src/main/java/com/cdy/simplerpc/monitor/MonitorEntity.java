@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.monitor;
 
+import lombok.Data;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.concurrent.Future;
  * Created by 陈东一
  * 2019/2/8 0008 18:20
  */
+@Data
 public class MonitorEntity {
     
     public static ThreadLocal<MonitorEntity> local = new ThreadLocal<>();
@@ -48,60 +50,4 @@ public class MonitorEntity {
         }
     }
     
-    
-    public Object getResult() {
-        return result;
-    }
-    
-    public void setResult(Object result) {
-        this.result = result;
-    }
-    
-    public String getStack() {
-        return stack;
-    }
-    
-    public void setStack(String stack) {
-        this.stack = stack;
-    }
-    
-    public String getAddress() {
-        return address;
-    }
-    
-    public void setAddress(String address) {
-        this.address = address;
-    }
-    
-    public Date getStartTime() {
-        return startTime;
-    }
-    
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-    
-    public Long getDuraing() {
-        return duraing;
-    }
-    
-    public void setDuraing(Long duraing) {
-        this.duraing = duraing;
-    }
-    
-    public String getMethod() {
-        return method;
-    }
-    
-    public void setMethod(String method) {
-        this.method = method;
-    }
-    
-    public Object[] getArgs() {
-        return args;
-    }
-    
-    public void setArgs(Object[] args) {
-        this.args = args;
-    }
 }

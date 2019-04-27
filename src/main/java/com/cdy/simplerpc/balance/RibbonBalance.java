@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.balance;
 
 import com.netflix.loadbalancer.*;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -16,9 +17,10 @@ import static com.cdy.simplerpc.util.StringUtil.toServer;
  * 2019/2/7 0007 20:14
  */
 @Slf4j
+@Data
 public class RibbonBalance implements IBalance {
     
-    private IRule iRule;
+    private IRule iRule = new RandomRule();
     
     private static ConcurrentHashMap<String, BaseLoadBalancer> loadBalancerMap
             = new ConcurrentHashMap<>();
@@ -49,15 +51,6 @@ public class RibbonBalance implements IBalance {
                 .withRule(iRule)
                 .withPing(new DummyPing())
                 .buildFixedServerListLoadBalancer(collect);
-    }
-    
-    
-    public IRule getiRule() {
-        return iRule;
-    }
-    
-    public void setiRule(IRule iRule) {
-        this.iRule = iRule;
     }
     
     

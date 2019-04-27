@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.proxy;
 
 import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
+import lombok.Data;
 
 /**
  * 客户端适配器
@@ -8,6 +9,7 @@ import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
  * Created by 陈东一
  * 2019/1/26 0026 21:53
  */
+@Data
 public abstract class InvokerAdapter implements Invoker{
     
     Invoker<?> invoker;
@@ -19,14 +21,6 @@ public abstract class InvokerAdapter implements Invoker{
     @Override
     public Object invoke(Invocation invocation) throws Exception {
         return invoker.invoke(invocation);
-    }
-    
-    public Invoker<?> getInvoker() {
-        return invoker;
-    }
-    
-    public void setInvoker(Invoker<?> invoker) {
-        this.invoker = invoker;
     }
     
     @Override
