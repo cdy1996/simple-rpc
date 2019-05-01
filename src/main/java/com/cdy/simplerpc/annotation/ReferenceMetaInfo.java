@@ -3,7 +3,7 @@ package com.cdy.simplerpc.annotation;
 import lombok.Data;
 
 /**
- * todo
+ * 元信息实体
  * Created by 陈东一
  * 2019/3/3 0003 21:04
  */
@@ -16,16 +16,22 @@ public class ReferenceMetaInfo {
     
     private long timeout = 5000L;
     
+    private String url;
+    
     private String[] protocols;
     
-    public ReferenceMetaInfo(RPCReference annotation) {
+    public static ReferenceMetaInfo generateMetaInfo(RPCReference annotation) {
         ReferenceMetaInfo referenceMetaInfo = new ReferenceMetaInfo();
         referenceMetaInfo.setAsync(annotation.async());
         referenceMetaInfo.setTimeout(annotation.timeout());
+        referenceMetaInfo.setUrl(annotation.url());
         referenceMetaInfo.setProtocols(annotation.protocols());
+        return referenceMetaInfo;
     }
     
     
     private ReferenceMetaInfo() {
     }
+    
+    
 }

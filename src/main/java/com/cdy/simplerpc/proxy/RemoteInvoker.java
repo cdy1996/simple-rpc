@@ -20,6 +20,7 @@ import static com.cdy.simplerpc.annotation.ReferenceMetaInfo.METAINFO_KEY;
 public class RemoteInvoker implements Invoker{
     
     public static ConcurrentHashMap<String, RPCFuture> responseFuture = new ConcurrentHashMap<>();
+    /* target.getClass().getName() + "#" + fieldName; */
     public static ConcurrentHashMap<String, ReferenceMetaInfo> metaInfoMap = new ConcurrentHashMap<>();
     
     private Client client;
