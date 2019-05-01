@@ -14,6 +14,14 @@ import java.net.InetSocketAddress;
  */
 public class StringUtil {
     
+    public static boolean isBlank(String string){
+        if (string == null || "".equals(string)) {
+            return true;
+        }
+        return false;
+    }
+    
+    
     /**
      * 输入流转字符串
      * @param inputStream

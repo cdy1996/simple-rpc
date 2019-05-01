@@ -63,7 +63,7 @@ public class NacosDiscovery extends AbstractDiscovery {
     
     public void subscribe(String serviceName, String... protocols) throws NacosException {
         namingService.subscribe(serviceName, event -> {
-            log.info("nacos 服务监听发生变化" + ((NamingEvent) event).getServiceName());
+            log.debug("nacos 服务监听发生变化" + ((NamingEvent) event).getServiceName());
             List<String> collect = ((NamingEvent) event).getInstances().stream().map(e -> e.getClusterName() + "-" + e.getIp() + ":" + e.getPort()).collect(Collectors.toList());
             getCache().get(serviceName).clear();
             //todo 线程安全问题
