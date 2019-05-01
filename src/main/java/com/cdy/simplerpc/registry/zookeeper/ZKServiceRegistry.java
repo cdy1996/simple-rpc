@@ -13,12 +13,13 @@ import org.apache.zookeeper.CreateMode;
  * 2018/9/1 21:19
  */
 @Slf4j
-public class ZKServiceRegistryImpl implements IServiceRegistry {
+public class ZKServiceRegistry implements IServiceRegistry {
     
-    CuratorFramework curatorFramework;
+    private CuratorFramework curatorFramework;
+    private ZKConfig zkConfig;
     
-    public ZKServiceRegistryImpl() {
-        curatorFramework = CuratorFrameworkFactory.builder().connectString(ZKConfig.zkAddress)
+    public ZKServiceRegistry(ZKConfig zkConfig) {
+        curatorFramework = CuratorFrameworkFactory.builder().connectString(zkConfig.getZkAddress())
                 .sessionTimeoutMs(4000)
                 .retryPolicy(new ExponentialBackoffRetry(10000, 5))
                 .build();
@@ -27,20 +28,19 @@ public class ZKServiceRegistryImpl implements IServiceRegistry {
     
     @Override
     public void register(String name, String address) throws Exception {
-        String servicePath = ZKConfig.zkRegistryPath + "/" + name;
+        String servicePath = zkConfig.getZkRegistryPath() + "/" + name;
         
         if (curatorFramework.checkExists().forPath(servicePath) == null) {
             curatorFramework.create().creatingParentContainersIfNeeded()
                     .withMode(CreateMode.PERSISTENT)
                     .forPath(servicePath, "0".getBytes());
         }
-    
-        log.debug("serviceName 创建成功" + servicePath);
+        log.debug("serviceName 路径创建成功" + servicePath);
         
         String addressPath = servicePath + "/" + address;
         String addNode = curatorFramework.create().withMode(CreateMode.EPHEMERAL)
                 .forPath(addressPath, "0".getBytes());
-        log.debug("address 创建成功 " + addNode);
+        log.debug("address 路径创建成功 " + addNode);
         
     }
 }

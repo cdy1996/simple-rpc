@@ -12,9 +12,21 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RPCReference {
     
-    String value() default "default";
-    // version
+    /**
+     * 是否开启异步
+     * @return
+     */
     boolean async() default false;
-    // timeout
+    
+    /**
+     * 服务调用的超时时间
+     * @return
+     */
     long timeout() default 5000L;
+    
+    /**
+     * 直连的url地址
+     * @return
+     */
+    String url() default "";
 }

@@ -2,9 +2,9 @@ package com.cdy.simplerpc.test;
 
 import com.cdy.simplerpc.ServerBootStrap;
 import com.cdy.simplerpc.registry.IServiceRegistry;
-import com.cdy.simplerpc.registry.simple.SimpleRegisteryImpl;
+import com.cdy.simplerpc.registry.nacos.NacosConfig;
+import com.cdy.simplerpc.registry.nacos.NacosRegistry;
 import com.cdy.simplerpc.remoting.Server;
-import com.cdy.simplerpc.remoting.jetty.HttpServer;
 import com.cdy.simplerpc.remoting.netty.RPCServer;
 
 import java.util.Collections;
@@ -20,19 +20,23 @@ public class ServerTest {
         ServerBootStrap serverBootStrap = new ServerBootStrap();
 //        ZKServiceRegistryImpl registery = new ZKServiceRegistryImpl();
         
-        IServiceRegistry registery = new SimpleRegisteryImpl();
+//        IServiceRegistry registery = new SimpleRegisteryImpl();
+    
+        NacosConfig nacosConfig = new NacosConfig();
+    
+        IServiceRegistry registery = new NacosRegistry(nacosConfig);
         Server rpcServer = new RPCServer("rpc-127.0.0.1:8080");
-        Server rpcServer2 = new RPCServer("rpc-127.0.0.1:8082");
+//        Server rpcServer2 = new RPCServer("rpc-127.0.0.1:8082");
         
-        Server httpServer = new HttpServer("http-127.0.0.1:8888");
+//        Server httpServer = new HttpServer("http-127.0.0.1:8888");
         rpcServer.setRegistry(registery);
-        rpcServer2.setRegistry(registery);
-        httpServer.setRegistry(registery);
+//        rpcServer2.setRegistry(registery);
+//        httpServer.setRegistry(registery);
     
         TestServiceImpl object = new TestServiceImpl();
         serverBootStrap.bind(rpcServer, Collections.EMPTY_LIST, object);
-        serverBootStrap.bind(rpcServer2, Collections.EMPTY_LIST, object);
-        serverBootStrap.bind(httpServer, Collections.EMPTY_LIST, object);
+//        serverBootStrap.bind(rpcServer2, Collections.EMPTY_LIST, object);
+//        serverBootStrap.bind(httpServer, Collections.EMPTY_LIST, object);
         System.in.read();
         serverBootStrap.closeAll();
         

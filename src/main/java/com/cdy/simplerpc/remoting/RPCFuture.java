@@ -64,8 +64,8 @@ public class RPCFuture implements Serializable, Future<Object> {
     @Override
     public Object get() throws InterruptedException {
         synchronized (lock){
+            lock.wait(defaultTimeout);
             if (resultData == null) {
-                lock.wait(defaultTimeout);
                 throw new InvokeTimeOutException();
             }
             return resultData;

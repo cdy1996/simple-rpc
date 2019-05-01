@@ -80,7 +80,6 @@ public class RPCClient extends AbstractClient {
             addressChannel.putIfAbsent(serviceName, channel);
         }
     
-        addressChannel.put(serviceName, channel);
         // 隐式传递参数
         RPCContext rpcContext1 = RPCContext.current();
         rpcRequest.setAttach(rpcContext1.getMap());

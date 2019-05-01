@@ -41,23 +41,24 @@ public class ClientBootStrap {
     }
     
     @SafeVarargs
-    public final <T> T inject(Client client, List<Filter> filters, T t, Function<Invoker, Invoker>... function) throws Exception {
+    public final <T> T inject(Client client, List<Filter> filters, T target, Function<Invoker, Invoker>... function) throws Exception {
         clients.add(client);
-        Field[] fields = t.getClass().getDeclaredFields();
+        Field[] fields = target.getClass().getDeclaredFields();
         for (Field field : fields) {
             RPCReference annotation = field.getAnnotation(RPCReference.class);
             if (annotation != null) {
-                Class<?> clazz = field.getType();
-                synchronized (clazz.getName()) {
-                    String key = t.getClass().getName() + "#" + clazz.getName();
+                Class<?> fieldType = field.getType();
+                String fieldName = field.getName();
+                synchronized (fieldType.getName()) {
+                    String key = target.getClass().getName() + "#" + fieldName;
                     Invoker invoker = invokerMap.get(key);
-                    ReferenceMetaInfo data = new ReferenceMetaInfo(annotation);
+                    ReferenceMetaInfo data = ReferenceMetaInfo.generateMetaInfo(annotation);
                     field.setAccessible(true);
                     //相同的invoker但是可以配置不同的策略
                     if (invoker != null) {
                         invoker.addMetaInfo(key, data);
-                        Object proxy = proxyFactory.createProxy(new FilterChain(invoker, filters), clazz, key);
-                        field.set(t, proxy);
+                        Object proxy = proxyFactory.createProxy(new FilterChain(invoker, filters), fieldType, key);
+                        field.set(target, proxy);
                         continue;
                     }
                     invoker = new RemoteInvoker(client);
@@ -67,12 +68,12 @@ public class ClientBootStrap {
                     }
                     invokerMap.put(key, invoker);
                     filters.addAll(this.filters);
-                    Object proxy = proxyFactory.createProxy(new FilterChain(invoker, filters), clazz, key);
-                    field.set(t, proxy);
+                    Object proxy = proxyFactory.createProxy(new FilterChain(invoker, filters), fieldType, key);
+                    field.set(target, proxy);
                 }
             }
         }
-        return t;
+        return target;
     }
     
     public ReferenceMetaInfo getReferenceMetaInfo(String serviceName) {

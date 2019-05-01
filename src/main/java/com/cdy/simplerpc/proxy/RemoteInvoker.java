@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RemoteInvoker implements Invoker{
     
     public static ConcurrentHashMap<String, RPCFuture> responseFuture = new ConcurrentHashMap<>();
+    /* target.getClass().getName() + "#" + fieldName; */
     public static ConcurrentHashMap<String, ReferenceMetaInfo> metaInfoMap = new ConcurrentHashMap<>();
     
     private Client client;
@@ -36,7 +37,6 @@ public class RemoteInvoker implements Invoker{
     
         ReferenceMetaInfo referenceMetaInfo = client.getClientBootStrap().getReferenceMetaInfo((String) invocation.getAttach().get("metaInfoKey"));
         
-        // todo 重试
         Object invoke = invokeRemote(invocation);
         if(invoke instanceof Exception){
             throw new RPCException(((Exception) invoke).getMessage());

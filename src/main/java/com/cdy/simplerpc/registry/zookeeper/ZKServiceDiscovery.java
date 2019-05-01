@@ -17,22 +17,23 @@ import java.util.Map;
  * 2018/9/1 21:31
  */
 @Slf4j
-public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
+public class ZKServiceDiscovery extends AbstractDiscovery {
     
-    CuratorFramework curatorFramework;
-  
+    private CuratorFramework curatorFramework;
     
-    public ZKServiceDiscoveryImpl() {
-        init();
+    private ZKConfig zkConfig;
+    
+    public ZKServiceDiscovery(ZKConfig zkConfig) {
+        this.zkConfig = zkConfig;
         try {
-            listener();
+            init();
         } catch (Exception e) {
             throw new DiscoveryException("zookeeper 服务发现监听异常", e);
         }
     }
     
     public void init() {
-        curatorFramework = CuratorFrameworkFactory.builder().connectString(ZKConfig.zkAddress)
+        curatorFramework = CuratorFrameworkFactory.builder().connectString(zkConfig.getZkAddress())
                 .sessionTimeoutMs(4000)
                 .retryPolicy(new ExponentialBackoffRetry(10000, 5))
                 .build();
@@ -41,44 +42,40 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
     
     @Override
     public String discovery(String serviceName, String type) throws Exception {
-        String path = ZKConfig.zkRegistryPath + "/" + serviceName;
-        // 第一次初始化缓存或者是为空需要重新获取
-        Map<String, List<String>> cache = getCache();
-        List<String> cacheList = cache.get(serviceName);
-        if (cacheList == null) {
-            List<String> value = curatorFramework.getChildren().forPath(path);
-            value.removeIf(e -> !e.startsWith(type));
-            value.replaceAll(e->e=e.replace(type+"-",""));
-            cacheList = cache.putIfAbsent(serviceName, value);
-        }
-    
+        List<String> value = listServer(serviceName);
+        value.removeIf(e -> !e.startsWith(type));
+        value.replaceAll(e->e=e.replace(type+"-",""));
         //负载均衡
-        return loadBalance(serviceName, cacheList);
+        return loadBalance(serviceName, value);
     }
     
     
     @Override
     public List<String> listServer(String serviceName) throws Exception {
-        String path = ZKConfig.zkRegistryPath + "/" + serviceName;
+        String path = zkConfig.getZkRegistryPath() + "/" + serviceName;
         //发现地址
         Map<String, List<String>> cache = getCache();
         List<String> cacheList = cache.get(serviceName);
         if (cacheList == null) {
-            List<String> value = curatorFramework.getChildren().forPath(path);
-            cacheList = cache.putIfAbsent(serviceName, value);
+            cacheList = curatorFramework.getChildren().forPath(path);
+            cache.putIfAbsent(serviceName, cacheList);
+            subscrible(serviceName);
         }
         return cacheList;
     }
     
-    
-    public void listener() throws Exception {
+    public void subscrible(String serviceName) {
         // 服务监听 更新负载均衡中的可用服务
-        rootListener();
+        try {
+            rootListener(serviceName);
+        } catch (Exception e) {
+            log.error("监听异常", e);
+        }
     }
     
     
-    public void rootListener() throws Exception{
-        PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, ZKConfig.zkRegistryPath, true);
+    public void rootListener(String servicePath) throws Exception{
+        PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, zkConfig.getZkRegistryPath()+"/"+servicePath, true);
         //Normal--初始化为空  BUILD_INITIAL_CACHE--rebuild  POST_INITIALIZED_EVENT--初始化后发送事件
         pathChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
         pathChildrenCache.getListenable().addListener((curatorFramework1, pathChildrenCacheEvent) -> {
@@ -88,22 +85,16 @@ public class ZKServiceDiscoveryImpl extends AbstractDiscovery {
             String server = split[1];
             switch (pathChildrenCacheEvent.getType()) {
                 case CHILD_ADDED:
-                    log.debug("增加新的服务节点");
-                    getCache().remove(serviceName);
+                    log.debug("增加新的服务节点 service = {}, server = {} ", serviceName, server);
+                    getCache().get(serviceName).add(server);
                     //todo 更新这里的cache即可 ,不用更新ribbon中的list
-//                    getBalance().addServer(serviceName, Collections.singletonList(server));
                     break;
                 case CHILD_REMOVED:
-                    log.debug("删除服务节点");
-                    getCache().remove(serviceName);
-//                    pathChildrenCacheEvent.getType();
-//                    getBalance().deleteServer(serviceName, null);
+                    log.debug("删除的服务节点 service = {}, server = {} ", serviceName, server);
+                    getCache().get(serviceName).remove(server);
                     break;
                 case CHILD_UPDATED:
                     // 暂时没有节点更新的操作
-                    /*cache.remove(serviceName);
-                    getBalance().deleteServer(serviceName, null);
-                    getBalance().addServer(serviceName, Collections.singletonList(server));*/
                     break;
                 default:
                     break;

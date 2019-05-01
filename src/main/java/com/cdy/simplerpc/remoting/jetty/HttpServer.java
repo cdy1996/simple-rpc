@@ -127,8 +127,8 @@ public class HttpServer extends AbstractServer {
         
         
         StandardServer server = (StandardServer) tomcat.getServer();
-        AprLifecycleListener listener = new AprLifecycleListener();
-        server.addLifecycleListener(listener);
+        AprLifecycleListener subscrible = new AprLifecycleListener();
+        server.addLifecycleListener(subscrible);
         
         //设置appBase为项目所在目录
         
