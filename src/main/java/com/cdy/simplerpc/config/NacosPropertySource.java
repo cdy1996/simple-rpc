@@ -13,12 +13,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
 /**
- * todo
+ * nacos远程配置
+ *
  * Created by 陈东一
  * 2019/5/25 0025 16:09
  */
 @Slf4j
-@Order(2)
+@Order(3)
 public class NacosPropertySource implements PropertySource {
     
     private ConfigService configService;

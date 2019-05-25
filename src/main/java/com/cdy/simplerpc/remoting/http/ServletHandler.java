@@ -7,6 +7,7 @@ import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
+import io.netty.channel.ChannelHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServlet;
@@ -14,7 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
+
+import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
 
 /**
  * 服务端处理
@@ -22,14 +24,10 @@ import java.util.HashMap;
  * 2019/1/27 0027 14:47
  */
 @Slf4j
+@ChannelHandler.Sharable
 public class ServletHandler extends HttpServlet {
     
-    private HashMap<String, Invoker> handlerMap;
-    
-    public ServletHandler(HashMap<String, Invoker> handlerMap) {
-        this.handlerMap = handlerMap;
-    }
-    
+
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         

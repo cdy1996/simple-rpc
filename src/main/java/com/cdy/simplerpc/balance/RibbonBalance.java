@@ -22,7 +22,7 @@ public class RibbonBalance implements IBalance {
     
     private IRule iRule = new RandomRule();
     
-    private static ConcurrentHashMap<String, BaseLoadBalancer> loadBalancerMap
+    private final ConcurrentHashMap<String, BaseLoadBalancer> loadBalancerMap
             = new ConcurrentHashMap<>();
     
     

@@ -1,9 +1,11 @@
 package com.cdy.simplerpc.remoting.http.httpClient;
 
 import com.cdy.serialization.JsonUtil;
-import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
+import com.cdy.simplerpc.config.ConfigConstants;
+import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
+import com.cdy.simplerpc.proxy.InvokerInvocationHandler;
 import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
@@ -13,7 +15,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.cdy.simplerpc.annotation.ReferenceMetaInfo.METAINFO_KEY;
 import static com.cdy.simplerpc.remoting.http.httpClient.HttpClientUtil.getHttpClient;
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
@@ -23,6 +24,11 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
  * 2018/11/25 0025 14:28
  */
 public class HTTPClient extends AbstractClient {
+    
+    
+    public HTTPClient(PropertySources propertySources) {
+        super(propertySources);
+    }
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
@@ -37,27 +43,29 @@ public class HTTPClient extends AbstractClient {
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
     
-        ReferenceMetaInfo referenceMetaInfo = (ReferenceMetaInfo) invocation.getAttach().get(METAINFO_KEY);
+        String annotationKey = (String) invocation.getAttach().get(InvokerInvocationHandler.annotationKey);
+        String async = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.async);
+        String timeout = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.timeout);
     
-        if (referenceMetaInfo.isAsync()) {
+        if (async.equalsIgnoreCase("true")) {
             return CompletableFuture.supplyAsync(() -> {
                 try {
-                    return send(rpcRequest, server, client, referenceMetaInfo);
+                    return send(rpcRequest, server, client, timeout);
                 } catch (Exception e) {
                     throw new RPCException(e);
                 }
             });
         } else {
-            return send(rpcRequest, server, client, referenceMetaInfo);
+            return send(rpcRequest, server, client, timeout);
         }
        
     }
     
-    private Object send(RPCRequest rpcRequest, StringUtil.TwoResult<String, Integer> server, CloseableHttpClient client, ReferenceMetaInfo referenceMetaInfo) throws Exception {
+    private Object send(RPCRequest rpcRequest, StringUtil.TwoResult<String, Integer> server, CloseableHttpClient client, String timeout) throws Exception {
         String result = HttpClientUtil.execute(client,
                 "http://" + server.getFirst() + ":" + server.getSecond() + "/simpleRPC",
                 JsonUtil.toString(rpcRequest),
-                Math.toIntExact(referenceMetaInfo.getTimeout()));
+                Integer.valueOf(timeout));
         
         
         RPCResponse rpcResponse = JsonUtil.parseObject(result, RPCResponse.class);

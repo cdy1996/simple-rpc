@@ -29,7 +29,7 @@ import static com.cdy.simplerpc.util.StringUtil.inputStreamToString;
  * 2019/1/27 0027 14:43
  */
 public class HttpClientUtil {
-    private static PoolingHttpClientConnectionManager manager;
+    private static final PoolingHttpClientConnectionManager manager;
     
     
     static {

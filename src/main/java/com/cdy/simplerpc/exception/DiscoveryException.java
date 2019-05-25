@@ -6,7 +6,6 @@ package com.cdy.simplerpc.exception;
  * 2019/2/23 0023 21:45
  */
 public class DiscoveryException extends RPCException {
-    private static final long serialVersionUID = -2597853705188126677L;
     
     public DiscoveryException(Throwable cause) {
         super(cause);

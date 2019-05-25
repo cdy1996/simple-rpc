@@ -9,6 +9,7 @@ import com.cdy.simplerpc.registry.IServiceRegistry;
 import java.io.Closeable;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -18,8 +19,12 @@ import java.util.function.Function;
  */
 public abstract class AbstractServer implements Server, Closeable {
     
-    //服务名称, 执行器   同一个server可以用多个执行器
-    private HashMap<String, Invoker> handlerMap = new HashMap<>();
+    /**
+     * 存放本地的invoker
+     *     key->className
+     *     static是因为本地要共享同一个实例
+     */
+    public static Map<String, Invoker> handlerMap = new HashMap<>();
     private IServiceRegistry registry;
     private String protocol;
     private String port;
@@ -62,7 +67,4 @@ public abstract class AbstractServer implements Server, Closeable {
         return address + ":" + port;
     }
     
-    public HashMap<String, Invoker> getHandlerMap() {
-        return handlerMap;
-    }
 }

@@ -6,14 +6,11 @@ import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.Server;
 import com.cdy.simplerpc.remoting.ServerFactory;
-import com.cdy.simplerpc.remoting.http.HttpServer;
-import com.cdy.simplerpc.remoting.rpc.RPCServer;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -28,14 +25,14 @@ public class ServerBootStrap {
     
     private List<Filter> filters = new ArrayList<>();
     
-    private HashMap<String, Server> servers = new HashMap<>();
+    private Map<String, Server> servers = new HashMap<>();
     
     //todo 以后增加多注册中心
     private IServiceRegistry registry;
     
     private ExecutorService executor = Executors.newCachedThreadPool();
     
-   //通用filter
+    //通用filter
     public ServerBootStrap filters(Filter... filters) {
         this.filters.addAll(Arrays.asList(filters));
         return this;
@@ -48,7 +45,7 @@ public class ServerBootStrap {
     @SafeVarargs
     public final <T> void bind(String protocol, String port, List<Filter> filters, T object, Function<Invoker, Invoker>... function) throws Exception {
         Server server;
-        if ((server =  servers.get(protocol + port)) == null) {
+        if ((server = servers.get(protocol + port)) == null) {
             server = ServerFactory.createServer(protocol, port);
             server.setRegistry(registry);
             servers.put(protocol + port, server);
@@ -58,20 +55,32 @@ public class ServerBootStrap {
             filters.addAll(this.filters);
             try {
                 RPCService annotation = object.getClass().getAnnotation(RPCService.class);
-                String serviceName = annotation.clazz().getName();
+                if (annotation == null) {
+                    return;
+                }
+                String serviceName = object.getClass().getName();
                 finalServer.bind(serviceName, object, filters, function);
                 finalServer.openServer();
                 finalServer.register(serviceName);
             } catch (Exception e) {
-                log.error(e.getMessage(),e);
+                log.error(e.getMessage(), e);
             }
         });
         
-    
+        
     }
     
-    public void closeAll(){
-        RPCServer.servers.forEach((k,v)->v.close());
-        HttpServer.servers.forEach((k, v)->v.close());
+    public void closeAll() {
+        servers.forEach((k, v) -> {
+                    if (v instanceof Closeable) {
+                        try {
+                            ((Closeable) v).close();
+                        } catch (IOException e) {
+                            log.error(e.getMessage(), e);
+                        }
+                        
+                    }
+                }
+        );
     }
 }

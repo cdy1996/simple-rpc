@@ -10,6 +10,7 @@ import com.cdy.simplerpc.exception.DiscoveryException;
 import com.cdy.simplerpc.registry.AbstractDiscovery;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -49,12 +50,14 @@ public class NacosDiscovery extends AbstractDiscovery {
     
     @Override
     public List<String> listServer(String serviceName, String... protocols) throws Exception {
-        List<Instance> allInstances = namingService.getAllInstances(serviceName, false);
-        
         Map<String, List<String>> cache = getCache();
         List<String> cacheList = cache.get(serviceName);
         if (cacheList == null) {
+            List<Instance> allInstances = namingService.getAllInstances(serviceName, false);
             cacheList = allInstances.stream().map(e -> e.getClusterName() + "-" + e.getIp() + ":" + e.getPort()).collect(Collectors.toList());
+            if (!(protocols == null || protocols.length==0)) {
+                cacheList = cacheList.stream().filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith)).collect(Collectors.toList());
+            }
             cache.putIfAbsent(serviceName, cacheList);
             subscribe(serviceName);
         }

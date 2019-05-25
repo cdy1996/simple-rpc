@@ -2,7 +2,6 @@ package com.cdy.simplerpc.remoting;
 
 import com.cdy.simplerpc.exception.InvokeTimeOutException;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -13,9 +12,7 @@ import java.util.concurrent.TimeUnit;
  * Created by 陈东一
  * 2018/9/1 22:15
  */
-public class RPCFuture implements Serializable, Future<Object> {
-    
-    private static final long serialVersionUID = -3577840344928082441L;
+public class RPCFuture implements Future<Object> {
     
     private Object resultData;
     private Map<String, Object> attach = new HashMap<>();

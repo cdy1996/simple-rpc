@@ -9,7 +9,8 @@ import java.io.InputStream;
 import java.util.PropertyResourceBundle;
 
 /**
- * todo
+ * 本地配置文件配置
+ *
  * Created by 陈东一
  * 2019/5/25 0025 16:09
  */

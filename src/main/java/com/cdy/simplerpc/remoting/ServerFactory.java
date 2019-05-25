@@ -5,13 +5,14 @@ import com.cdy.simplerpc.remoting.http.HttpServer;
 import com.cdy.simplerpc.remoting.rpc.RPCServer;
 
 /**
- * todo
+ * 服务创建工厂
+ *
  * Created by 陈东一
  * 2019/5/25 0025 19:51
  */
 public class ServerFactory {
     
-    public static String ip = "127.0.0.1";
+    public static final String ip = "127.0.0.1";
     
     public static Server createServer(String protocol, String port) {
         switch (protocol) {

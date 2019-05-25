@@ -1,9 +1,13 @@
 package com.cdy.simplerpc.annotation;
 
+import com.cdy.simplerpc.config.ConfigConstants;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 远程服务
@@ -37,4 +41,19 @@ public @interface RPCReference {
     String url() default "";
     
     String[] protocols() default {"rpc","http"};
+    
+    
+    class ReferenceAnnotationInfo {
+
+        public static Map<String,String> getConfig(String key, RPCReference annotation) {
+            Map<String, String> map = new HashMap<>();
+            map.put(key+"."+ConfigConstants.async, annotation.async()+"");
+            map.put(key+"."+ConfigConstants.timeout, annotation.timeout()+"");
+            map.put(key+"."+ConfigConstants.url, annotation.url()+"");
+            map.put(key+"."+ConfigConstants.protocols, String.join(",",annotation.protocols()));
+            return map;
+        }
+        
+    }
+    
 }

@@ -10,7 +10,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import javax.servlet.http.HttpServlet;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
@@ -22,22 +21,16 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
 @Slf4j
 public class HttpServer extends AbstractServer {
     
-    public static ConcurrentHashMap<String, HttpServer> servers = new ConcurrentHashMap<>();
-    private HttpServlet servlet;
     private Server server;
+    private final HttpServlet servlet = new ServletHandler();
+    
     
     public HttpServer(String protocol, String port, String address) {
         super(protocol, port, address);
-        servlet = new ServletHandler(getHandlerMap());
     }
     
     @Override
     public void openServer() throws Exception {
-        HttpServer httpServer = servers.get(getAddress());
-        if (httpServer != null) {
-            return;
-        }
-    
         StringUtil.TwoResult<String, Integer> server = getServer(getAddress());
         //维持tomcat服务，否则tomcat一启动就会关闭
         jettyStart(server.getFirst(), server.getSecond());
@@ -54,7 +47,7 @@ public class HttpServer extends AbstractServer {
     
     
     public void jettyStart(String host, Integer port) throws Exception {
-        server = new Server();// 创建jetty web容器
+        this.server = new Server();// 创建jetty web容器
         server.setStopAtShutdown(true);// 在退出程序是关闭服务
         
         // 创建连接器，每个连接器都是由IP地址和端口号组成，连接到连接器的连接将会被jetty处理
@@ -100,7 +93,6 @@ public class HttpServer extends AbstractServer {
         
         server.start();// 开启服务
     
-        servers.putIfAbsent(host + ":" + port, this);
 //        server.join();
     }
     

@@ -14,8 +14,6 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
 /**
@@ -26,10 +24,9 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
 @Slf4j
 public class RPCServer extends AbstractServer {
     
-    public static ConcurrentHashMap<String, RPCServer> servers = new ConcurrentHashMap<>();
     private Channel channel;
-    private EventLoopGroup boss = new NioEventLoopGroup();
-    private EventLoopGroup work = new NioEventLoopGroup();
+    private static final EventLoopGroup boss = new NioEventLoopGroup();
+    private static final EventLoopGroup work = new NioEventLoopGroup();
     
     public RPCServer(String protocol, String port, String address) {
         super(protocol, port, address);
@@ -38,11 +35,6 @@ public class RPCServer extends AbstractServer {
     
     @Override
     public void openServer() throws Exception {
-        RPCServer rpcServer = servers.get(getAddress());
-        if (rpcServer != null) {
-            return;
-        }
-        
         // 监听端口 并通讯
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(boss, work)
@@ -55,39 +47,33 @@ public class RPCServer extends AbstractServer {
                                 .addLast(new LengthFieldPrepender(4))
                                 .addLast("encoder", new ObjectEncoder())
                                 .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast(new RPCServerHandler(getHandlerMap()));
+                                .addLast(new RPCServerHandler());
                         
                     }
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)
                 .childOption(ChannelOption.SO_KEEPALIVE, true);
-    
+        
         StringUtil.TwoResult<String, Integer> server = getServer(getAddress());
         String ip = server.getFirst();
         int port = server.getSecond();
         ChannelFuture channelFuture = bootstrap.bind(ip, port);
         channelFuture.syncUninterruptibly();
-        channel = channelFuture.channel();
-    
-        servers.putIfAbsent(getAddress(), this);
+        this.channel = channelFuture.channel();
+        
     }
     
     @Override
-    public void close()  {
+    public void close() {
         try {
-            if (channel != null) {
-                // unbind.
-                channel.close();
-            }
+            channel.close();
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
         }
         
         try {
-            if (boss != null) {
-                boss.shutdownGracefully();
-                work.shutdownGracefully();
-            }
+            boss.shutdownGracefully();
+            work.shutdownGracefully();
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
         }

@@ -23,11 +23,15 @@ public class ClientTest {
     public void mutiTest() throws Exception {
         ClientTest2 test2 = new ClientTest2();
         ClientTest3 test3 = new ClientTest3();
-        
+    
+        PropertySources propertySources = new PropertySources();
+        propertySources.addPropertySources(new LocalPropertySource("D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties"));
+    
+    
         ClientBootStrap clientBootStrap = new ClientBootStrap();
         IServiceDiscovery discovery = new SimpleDiscoveryImpl();
         discovery.setBalance(new SimpleBalance());
-        
+        clientBootStrap.setPropertySources(propertySources);
         
         clientBootStrap.setServiceDiscovery(discovery);
         ClientTest2 inject2 = clientBootStrap.inject(Collections.EMPTY_LIST, test2);
@@ -49,6 +53,7 @@ public class ClientTest {
         ClientBootStrap clientBootStrap = new ClientBootStrap();
         IServiceDiscovery discovery = new NacosDiscovery(propertySources);
         discovery.setBalance(new SimpleBalance());
+        clientBootStrap.setPropertySources(propertySources);
         
         clientBootStrap.setServiceDiscovery(discovery);
         ClientTest3 inject3 = clientBootStrap.inject(Collections.EMPTY_LIST, test3);

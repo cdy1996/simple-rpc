@@ -1,6 +1,5 @@
 package com.cdy.simplerpc.remoting;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,10 +8,7 @@ import java.util.Map;
  * Created by 陈东一
  * 2018/9/1 22:15
  */
-public class RPCResponse implements Serializable{
-    
-    
-    private static final long serialVersionUID = -2916693541845750525L;
+public class RPCResponse {
     
     private String requestId;
     private Object resultData;

@@ -7,8 +7,6 @@ package com.cdy.simplerpc.exception;
  */
 public class RPCException extends RuntimeException {
     
-    private static final long serialVersionUID = 1373538162299799580L;
-    
     public RPCException(Throwable cause) {
         super(cause);
     }

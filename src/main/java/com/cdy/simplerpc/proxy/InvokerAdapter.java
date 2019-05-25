@@ -1,6 +1,5 @@
 package com.cdy.simplerpc.proxy;
 
-import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
 import lombok.Data;
 
 /**
@@ -23,13 +22,4 @@ public abstract class InvokerAdapter implements Invoker{
         return invoker.invoke(invocation);
     }
     
-    @Override
-    public void addMetaInfo(String s, ReferenceMetaInfo data) {
-        invoker.addMetaInfo(s, data);
-    }
-    
-    @Override
-    public ReferenceMetaInfo getMetaInfo(String s) {
-        return invoker.getMetaInfo(s);
-    }
 }

@@ -5,7 +5,8 @@ import com.cdy.simplerpc.remoting.http.httpClient.HttpClientUtil;
 import org.junit.Test;
 
 /**
- * todo
+ * httpclient测试
+ *
  * Created by 陈东一
  * 2019/3/3 0003 17:27
  */

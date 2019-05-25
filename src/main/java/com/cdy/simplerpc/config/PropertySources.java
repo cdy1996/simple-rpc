@@ -7,11 +7,12 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 /**
- * todo
+ * 配置聚合,用于配置覆盖
+ *
  * Created by 陈东一
  * 2019/5/25 0025 16:09
  */
-public class PropertySources implements PropertySource{
+public class PropertySources implements PropertySource {
     
     private TreeSet<PropertySource> propertySources = new TreeSet<>((a, b) -> {
         Order orderA = a.getClass().getAnnotation(Order.class);
@@ -30,16 +31,28 @@ public class PropertySources implements PropertySource{
     });
     
     
-    public void addPropertySources(PropertySource propertySource){
+    public void addPropertySources(PropertySource propertySource) {
         propertySources.add(propertySource);
     }
     
-
-    @Override
-    public String resolveProperty(String key){
-    
+    public PropertySource getProperetySource(Integer order) {
         Iterator<PropertySource> iterator = propertySources.iterator();
-        String result=null;
+        while (iterator.hasNext()) {
+            PropertySource next = iterator.next();
+            Order order1;
+            if ((order1 = next.getClass().getAnnotation(Order.class)) != null
+                    && order1.value() == order) {
+                return next;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+    public String resolveProperty(String key) {
+        
+        Iterator<PropertySource> iterator = propertySources.iterator();
+        String result = null;
         while (iterator.hasNext()) {
             PropertySource next = iterator.next();
             String property = next.resolveProperty(key);
@@ -49,5 +62,5 @@ public class PropertySources implements PropertySource{
         return result;
     }
     
-
+    
 }

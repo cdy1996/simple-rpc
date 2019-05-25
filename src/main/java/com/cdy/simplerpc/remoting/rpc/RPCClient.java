@@ -1,8 +1,10 @@
 package com.cdy.simplerpc.remoting.rpc;
 
-import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
+import com.cdy.simplerpc.config.ConfigConstants;
+import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
+import com.cdy.simplerpc.proxy.InvokerInvocationHandler;
 import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCFuture;
@@ -20,12 +22,11 @@ import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.cdy.simplerpc.annotation.ReferenceMetaInfo.METAINFO_KEY;
-import static com.cdy.simplerpc.proxy.RemoteInvoker.responseFuture;
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 import static com.cdy.simplerpc.util.StringUtil.toSocketAddress;
 
@@ -35,15 +36,21 @@ import static com.cdy.simplerpc.util.StringUtil.toSocketAddress;
  * 2018/11/25 0025 14:28
  */
 public class RPCClient extends AbstractClient {
+    /**
+     * 上下文传递服务端address的key
+     */
+    public static final AttributeKey<String> ATTRIBUTE_KEY_ADDRESS = AttributeKey.valueOf("address");
     
     private final Bootstrap bootstrap = new Bootstrap();
-    private final EventLoopGroup boss = new NioEventLoopGroup();
-    private static final AtomicInteger requestId = new AtomicInteger(0);
-    public static final AttributeKey<String> ATTRIBUTE_KEY_ADDRESS = AttributeKey.valueOf("address");
-    public static final ConcurrentHashMap<String, Channel> addressChannel = new ConcurrentHashMap<>();
+    private static final EventLoopGroup boss = new NioEventLoopGroup();
+    private final AtomicInteger requestId = new AtomicInteger(0);
+    private final Map<String, Channel> addressChannel = new ConcurrentHashMap<>();
+    private final Map<String, RPCFuture> responseFuture = new ConcurrentHashMap<>();
+    
     
     
     private void init() {
+        Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(boss)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
@@ -54,14 +61,15 @@ public class RPCClient extends AbstractClient {
                                 .addLast(new LengthFieldPrepender(4))
                                 .addLast("encoder", new ObjectEncoder())
                                 .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast(new RPCClientHandler());
+                                .addLast(new RPCClientHandler(addressChannel,responseFuture));
                     }
                 })
                 .option(ChannelOption.TCP_NODELAY, true);
 //                                    .childOption(ChannelOption.SO_KEEPALIVE, true);
     }
     
-    public RPCClient() {
+    public RPCClient(PropertySources propertySources) {
+        super(propertySources);
         init();
     }
     
@@ -83,12 +91,16 @@ public class RPCClient extends AbstractClient {
         RPCContext rpcContext1 = RPCContext.current();
         rpcRequest.setAttach(rpcContext1.getMap());
         rpcRequest.getAttach().put("address", address);
-        
-        ReferenceMetaInfo referenceMetaInfo = (ReferenceMetaInfo) invocation.getAttach().get(METAINFO_KEY);
-        RPCFuture future = new RPCFuture(referenceMetaInfo.getTimeout());
+    
+        String annotationKey = (String) invocation.getAttach().get(InvokerInvocationHandler.annotationKey);
+        String async = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.async);
+        String timeout = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.timeout);
+    
+    
+        RPCFuture future = new RPCFuture(Long.valueOf(timeout));
         responseFuture.put(rpcRequest.getRequestId(), future);
         
-        if (referenceMetaInfo.isAsync()) {
+        if (async.equalsIgnoreCase("true")) {
             Channel finalChannel = channel;
             return CompletableFuture.supplyAsync(() -> {
                 try {

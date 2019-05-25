@@ -43,7 +43,7 @@ public class Invocation {
     private String address;
     
     /**
-     * 附加属性
+     * 附加属性,用于传递RPCContext
      */
     private Map<String, Object> attach = new HashMap<>();
     
