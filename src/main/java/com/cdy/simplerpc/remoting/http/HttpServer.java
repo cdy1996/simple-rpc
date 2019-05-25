@@ -23,20 +23,18 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
 public class HttpServer extends AbstractServer {
     
     public static ConcurrentHashMap<String, HttpServer> servers = new ConcurrentHashMap<>();
-    private HttpServlet servlet = new ServletHandler();
+    private HttpServlet servlet;
     private Server server;
     
-    public HttpServer(String address) {
-        super(address);
+    public HttpServer(String protocol, String port, String address) {
+        super(protocol, port, address);
+        servlet = new ServletHandler(getHandlerMap());
     }
     
     @Override
-    public void registerAndListen() throws Exception {
-        register();
-    
-    
-        HttpServer rpcServer = servers.get(getAddress());
-        if (rpcServer != null) {
+    public void openServer() throws Exception {
+        HttpServer httpServer = servers.get(getAddress());
+        if (httpServer != null) {
             return;
         }
     

@@ -5,6 +5,7 @@ import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.DiscoveryException;
 import com.cdy.simplerpc.registry.AbstractDiscovery;
 import lombok.extern.slf4j.Slf4j;
@@ -24,13 +25,13 @@ import java.util.stream.Collectors;
 public class NacosDiscovery extends AbstractDiscovery {
     
     private NamingService namingService;
-    private NacosConfig nacosConfig;
+    private PropertySources propertySources;
     
-    public NacosDiscovery(NacosConfig nacosConfig) {
-        this.nacosConfig = nacosConfig;
+    public NacosDiscovery(PropertySources propertySources) {
+        this.propertySources = propertySources;
         Properties properties = new Properties();
-        properties.setProperty("serverAddr", this.nacosConfig.getServerAddr());
-        properties.setProperty("namespace", this.nacosConfig.getNamespaceId());
+        properties.setProperty("serverAddr", propertySources.resolveProperty("serverAddr"));
+        properties.setProperty("namespace",  propertySources.resolveProperty("namespace"));
         
         try {
             namingService = NamingFactory.createNamingService(properties);
@@ -63,7 +64,7 @@ public class NacosDiscovery extends AbstractDiscovery {
     
     public void subscribe(String serviceName, String... protocols) throws NacosException {
         namingService.subscribe(serviceName, event -> {
-            log.debug("nacos 服务监听发生变化" + ((NamingEvent) event).getServiceName());
+            log.info("nacos 服务监听发生变化" + ((NamingEvent) event).getServiceName());
             List<String> collect = ((NamingEvent) event).getInstances().stream().map(e -> e.getClusterName() + "-" + e.getIp() + ":" + e.getPort()).collect(Collectors.toList());
             getCache().get(serviceName).clear();
             //todo 线程安全问题

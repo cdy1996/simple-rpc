@@ -2,7 +2,7 @@ package com.cdy.simplerpc;
 
 import com.cdy.simplerpc.annotation.RPCReference;
 import com.cdy.simplerpc.annotation.ReferenceMetaInfo;
-import com.cdy.simplerpc.config.RemotingConfig;
+import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterChain;
 import com.cdy.simplerpc.proxy.Invoker;
@@ -36,9 +36,9 @@ public class ClientBootStrap {
     
     private List<Filter> filters = new ArrayList<>();
     
-    private RemotingConfig remotingConfig = new RemotingConfig();
-    
     private IServiceDiscovery serviceDiscovery;
+    
+    private PropertySources propertySources;
     
     public ClientBootStrap filters(Filter... filters) {
         this.filters.addAll(Arrays.asList(filters));

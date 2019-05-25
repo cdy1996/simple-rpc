@@ -31,14 +31,13 @@ public class RPCServer extends AbstractServer {
     private EventLoopGroup boss = new NioEventLoopGroup();
     private EventLoopGroup work = new NioEventLoopGroup();
     
-    public RPCServer(String address) {
-        super(address);
+    public RPCServer(String protocol, String port, String address) {
+        super(protocol, port, address);
     }
     
-    @Override
-    public void registerAndListen() throws Exception {
-        register();
     
+    @Override
+    public void openServer() throws Exception {
         RPCServer rpcServer = servers.get(getAddress());
         if (rpcServer != null) {
             return;
@@ -56,7 +55,7 @@ public class RPCServer extends AbstractServer {
                                 .addLast(new LengthFieldPrepender(4))
                                 .addLast("encoder", new ObjectEncoder())
                                 .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast(new RPCServerHandler());
+                                .addLast(new RPCServerHandler(getHandlerMap()));
                         
                     }
                 })

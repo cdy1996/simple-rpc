@@ -83,10 +83,10 @@ public class RibbonTest {
         
         // 5、发 送 10 次请求到服务器中
         for (int i = 0; i < 10; i++) {
-            log.debug("the "+(i+1)+"th: ");
+            log.info("the "+(i+1)+"th: ");
             HttpResponse response = client.executeWithLoadBalancer(request);
             String result = response.getEntity(String.class);
-            log.debug(result);
+            log.info(result);
         }
         return null;
     }

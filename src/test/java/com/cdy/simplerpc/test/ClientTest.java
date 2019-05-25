@@ -3,8 +3,9 @@ package com.cdy.simplerpc.test;
 import com.cdy.simplerpc.ClientBootStrap;
 import com.cdy.simplerpc.annotation.RPCReference;
 import com.cdy.simplerpc.balance.SimpleBalance;
+import com.cdy.simplerpc.config.LocalPropertySource;
+import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.registry.IServiceDiscovery;
-import com.cdy.simplerpc.registry.nacos.NacosConfig;
 import com.cdy.simplerpc.registry.nacos.NacosDiscovery;
 import com.cdy.simplerpc.registry.simple.SimpleDiscoveryImpl;
 import org.junit.Test;
@@ -40,9 +41,13 @@ public class ClientTest {
     @Test
     public void nacosTest() throws Exception {
         ClientTest3 test3 = new ClientTest3();
-        
+    
+        PropertySources propertySources = new PropertySources();
+        propertySources.addPropertySources(new LocalPropertySource("D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties"));
+    
+    
         ClientBootStrap clientBootStrap = new ClientBootStrap();
-        IServiceDiscovery discovery = new NacosDiscovery(new NacosConfig());
+        IServiceDiscovery discovery = new NacosDiscovery(propertySources);
         discovery.setBalance(new SimpleBalance());
         
         clientBootStrap.setServiceDiscovery(discovery);
@@ -55,7 +60,7 @@ public class ClientTest {
 }
 
 class ClientTest2 {
-    @RPCReference
+    @RPCReference("ClientTest2.testService")
     private TestService testService;
     
     public void test2() {
@@ -64,7 +69,7 @@ class ClientTest2 {
 }
 
 class ClientTest3 {
-    @RPCReference
+    @RPCReference("ClientTest3.testService1")
     private TestService testService;
     
     public void test() {

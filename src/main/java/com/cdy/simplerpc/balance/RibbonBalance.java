@@ -33,7 +33,7 @@ public class RibbonBalance implements IBalance {
     
     @Override
     public String loadBalance(String serviceName, List<String> list) {
-        log.debug("可用地址"+list);
+        log.info("可用地址"+list);
         BaseLoadBalancer baseLoadBalancer = loadBalancerMap.get(serviceName);
         if (baseLoadBalancer == null) {
             baseLoadBalancer = generateBalancer(list);

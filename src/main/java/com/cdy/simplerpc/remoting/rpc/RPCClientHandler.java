@@ -34,7 +34,7 @@ public class RPCClientHandler extends SimpleChannelInboundHandler<RPCResponse> {
     
     @Override
     public void channelRead0(ChannelHandlerContext ctx, RPCResponse msg) throws Exception {
-        log.debug("接收到内容" + msg);
+        log.info("接收到内容" + msg);
         RPCFuture rpcFuture = responseFuture.remove(msg.getRequestId());
         if(rpcFuture == null){
             return;

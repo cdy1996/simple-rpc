@@ -16,7 +16,7 @@ public class SimpleBalance implements IBalance{
     
     @Override
     public String loadBalance(String serviceName, List<String> list) {
-        log.debug("可用地址"+list);
+        log.info("可用地址"+list);
         if (list == null || list.isEmpty()) {
             throw new DiscoveryException("没有可用的地址");
         }

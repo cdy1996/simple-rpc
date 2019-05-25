@@ -14,8 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
+import java.util.HashMap;
 
 /**
  * 服务端处理
@@ -25,6 +24,11 @@ import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
 @Slf4j
 public class ServletHandler extends HttpServlet {
     
+    private HashMap<String, Invoker> handlerMap;
+    
+    public ServletHandler(HashMap<String, Invoker> handlerMap) {
+        this.handlerMap = handlerMap;
+    }
     
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
@@ -32,7 +36,7 @@ public class ServletHandler extends HttpServlet {
         String params = req.getParameter("params");
         RPCRequest msg1 = JsonUtil.parseObject(params, RPCRequest.class);
     
-        log.debug("接受到请求" + msg1);
+        log.info("接受到请求" + msg1);
         
         String className = msg1.getClassName();
         Object result = null;

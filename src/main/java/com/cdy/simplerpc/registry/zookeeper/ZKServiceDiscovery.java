@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.registry.zookeeper;
 
+import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.DiscoveryException;
 import com.cdy.simplerpc.registry.AbstractDiscovery;
 import lombok.extern.slf4j.Slf4j;
@@ -22,11 +23,10 @@ import java.util.stream.Collectors;
 public class ZKServiceDiscovery extends AbstractDiscovery {
     
     private CuratorFramework curatorFramework;
+    private PropertySources propertySources;
     
-    private ZKConfig zkConfig;
-    
-    public ZKServiceDiscovery(ZKConfig zkConfig) {
-        this.zkConfig = zkConfig;
+    public ZKServiceDiscovery(PropertySources propertySources) {
+        this.propertySources = propertySources;
         try {
             init();
         } catch (Exception e) {
@@ -35,7 +35,7 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
     }
     
     public void init() {
-        curatorFramework = CuratorFrameworkFactory.builder().connectString(zkConfig.getZkAddress())
+        curatorFramework = CuratorFrameworkFactory.builder().connectString(propertySources.resolveProperty("zkAddress"))
                 .sessionTimeoutMs(4000)
                 .retryPolicy(new ExponentialBackoffRetry(10000, 5))
                 .build();
@@ -51,7 +51,7 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
     
     @Override
     public List<String> listServer(String serviceName, String ...protocols) throws Exception {
-        String path = zkConfig.getZkRegistryPath() + "/" + serviceName;
+        String path = propertySources.resolveProperty("zkRegistryPath") + "/" + serviceName;
         // 第一次初始化缓存或者是为空需要重新获取
         Map<String, List<String>> cache = getCache();
         List<String> cacheList = cache.get(serviceName);
@@ -77,7 +77,7 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
     
     
     public void rootListener(String servicePath) throws Exception{
-        PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, zkConfig.getZkRegistryPath()+"/"+servicePath, true);
+        PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, propertySources.resolveProperty("zkRegistryPath")+"/"+servicePath, true);
         //Normal--初始化为空  BUILD_INITIAL_CACHE--rebuild  POST_INITIALIZED_EVENT--初始化后发送事件
         pathChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
         pathChildrenCache.getListenable().addListener((curatorFramework1, pathChildrenCacheEvent) -> {
@@ -87,11 +87,11 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
             String server = split[1];
             switch (pathChildrenCacheEvent.getType()) {
                 case CHILD_ADDED:
-                    log.debug("增加新的服务节点 service = {}, server = {} ", serviceName, server);
+                    log.info("增加新的服务节点 service = {}, server = {} ", serviceName, server);
                     getCache().get(serviceName).add(server);
                      break;
                 case CHILD_REMOVED:
-                    log.debug("删除的服务节点 service = {}, server = {} ", serviceName, server);
+                    log.info("删除的服务节点 service = {}, server = {} ", serviceName, server);
                     getCache().get(serviceName).remove(server);
                     break;
                 case CHILD_UPDATED:

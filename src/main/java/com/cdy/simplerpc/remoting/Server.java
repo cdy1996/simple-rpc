@@ -16,18 +16,27 @@ public interface Server {
     
     /**
      * 绑定
+     *
+     * @param serviceName
      * @param services
      * @param filters
      * @param functions
      * @throws Exception
      */
-    void bind(Object services, List<Filter> filters, Function<Invoker, Invoker>... functions) throws Exception;
+    void bind(String serviceName, Object services, List<Filter> filters, Function<Invoker, Invoker>... functions) throws Exception;
     
     /**
-     * 注册和监听
+     * 注册
+     * @throws Exception
+     * @param serviceName
+     */
+    void register(String serviceName) throws Exception;
+    
+    /**
+     * 打开服务
      * @throws Exception
      */
-    void registerAndListen() throws Exception;
+    void openServer() throws Exception;
     
     /**
      * 设置注册器

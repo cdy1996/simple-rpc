@@ -3,6 +3,7 @@ package com.cdy.simplerpc.registry.nacos;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
+import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.DiscoveryException;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.util.StringUtil;
@@ -20,12 +21,13 @@ import java.util.Properties;
 public class NacosRegistry implements IServiceRegistry {
     
     private NamingService namingService;
-    private NacosConfig nacosConfig;
+    private PropertySources propertySources;
     
-    public NacosRegistry(NacosConfig nacosConfig) {
+    public NacosRegistry(PropertySources propertySources) {
+        this.propertySources = propertySources;
         Properties properties = new Properties();
-        properties.setProperty("serverAddr", nacosConfig.getServerAddr());
-        properties.setProperty("namespace", nacosConfig.getNamespaceId());
+        properties.setProperty("serverAddr", propertySources.resolveProperty("serverAddr"));
+        properties.setProperty("namespace", propertySources.resolveProperty("namespaceId"));
     
         try {
             namingService = NamingFactory.createNamingService(properties);
@@ -40,7 +42,7 @@ public class NacosRegistry implements IServiceRegistry {
         String cluster = split[0];
         address = split[1];
         StringUtil.TwoResult<String, Integer> server = StringUtil.getServer(address);
-        log.debug("nacos注册 name = {}, address = {}", name, address);
+        log.info("nacos注册 name = {}, address = {}", name, address);
         namingService.registerInstance(name, server.getFirst(), server.getSecond(), cluster);
     }
     

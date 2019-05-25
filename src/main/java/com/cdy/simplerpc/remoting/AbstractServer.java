@@ -1,6 +1,5 @@
 package com.cdy.simplerpc.remoting;
 
-import com.cdy.simplerpc.annotation.RPCService;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterChain;
 import com.cdy.simplerpc.proxy.Invoker;
@@ -17,21 +16,24 @@ import java.util.function.Function;
  * Created by 陈东一
  * 2018/9/1 21:41
  */
-public abstract class AbstractServer implements Server , Closeable {
+public abstract class AbstractServer implements Server, Closeable {
     
-    //服务类和方法列表
-    public static HashMap<String, Invoker> handlerMap = new HashMap<>();
+    //服务名称, 执行器   同一个server可以用多个执行器
+    private HashMap<String, Invoker> handlerMap = new HashMap<>();
     private IServiceRegistry registry;
+    private String protocol;
+    private String port;
     private String address;
     
-    public AbstractServer(String address) {
+    public AbstractServer(String protocol, String port, String address) {
+        this.protocol = protocol;
+        this.port = port;
         this.address = address;
     }
     
     @Override
-    public void bind(Object service, List<Filter> filters, Function<Invoker, Invoker>... functions) throws Exception{
-        RPCService annotation = service.getClass().getAnnotation(RPCService.class);
-        String serviceName = annotation.clazz().getName();
+    public void bind(String serviceName, Object service, List<Filter> filters, Function<Invoker, Invoker>... functions) throws Exception {
+        
         Invoker objectInvoker = ProxyFactory.createWithInstance(service);
         for (Function<Invoker, Invoker> function : functions) {
             objectInvoker = function.apply(objectInvoker);
@@ -40,12 +42,10 @@ public abstract class AbstractServer implements Server , Closeable {
         handlerMap.put(serviceName, new FilterChain(objectInvoker, filters));
     }
     
-    public void register() throws Exception {
+    @Override
+    public void register(String serviceName) throws Exception {
         // 注册服务
-        for (String s : handlerMap.keySet()) {
-            //注册服务和地址
-            registry.register(s, address);
-        }
+        registry.register(serviceName, protocol + "-" + address + ":" + port);
     }
     
     public IServiceRegistry getRegistry() {
@@ -59,13 +59,10 @@ public abstract class AbstractServer implements Server , Closeable {
     
     public String getAddress() {
         // rpc-127.0.0.1:8080
-        return address.split("-")[1];
+        return address + ":" + port;
     }
     
-    public void setAddress(String address) {
-        this.address = address;
+    public HashMap<String, Invoker> getHandlerMap() {
+        return handlerMap;
     }
-    
-    
-   
 }

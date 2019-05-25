@@ -25,13 +25,13 @@ public class ContextFilter extends FilterAdapter {
     protected void beforeServerInvoke(Invocation invocation) {
         RPCContext rpcContext = RPCContext.newContext();
         rpcContext.setMap(invocation.getAttach());
-        log.debug("服务端过滤器将客户端传过来的隐式传参放在threadlocal中");
+        log.info("服务端过滤器将客户端传过来的隐式传参放在threadlocal中");
     }
     
     @Override
     protected void beforeClientInvoke(Invocation invocation) {
         RPCContext rpcContext = RPCContext.current();
         invocation.getAttach().putAll(rpcContext.getMap());
-        log.debug("客户端过滤器将threadlocal传递到服务端");
+        log.info("客户端过滤器将threadlocal传递到服务端");
     }
 }
