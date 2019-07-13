@@ -59,13 +59,20 @@ public class StringUtil {
         return new TwoResult<>(stringStringTwoResult.getFirst(), Integer.valueOf(stringStringTwoResult.getSecond()));
     }
     
+    public static ThreeResult<String, String, Integer> getServerWithSchema(String address) {
+        int i = address.indexOf("-");
+        String schema = address.substring(0, i);
+        TwoResult<String, String> stringStringTwoResult = splitWith(address.substring(i+1), ":");
+        return new ThreeResult<>(schema, stringStringTwoResult.getFirst(), Integer.valueOf(stringStringTwoResult.getSecond()));
+    }
+    
     /**
      * 转换为{@link Server}
      * @param server
      * @return
      */
-    public static Server toServer(TwoResult<String, Integer> server){
-        return new Server(server.getFirst(), server.getSecond());
+    public static Server toServer(ThreeResult<String, String, Integer> server){
+        return new Server(server.getFirst(), server.getSecond(), server.getThird());
     }
     
     /**
@@ -92,6 +99,30 @@ public class StringUtil {
         
         public E getSecond() {
             return second;
+        }
+    }
+    
+    public static class ThreeResult<T, E, F> {
+        private T first;
+        private E second;
+        private F third;
+        
+        public ThreeResult(T first, E second, F third) {
+            this.first = first;
+            this.second = second;
+            this.third = third;
+        }
+        
+        public T getFirst() {
+            return first;
+        }
+        
+        public E getSecond() {
+            return second;
+        }
+    
+        public F getThird() {
+            return third;
         }
     }
     

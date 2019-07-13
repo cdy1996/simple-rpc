@@ -15,23 +15,14 @@ import lombok.extern.slf4j.Slf4j;
 public class ContextFilter extends FilterAdapter {
     
     
-    /**
-     * 将rpccontext上下文附着在attach上传到服务端
-     *
-     * @param invocation
-     * @throws Exception
-     */
     @Override
-    protected void beforeServerInvoke(Invocation invocation) {
-        RPCContext rpcContext = RPCContext.newContext();
-        rpcContext.setMap(invocation.getAttach());
-        log.info("服务端过滤器将客户端传过来的隐式传参放在threadlocal中");
+    protected void afterServerInvoke(Invocation invocation, Object o) {
+        //服务端返回后清理上下文
+        RPCContext.cleanContext();
     }
     
     @Override
-    protected void beforeClientInvoke(Invocation invocation) {
-        RPCContext rpcContext = RPCContext.current();
-        invocation.getAttach().putAll(rpcContext.getMap());
-        log.info("客户端过滤器将threadlocal传递到服务端");
+    protected void afterClientInvoke(Invocation invocation, Object o) {
+        RPCContext.cleanContext();
     }
 }

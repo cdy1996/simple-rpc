@@ -10,6 +10,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Map;
+
 import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
 
 /**
@@ -24,18 +26,22 @@ public class RPCServerHandler extends SimpleChannelInboundHandler<RPCRequest> {
     @Override
     public void channelRead0(ChannelHandlerContext ctx, RPCRequest msg1) throws Exception {
         log.info("接受到请求" + msg1);
+    
+        RPCContext context = RPCContext.current();
+        Map<String, Object> contextMap = context.getMap();
         
         String className = msg1.getClassName();
         Object result = null;
-        RPCResponse rpcResponse = new RPCResponse();
         if (handlerMap.containsKey(className)) {
             Invoker o = handlerMap.get(className);
             Invocation invocation = new Invocation(msg1.getMethodName(), msg1.getParams(), msg1.getTypes());
-            invocation.setAttach(msg1.getAttach());
+            //接受传过来的上下文
+            contextMap.putAll(msg1.getAttach());
             result = o.invoke(invocation);
         }
-        RPCContext rpcContext = RPCContext.current();
-        rpcResponse.setAttach(rpcContext.getMap());
+        
+        RPCResponse rpcResponse = new RPCResponse();
+        rpcResponse.setAttach(contextMap);
         rpcResponse.setRequestId(msg1.getRequestId());
         rpcResponse.setResultData(result);
         ctx.writeAndFlush(rpcResponse);

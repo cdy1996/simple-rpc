@@ -9,6 +9,10 @@ import java.util.Map;
  * 2019/1/23 0023 22:16
  */
 public class RPCContext {
+    //reference注解中的value,存放在context的key
+    public static final String annotationKey = "annotationKey";
+    //客户端访问服务端的地址, 存放在context的key
+    public static final String address = "address";
     
     private static ThreadLocal<RPCContext> local = new ThreadLocal<>();
     
@@ -23,11 +27,8 @@ public class RPCContext {
         return rpcContext;
     }
     
-    public static RPCContext newContext(){
+    public static void cleanContext(){
         local.remove();
-        RPCContext rpcContext = new RPCContext();
-        local.set(rpcContext);
-        return rpcContext;
     }
     
     

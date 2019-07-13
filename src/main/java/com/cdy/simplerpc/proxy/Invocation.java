@@ -4,8 +4,6 @@ import com.cdy.simplerpc.remoting.RPCRequest;
 import lombok.Data;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 执行参数
@@ -37,23 +35,7 @@ public class Invocation {
      */
     private Class interfaceClass;
     
-    /**
-     * 远程服务地址
-     */
-    private String address;
-    
-    /**
-     * 附加属性,用于传递RPCContext
-     */
-    private Map<String, Object> attach = new HashMap<>();
-    
-    public Map<String, Object> getAttach() {
-        return attach;
-    }
-    
-    public void setAttach(Map<String, Object> attach) {
-        this.attach = attach;
-    }
+
     
     //用于构造代理对象
     public Invocation(Method method, Object[] args, Class interfaceClass) {

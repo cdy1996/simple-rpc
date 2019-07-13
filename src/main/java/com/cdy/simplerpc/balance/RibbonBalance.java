@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static com.cdy.simplerpc.util.StringUtil.getServer;
-import static com.cdy.simplerpc.util.StringUtil.toServer;
+import static com.cdy.simplerpc.util.StringUtil.*;
 
 /**
  * ribbon实现负载均衡
@@ -40,11 +39,11 @@ public class RibbonBalance implements IBalance {
             loadBalancerMap.putIfAbsent(serviceName, baseLoadBalancer);
         }
         Server server = baseLoadBalancer.chooseServer();
-        return server.getHost() + ":" + server.getPort();
+        return server.getScheme()+"-"+server.getHost() + ":" + server.getPort();
     }
     
     public BaseLoadBalancer generateBalancer(List<String> list) {
-        List<Server> collect = list.stream().map(e -> toServer(getServer(e))).collect(Collectors.toList());
+        List<Server> collect = list.stream().map(e -> toServer(getServerWithSchema(e))).collect(Collectors.toList());
         
         
         return LoadBalancerBuilder.newBuilder()
@@ -65,7 +64,7 @@ public class RibbonBalance implements IBalance {
      */
     public void addServer(String serviceName, List<String> servers) {
         loadBalancerMap.computeIfPresent(serviceName, (k, v) -> {
-            servers.forEach(e -> v.addServer(toServer(getServer(e))));
+            servers.forEach(e -> v.addServer(toServer(getServerWithSchema(e))));
             return v;
         });
     }
@@ -84,7 +83,7 @@ public class RibbonBalance implements IBalance {
             loadBalancerMap.remove(serviceName);
         } else {
             loadBalancerMap.computeIfPresent(serviceName, (k, v) -> {
-                servers.forEach(e -> v.markServerDown(toServer(getServer(e))));
+                servers.forEach(e -> v.markServerDown(toServer(getServerWithSchema(e))));
                 return v;
             });
         }

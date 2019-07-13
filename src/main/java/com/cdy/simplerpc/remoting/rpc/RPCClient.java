@@ -4,7 +4,6 @@ import com.cdy.simplerpc.config.ConfigConstants;
 import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
-import com.cdy.simplerpc.proxy.InvokerInvocationHandler;
 import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCFuture;
@@ -44,6 +43,7 @@ public class RPCClient extends AbstractClient {
     private final Bootstrap bootstrap = new Bootstrap();
     private static final EventLoopGroup boss = new NioEventLoopGroup();
     private final AtomicInteger requestId = new AtomicInteger(0);
+    //服务端地址
     private final Map<String, Channel> addressChannel = new ConcurrentHashMap<>();
     private final Map<String, RPCFuture> responseFuture = new ConcurrentHashMap<>();
     
@@ -75,11 +75,17 @@ public class RPCClient extends AbstractClient {
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
+     
+        RPCContext context = RPCContext.current();
+        Map<String, Object> contextMap = context.getMap();
+    
+        // 隐式传递参数
         RPCRequest rpcRequest = invocation.toRequest();
         rpcRequest.setRequestId(requestId.getAndIncrement() + "");
+        rpcRequest.setAttach(contextMap);
         
         //netty 连接
-        String address = invocation.getAddress();
+        String address = (String) contextMap.get(RPCContext.address);
         Channel channel = addressChannel.get(address);
         if (channel == null) {
             channel = connect(address);
@@ -87,12 +93,8 @@ public class RPCClient extends AbstractClient {
         }
     
         addressChannel.put(address, channel);
-        // 隐式传递参数
-        RPCContext rpcContext1 = RPCContext.current();
-        rpcRequest.setAttach(rpcContext1.getMap());
-        rpcRequest.getAttach().put("address", address);
     
-        String annotationKey = (String) invocation.getAttach().get(InvokerInvocationHandler.annotationKey);
+        String annotationKey = (String) contextMap.get(RPCContext.annotationKey);
         String async = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.async);
         String timeout = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.timeout);
     
@@ -100,7 +102,7 @@ public class RPCClient extends AbstractClient {
         RPCFuture future = new RPCFuture(Long.valueOf(timeout));
         responseFuture.put(rpcRequest.getRequestId(), future);
         
-        if (async.equalsIgnoreCase("true")) {
+        if ("true".equalsIgnoreCase(async)) {
             Channel finalChannel = channel;
             return CompletableFuture.supplyAsync(() -> {
                 try {

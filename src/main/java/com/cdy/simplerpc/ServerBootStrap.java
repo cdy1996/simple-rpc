@@ -44,13 +44,6 @@ public class ServerBootStrap {
     
     @SafeVarargs
     public final <T> void bind(String protocol, String port, List<Filter> filters, T object, Function<Invoker, Invoker>... function) throws Exception {
-        Server server;
-        if ((server = servers.get(protocol + port)) == null) {
-            server = ServerFactory.createServer(protocol, port);
-            server.setRegistry(registry);
-            servers.put(protocol + port, server);
-        }
-        Server finalServer = server;
         executor.execute(() -> {
             filters.addAll(this.filters);
             try {
@@ -58,10 +51,24 @@ public class ServerBootStrap {
                 if (annotation == null) {
                     return;
                 }
-                String serviceName = object.getClass().getName();
-                finalServer.bind(serviceName, object, filters, function);
-                finalServer.openServer();
-                finalServer.register(serviceName);
+                Server server;
+                //因为相同的协议和端口就不用不多起服务了,会占用端口号
+                if ((server = servers.get(protocol + port)) == null) {
+                    server = ServerFactory.createServer(protocol, port);
+                    server.setRegistry(registry);
+                    servers.put(protocol + port, server);
+    
+                    String serviceName = object.getClass().getName();
+                    server.bind(serviceName, object, filters, function);
+                    server.openServer();
+                    server.register(serviceName);
+                } else {
+                    //不用重复开启服务
+                    String serviceName = object.getClass().getName();
+                    server.bind(serviceName, object, filters, function);
+                    server.register(serviceName);
+                }
+           
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
             }

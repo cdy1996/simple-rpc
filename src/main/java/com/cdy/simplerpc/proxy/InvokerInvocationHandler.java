@@ -1,6 +1,8 @@
 package com.cdy.simplerpc.proxy;
 
 
+import com.cdy.simplerpc.remoting.RPCContext;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
@@ -15,10 +17,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
     private final Invoker<?> invoker;
     private final Class<?> clazz;
     private final String key; //元信息所属的key
-    /**
-     * reference注解中的value , 存放在attach中的key的名称
-     */
-    public static final String annotationKey = "annotationKey";
+  
     
     
     public InvokerInvocationHandler(Invoker<?> handler, Class<?> clazz, String key) {
@@ -45,7 +44,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
         Invocation invocation = new Invocation(method, args, clazz);
         
         //方便后续获取对应的元信息
-        invocation.getAttach().put(annotationKey, key);
+        RPCContext.current().getMap().put(RPCContext.annotationKey, key);
         return invoker.invoke(invocation);
     }
     

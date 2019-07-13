@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Map;
 
 import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
 
@@ -35,14 +36,17 @@ public class ServletHandler extends HttpServlet {
         RPCRequest msg1 = JsonUtil.parseObject(params, RPCRequest.class);
     
         log.info("接受到请求" + msg1);
+    
+        RPCContext context = RPCContext.current();
+        Map<String, Object> contextMap = context.getMap();
         
         String className = msg1.getClassName();
         Object result = null;
-        RPCResponse rpcResponse = new RPCResponse();
+
         if (handlerMap.containsKey(className)) {
             Invoker o = handlerMap.get(className);
             Invocation invocation = new Invocation(msg1.getMethodName(), msg1.getParams(), msg1.getTypes());
-            invocation.setAttach(msg1.getAttach());
+            contextMap.putAll(msg1.getAttach());
             try {
                 result = o.invoke(invocation);
             } catch (Exception e) {
@@ -50,8 +54,9 @@ public class ServletHandler extends HttpServlet {
                 throw new RPCException(e);
             }
         }
-        RPCContext rpcContext = RPCContext.current();
-        rpcResponse.setAttach(rpcContext.getMap());
+    
+        RPCResponse rpcResponse = new RPCResponse();
+        rpcResponse.setAttach(contextMap);
         rpcResponse.setRequestId(msg1.getRequestId());
         rpcResponse.setResultData(result);
         

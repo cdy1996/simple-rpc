@@ -24,18 +24,19 @@ public class MonitorEntity {
     private Object result;
     private Object[] args;
     
-    public static void start(String address, Date date, String method, Object[] args){
+    public static void start(Date date, String method, Object[] args){
         MonitorEntity monitorEntity = new MonitorEntity();
-        monitorEntity.setAddress(address);
+    
         monitorEntity.setStartTime(date);
         monitorEntity.setMethod(method);
         monitorEntity.setArgs(args);
         local.set(monitorEntity);
     }
     
-    public static MonitorEntity end(Date end, Object result){
+    public static MonitorEntity end(String address, Date end, Object result){
         try {
             MonitorEntity monitorEntity = local.get();
+            monitorEntity.setAddress(address);
             monitorEntity.setDuraing(end.getTime()-monitorEntity.getStartTime().getTime());
             if (result instanceof Exception) {
                 monitorEntity.setStack(ExceptionUtils.getStackTrace((Exception)result));

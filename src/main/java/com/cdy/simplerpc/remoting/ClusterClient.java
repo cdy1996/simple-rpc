@@ -4,7 +4,6 @@ import com.cdy.simplerpc.config.ConfigConstants;
 import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
-import com.cdy.simplerpc.proxy.InvokerInvocationHandler;
 import com.cdy.simplerpc.registry.IServiceDiscovery;
 import com.cdy.simplerpc.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +30,10 @@ public class ClusterClient extends AbstractClient {
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
-        String annotationKey = (String) invocation.getAttach().get(InvokerInvocationHandler.annotationKey);
+        RPCContext rpcContext1 = RPCContext.current();
+        Map<String, Object> rpcContext1Map = rpcContext1.getMap();
+    
+        String annotationKey = (String) rpcContext1Map.get(RPCContext.annotationKey);
         String directAddress = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.url);
     
         //服务发现
@@ -57,7 +59,9 @@ public class ClusterClient extends AbstractClient {
             }
             clientMap.putIfAbsent(serviceName + protocol, client);
         }
-        invocation.setAddress(address.replace(protocol + "-", ""));
+    
+    
+        rpcContext1Map.put("address", address.replace(protocol + "-", ""));
         return client.invoke(invocation);
     }
     
