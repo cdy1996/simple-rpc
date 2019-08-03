@@ -1,10 +1,11 @@
 package com.cdy.simplerpc.filter;
 
 import com.cdy.simplerpc.annotation.Order;
-import com.cdy.simplerpc.proxy.*;
+import com.cdy.simplerpc.proxy.Invocation;
+import com.cdy.simplerpc.proxy.Invoker;
+import com.cdy.simplerpc.proxy.InvokerAdapter;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -15,17 +16,20 @@ import java.util.List;
  */
 public class FilterChain extends InvokerAdapter {
     
-    private List<Filter> filters = new ArrayList<>();
-    private Filter last = new DefaultFilter();
+    private final List<Filter> filters = new ArrayList<>();
+    
+    public FilterChain(Invoker invoker) {
+        super(invoker);
+    }
     
     public FilterChain(Invoker invoker, List<Filter> filterList) {
         super(invoker);
-        filterList.stream().sorted(comparable).forEach(e -> {
-            e.setServer(invoker.getClass().isAssignableFrom(LocalInvoker.class));
+        filterList.stream().sorted(Order.orderComparator).forEach(e -> {
+            e.setInvoker(invoker);
             filters.add(e);
         });
+        Filter last = i->getInvoker().invoke(i);
         //构建链
-     
         for (int i = filters.size() - 1; i >= 0; i--) {
             filters.get(i).setNext(last);
             last = filters.get(i);
@@ -35,36 +39,9 @@ public class FilterChain extends InvokerAdapter {
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
-        return filters.isEmpty()?last.doFilter(invocation):filters.get(0).doFilter(invocation);
+        Filter defaultFilter = i->getInvoker().invoke(i);
+        return filters.isEmpty()?defaultFilter.doFilter(invocation):filters.get(0).doFilter(invocation);
     }
     
-    class DefaultFilter implements Filter {
-        @Override
-        public Object doFilter(Invocation invocation) throws Exception {
-            return getInvoker().invoke(invocation);
-        }
-        @Override
-        public void setServer(Boolean server) {
-        }
-        @Override
-        public void setNext(Filter last) {
-        }
-    }
-    
-    
-    private Comparator<Filter> comparable = (a, b) -> {
-        Order orderA = a.getClass().getAnnotation(Order.class);
-        Order orderB = b.getClass().getAnnotation(Order.class);
-        if (orderA != null && orderB != null) {
-            return orderA.value() - orderB.value();
-        }
-        if (orderA == null && orderB == null) {
-            return 0;
-        }
-        if (orderA == null) {
-            return 1 - orderB.value();
-        } else {
-            return orderA.value() - 1;
-        }
-    };
+  
 }

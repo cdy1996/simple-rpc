@@ -16,8 +16,8 @@ import org.apache.zookeeper.CreateMode;
 @Slf4j
 public class ZKServiceRegistry implements IServiceRegistry {
     
-    private CuratorFramework curatorFramework;
-    private PropertySources propertySources;
+    private final CuratorFramework curatorFramework;
+    private final PropertySources propertySources;
     
     
     public ZKServiceRegistry(PropertySources propertySources) {

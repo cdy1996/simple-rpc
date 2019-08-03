@@ -9,7 +9,7 @@ import com.cdy.simplerpc.config.PropertySources;
  */
 public abstract class AbstractClient implements Client {
     
-    protected PropertySources propertySources;
+    protected final PropertySources propertySources;
     
     public AbstractClient(PropertySources propertySources) {
         this.propertySources = propertySources;

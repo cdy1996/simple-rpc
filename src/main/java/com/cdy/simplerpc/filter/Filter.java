@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.filter;
 
 import com.cdy.simplerpc.proxy.Invocation;
+import com.cdy.simplerpc.proxy.Invoker;
 
 /**
  * 过滤器
@@ -18,14 +19,14 @@ public interface Filter {
     Object doFilter(Invocation invocation) throws Exception;
     
     /**
-     * 设置是否为服务端使用过滤器
-     * @param server
+     * 设置是正真执行器
+     * @param invoker
      */
-    void setServer(Boolean server);
+    default void setInvoker(Invoker invoker){}
     
     /**
      * 设置下一个过滤器
      * @param last
      */
-    void setNext(Filter last);
+    default void setNext(Filter last){}
 }

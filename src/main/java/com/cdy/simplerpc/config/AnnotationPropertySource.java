@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.config;
 
 import com.cdy.simplerpc.annotation.Order;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -15,7 +16,8 @@ import java.util.Map;
 @Order(1)
 public class AnnotationPropertySource implements PropertySource{
     
-    private Map<String,String> map;
+    @Getter
+    private final Map<String,String> map;
     
     
     public AnnotationPropertySource(Map<String,String> map) {

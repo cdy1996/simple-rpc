@@ -20,8 +20,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class ClusterClient extends AbstractClient {
     
-    private IServiceDiscovery servceDiscovery;
-    private Map<String, Client> clientMap = new ConcurrentHashMap<>();
+    private final IServiceDiscovery servceDiscovery;
+    private final Map<String, Client> clientMap = new ConcurrentHashMap<>();
     
     public ClusterClient(IServiceDiscovery servceDiscovery, PropertySources propertySources) {
         super(propertySources);

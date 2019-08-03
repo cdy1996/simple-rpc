@@ -5,6 +5,7 @@ import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.cdy.simplerpc.balance.IBalance;
 import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.DiscoveryException;
 import com.cdy.simplerpc.registry.AbstractDiscovery;
@@ -25,15 +26,16 @@ import java.util.stream.Collectors;
 @Slf4j
 public class NacosDiscovery extends AbstractDiscovery {
     
-    private NamingService namingService;
-    private PropertySources propertySources;
+    private final NamingService namingService;
+    private final PropertySources propertySources;
     
-    public NacosDiscovery(PropertySources propertySources) {
+    public NacosDiscovery(IBalance balance, PropertySources propertySources) {
+        super(balance);
         this.propertySources = propertySources;
         Properties properties = new Properties();
         properties.setProperty("serverAddr", propertySources.resolveProperty("serverAddr"));
         properties.setProperty("namespace",  propertySources.resolveProperty("namespace"));
-        
+    
         try {
             namingService = NamingFactory.createNamingService(properties);
         } catch (NacosException e) {
@@ -65,7 +67,7 @@ public class NacosDiscovery extends AbstractDiscovery {
     }
     
     
-    public void subscribe(String serviceName, String... protocols) throws NacosException {
+    private void subscribe(String serviceName, String... protocols) throws NacosException {
         namingService.subscribe(serviceName, event -> {
             log.info("nacos 服务监听发生变化" + ((NamingEvent) event).getServiceName());
             List<String> collect = ((NamingEvent) event).getInstances().stream().map(e -> e.getClusterName() + "-" + e.getIp() + ":" + e.getPort()).collect(Collectors.toList());

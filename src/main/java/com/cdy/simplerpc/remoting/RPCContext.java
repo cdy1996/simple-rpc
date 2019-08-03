@@ -31,7 +31,9 @@ public class RPCContext {
         local.remove();
     }
     
-    
+    /**
+     * 存储上下文map
+     */
     private Map<String, Object> map = new HashMap<>();
     
     public Map<String, Object> getMap() {

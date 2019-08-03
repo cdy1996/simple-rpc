@@ -16,14 +16,12 @@ public class InvokerInvocationHandler implements InvocationHandler {
     
     private final Invoker<?> invoker;
     private final Class<?> clazz;
-    private final String key; //元信息所属的key
   
     
     
-    public InvokerInvocationHandler(Invoker<?> handler, Class<?> clazz, String key) {
+    public InvokerInvocationHandler(Invoker<?> handler, Class<?> clazz) {
         this.invoker = handler;
         this.clazz = clazz;
-        this.key = key;
     }
     
     public Object invoke(Object proxy, Method method, Object[] args) throws Exception {
@@ -44,7 +42,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
         Invocation invocation = new Invocation(method, args, clazz);
         
         //方便后续获取对应的元信息
-        RPCContext.current().getMap().put(RPCContext.annotationKey, key);
+        RPCContext.current().getMap().put(RPCContext.annotationKey, clazz);
         return invoker.invoke(invocation);
     }
     

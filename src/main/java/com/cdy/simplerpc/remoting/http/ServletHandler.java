@@ -25,7 +25,6 @@ import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
  * 2019/1/27 0027 14:47
  */
 @Slf4j
-@ChannelHandler.Sharable
 public class ServletHandler extends HttpServlet {
     
 

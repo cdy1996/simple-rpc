@@ -48,8 +48,9 @@ public class RPCClient extends AbstractClient {
     private final Map<String, RPCFuture> responseFuture = new ConcurrentHashMap<>();
     
     
+    public RPCClient(PropertySources propertySources) {
+        super(propertySources);
     
-    private void init() {
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(boss)
                 .channel(NioSocketChannel.class)
@@ -66,11 +67,6 @@ public class RPCClient extends AbstractClient {
                 })
                 .option(ChannelOption.TCP_NODELAY, true);
 //                                    .childOption(ChannelOption.SO_KEEPALIVE, true);
-    }
-    
-    public RPCClient(PropertySources propertySources) {
-        super(propertySources);
-        init();
     }
     
     @Override

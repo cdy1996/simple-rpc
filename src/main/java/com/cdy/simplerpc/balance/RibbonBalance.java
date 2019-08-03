@@ -16,15 +16,15 @@ import static com.cdy.simplerpc.util.StringUtil.*;
  * 2019/2/7 0007 20:14
  */
 @Slf4j
-@Data
 public class RibbonBalance implements IBalance {
     
-    private IRule iRule = new RandomRule();
-    
+    private final IRule iRule;
     private final ConcurrentHashMap<String, BaseLoadBalancer> loadBalancerMap
             = new ConcurrentHashMap<>();
     
-    
+    public RibbonBalance() {
+        this.iRule = new RandomRule();
+    }
     public RibbonBalance(IRule iRule) {
         this.iRule = iRule;
     }
@@ -42,7 +42,7 @@ public class RibbonBalance implements IBalance {
         return server.getScheme()+"-"+server.getHost() + ":" + server.getPort();
     }
     
-    public BaseLoadBalancer generateBalancer(List<String> list) {
+    private BaseLoadBalancer generateBalancer(List<String> list) {
         List<Server> collect = list.stream().map(e -> toServer(getServerWithSchema(e))).collect(Collectors.toList());
         
         
@@ -90,8 +90,6 @@ public class RibbonBalance implements IBalance {
     }
     
     class RibbonServerRenewTask implements Runnable {
-    
-    
         @Override
         public void run() {
             //todo

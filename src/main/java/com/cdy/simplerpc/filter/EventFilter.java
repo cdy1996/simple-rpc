@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EventFilter extends FilterAdapter {
     
-    Publisher publisher;
+    private final Publisher publisher;
     
     public EventFilter(Publisher publisher) {
         this.publisher = publisher;

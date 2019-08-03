@@ -1,8 +1,15 @@
 package com.cdy.simplerpc.remoting.http;
 
+import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.AbstractServer;
+import com.cdy.simplerpc.remoting.ServerMetaInfo;
 import com.cdy.simplerpc.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.LifecycleException;
+import org.apache.catalina.connector.Connector;
+import org.apache.catalina.core.AprLifecycleListener;
+import org.apache.catalina.core.StandardServer;
+import org.apache.catalina.startup.Tomcat;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -10,6 +17,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import javax.servlet.http.HttpServlet;
+import java.io.File;
 
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
@@ -22,11 +30,11 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
 public class HttpServer extends AbstractServer {
     
     private Server server;
-    private final HttpServlet servlet = new ServletHandler();
+    private final HttpServlet servlet;
     
-    
-    public HttpServer(String protocol, String port, String address) {
-        super(protocol, port, address);
+    public HttpServer(IServiceRegistry registry, ServerMetaInfo serverMetaInfo) {
+        super(registry, serverMetaInfo);
+        this.servlet = new ServletHandler();
     }
     
     @Override
@@ -46,7 +54,7 @@ public class HttpServer extends AbstractServer {
     }
     
     
-    public void jettyStart(String host, Integer port) throws Exception {
+    private void jettyStart(String host, Integer port) throws Exception {
         this.server = new Server();// 创建jetty web容器
         server.setStopAtShutdown(true);// 在退出程序是关闭服务
         
@@ -98,7 +106,7 @@ public class HttpServer extends AbstractServer {
     
     
     
-        /*public void tomcatStart(String host, Integer port) throws LifecycleException {
+    private void tomcatStart(String host, Integer port) throws LifecycleException {
         Tomcat tomcat = new Tomcat();//创建tomcat实例，用来启动tomcat
 //        tomcat.setHostname(split[0]);//设置主机名
 //        tomcat.setPort(Integer.parseInt(split[1]));//设置端口
@@ -129,5 +137,5 @@ public class HttpServer extends AbstractServer {
         tomcat.start();//启动tomcat
         
         tomcat.getServer().await();
-    }*/
+    }
 }

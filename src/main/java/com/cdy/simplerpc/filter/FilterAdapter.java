@@ -1,6 +1,9 @@
 package com.cdy.simplerpc.filter;
 
 import com.cdy.simplerpc.proxy.Invocation;
+import com.cdy.simplerpc.proxy.Invoker;
+import com.cdy.simplerpc.proxy.LocalInvoker;
+import lombok.Setter;
 
 /**
  * 过滤器适配器
@@ -9,14 +12,21 @@ import com.cdy.simplerpc.proxy.Invocation;
  */
 public abstract class FilterAdapter implements Filter {
     
-    private Filter next;
     /**
-     * 是否用于服务端的过滤器
+     * 下一层过滤器
      */
-    private Boolean isServer;
+    @Setter
+    private Filter next;
+    
+    /**
+     * 正真执行
+     */
+    @Setter
+    private Invoker invoker;
  
     @Override
     public Object doFilter(Invocation invocation) throws Exception {
+        boolean isServer = invoker.getClass().isAssignableFrom(LocalInvoker.class);
         if (isServer) {
             beforeServerInvoke(invocation);
         } else {
@@ -38,15 +48,5 @@ public abstract class FilterAdapter implements Filter {
     protected void beforeClientInvoke(Invocation invocation){}
     protected void afterClientInvoke(Invocation invocation, Object o){}
     
-    
-    @Override
-    public void setServer(Boolean server) {
-        isServer = server;
-    }
-    
-    @Override
-    public void setNext(Filter next) {
-        this.next = next;
-    }
     
 }

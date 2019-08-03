@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.registry.simple;
 
+import com.cdy.simplerpc.balance.IBalance;
 import com.cdy.simplerpc.exception.DiscoveryException;
 import com.cdy.simplerpc.registry.AbstractDiscovery;
 import org.apache.commons.io.FileUtils;
@@ -15,10 +16,11 @@ import java.util.stream.Collectors;
  * 2019/1/22 0022 21:57
  */
 public class SimpleDiscoveryImpl extends AbstractDiscovery {
-    
+    //注册信息存放在内存中
     private Map<String, List<String>> map = new HashMap<>();
     
-    public SimpleDiscoveryImpl() {
+    public SimpleDiscoveryImpl(IBalance balance, Map<String, List<String>> map) {
+        super(balance);
         File file = new File("/simple-rpc");
     
         if (file.isDirectory()) {
@@ -40,7 +42,7 @@ public class SimpleDiscoveryImpl extends AbstractDiscovery {
                         cacheUrls.addAll(urls);
                     }
                 }
-                
+            
             }
         }
     }

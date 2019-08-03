@@ -1,6 +1,8 @@
 package com.cdy.simplerpc.remoting.rpc;
 
+import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.AbstractServer;
+import com.cdy.simplerpc.remoting.ServerMetaInfo;
 import com.cdy.simplerpc.util.StringUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -28,10 +30,9 @@ public class RPCServer extends AbstractServer {
     private static final EventLoopGroup boss = new NioEventLoopGroup();
     private static final EventLoopGroup work = new NioEventLoopGroup();
     
-    public RPCServer(String protocol, String port, String address) {
-        super(protocol, port, address);
+    public RPCServer(IServiceRegistry registry, ServerMetaInfo serverMetaInfo) {
+        super(registry, serverMetaInfo);
     }
-    
     
     @Override
     public void openServer() throws Exception {

@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.registry.zookeeper;
 
+import com.cdy.simplerpc.balance.IBalance;
 import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.DiscoveryException;
 import com.cdy.simplerpc.registry.AbstractDiscovery;
@@ -22,25 +23,23 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ZKServiceDiscovery extends AbstractDiscovery {
     
-    private CuratorFramework curatorFramework;
-    private PropertySources propertySources;
+    private final PropertySources propertySources;
+    private final CuratorFramework curatorFramework;
     
-    public ZKServiceDiscovery(PropertySources propertySources) {
+    public ZKServiceDiscovery(IBalance balance, PropertySources propertySources) {
+        super(balance);
         this.propertySources = propertySources;
         try {
-            init();
+            curatorFramework = CuratorFrameworkFactory.builder().connectString(propertySources.resolveProperty("zkAddress"))
+                    .sessionTimeoutMs(4000)
+                    .retryPolicy(new ExponentialBackoffRetry(10000, 5))
+                    .build();
+            curatorFramework.start();
         } catch (Exception e) {
             throw new DiscoveryException("zookeeper 服务发现监听异常", e);
         }
     }
-    
-    public void init() {
-        curatorFramework = CuratorFrameworkFactory.builder().connectString(propertySources.resolveProperty("zkAddress"))
-                .sessionTimeoutMs(4000)
-                .retryPolicy(new ExponentialBackoffRetry(10000, 5))
-                .build();
-        curatorFramework.start();
-    }
+
     
     @Override
     public String discovery(String serviceName, String ...protocols) throws Exception {
@@ -66,7 +65,7 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
         return cacheList;
     }
     
-    public void subscrible(String serviceName) {
+    private void subscrible(String serviceName) {
         // 服务监听 更新负载均衡中的可用服务
         try {
             rootListener(serviceName);
@@ -76,7 +75,7 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
     }
     
     
-    public void rootListener(String servicePath) throws Exception{
+    private void rootListener(String servicePath) throws Exception{
         PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, propertySources.resolveProperty("zkRegistryPath")+"/"+servicePath, true);
         //Normal--初始化为空  BUILD_INITIAL_CACHE--rebuild  POST_INITIALIZED_EVENT--初始化后发送事件
         pathChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);

@@ -2,8 +2,8 @@ package com.cdy.simplerpc.remoting;
 
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.proxy.Invoker;
-import com.cdy.simplerpc.registry.IServiceRegistry;
 
+import java.io.Closeable;
 import java.util.List;
 import java.util.function.Function;
 
@@ -12,7 +12,7 @@ import java.util.function.Function;
  * Created by 陈东一
  * 2018/11/25 0025 14:41
  */
-public interface Server {
+public interface Server extends Closeable {
     
     /**
      * 绑定
@@ -37,12 +37,6 @@ public interface Server {
      * @throws Exception
      */
     void openServer() throws Exception;
-    
-    /**
-     * 设置注册器
-     * @param registry
-     */
-    void setRegistry(IServiceRegistry registry);
     
  
 }

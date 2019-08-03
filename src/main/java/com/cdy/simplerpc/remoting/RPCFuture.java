@@ -1,6 +1,8 @@
 package com.cdy.simplerpc.remoting;
 
 import com.cdy.simplerpc.exception.InvokeTimeOutException;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,35 +15,20 @@ import java.util.concurrent.TimeUnit;
  * 2018/9/1 22:15
  */
 public class RPCFuture implements Future<Object> {
-    
+    @Getter @Setter
     private Object resultData;
+    @Getter @Setter
     private Map<String, Object> attach = new HashMap<>();
-    private final Object lock;
-    private long defaultTimeout = 5000L;
+    private final Object lock= new Object();
+    private final long defaultTimeout ;
     
+    public RPCFuture() {
+        this.defaultTimeout = 5000L;
+    }
     public RPCFuture(Long timeout) {
-        this.lock = new Object();
-        defaultTimeout = timeout;
+        this.defaultTimeout = timeout;
     }
-    
-    public Object getResultData() {
-        return resultData;
-    }
-    
-    public void setResultData(Object resultData) {
-        synchronized (lock){
-            this.resultData = resultData;
-            lock.notifyAll();
-        }
-    }
-    
-    public Map<String, Object> getAttach() {
-        return attach;
-    }
-    
-    public void setAttach(Map<String, Object> attach) {
-        this.attach = attach;
-    }
+
     
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
@@ -79,4 +66,7 @@ public class RPCFuture implements Future<Object> {
             return resultData;
         }
     }
+    
+    
+
 }

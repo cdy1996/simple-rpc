@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public abstract class InvokerAdapter implements Invoker{
     
-    Invoker<?> invoker;
+    private final Invoker<?> invoker;
     
     public InvokerAdapter(Invoker<?> invoker) {
         this.invoker = invoker;

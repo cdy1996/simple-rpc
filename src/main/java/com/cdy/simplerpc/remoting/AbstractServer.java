@@ -6,7 +6,6 @@ import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.proxy.ProxyFactory;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 
-import java.io.Closeable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +16,7 @@ import java.util.function.Function;
  * Created by 陈东一
  * 2018/9/1 21:41
  */
-public abstract class AbstractServer implements Server, Closeable {
+public abstract class AbstractServer implements Server {
     
     /**
      * 存放本地的invoker
@@ -25,15 +24,12 @@ public abstract class AbstractServer implements Server, Closeable {
      *     static是因为本地要共享同一个实例
      */
     public static Map<String, Invoker> handlerMap = new HashMap<>();
-    private IServiceRegistry registry;
-    private String protocol;
-    private String port;
-    private String address;
+    private final IServiceRegistry registry;
+    private final ServerMetaInfo serverMetaInfo;
     
-    public AbstractServer(String protocol, String port, String address) {
-        this.protocol = protocol;
-        this.port = port;
-        this.address = address;
+    public AbstractServer(IServiceRegistry registry, ServerMetaInfo serverMetaInfo) {
+        this.registry = registry;
+        this.serverMetaInfo = serverMetaInfo;
     }
     
     @Override
@@ -50,21 +46,13 @@ public abstract class AbstractServer implements Server, Closeable {
     @Override
     public void register(String serviceName) throws Exception {
         // 注册服务
-        registry.register(serviceName, protocol + "-" + address + ":" + port);
+        registry.register(serviceName, serverMetaInfo.getProtocol() + "-" + serverMetaInfo.getAddress() + ":" + serverMetaInfo.getPort());
     }
     
-    public IServiceRegistry getRegistry() {
-        return registry;
-    }
     
-    @Override
-    public void setRegistry(IServiceRegistry registry) {
-        this.registry = registry;
-    }
-    
-    public String getAddress() {
+    protected String getAddress() {
         // rpc-127.0.0.1:8080
-        return address + ":" + port;
+        return serverMetaInfo.getAddress() + ":" + serverMetaInfo.getPort();
     }
     
 }

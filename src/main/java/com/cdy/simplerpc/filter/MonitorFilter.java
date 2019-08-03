@@ -17,7 +17,7 @@ import java.util.Map;
 @Order(-3)
 public class MonitorFilter extends FilterAdapter {
     
-    MonitorSend monitorSend;
+    private final MonitorSend monitorSend;
     
     public MonitorFilter(MonitorSend monitorSend) {
         this.monitorSend = monitorSend;

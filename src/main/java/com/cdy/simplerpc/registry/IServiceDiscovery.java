@@ -1,7 +1,5 @@
 package com.cdy.simplerpc.registry;
 
-import com.cdy.simplerpc.balance.IBalance;
-
 import java.util.List;
 
 /**
@@ -30,8 +28,6 @@ public interface IServiceDiscovery {
      */
     List<String> listServer(String serviceName,  String ...protocols) throws Exception;
     
-    void setBalance(IBalance iBalance);
-    
-    IBalance getBalance();
+
     
 }

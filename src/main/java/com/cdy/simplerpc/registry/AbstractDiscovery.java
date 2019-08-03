@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.registry;
 
 import com.cdy.simplerpc.balance.IBalance;
+import lombok.Getter;
 
 import java.util.List;
 import java.util.Map;
@@ -15,25 +16,19 @@ public abstract class AbstractDiscovery implements IServiceDiscovery{
     
     private IBalance balance;
     
+    public AbstractDiscovery(IBalance balance) {
+        this.balance = balance;
+    }
+    
     //缓存所有的服务对应的地址列表
+    @Getter
     private Map<String, List<String>> cache = new ConcurrentHashMap<>();
+    
+    
     
     protected String loadBalance(String serviceName, List<String> list) {
         return balance.loadBalance(serviceName, list);
     }
     
-    
-    public IBalance getBalance() {
-        return balance;
-    }
-    
-    @Override
-    public void setBalance(IBalance iBalance) {
-        this.balance = iBalance;
-    }
-    
-    protected Map<String, List<String>> getCache() {
-        return cache;
-    }
     
 }

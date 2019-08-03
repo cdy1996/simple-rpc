@@ -13,7 +13,7 @@ import java.lang.reflect.Method;
 @Slf4j
 public class LocalInvoker<T> implements Invoker {
     
-    private T t;
+    private final T t;
 
     public LocalInvoker(T t) {
         this.t = t;

@@ -16,11 +16,11 @@ import java.util.Map;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RPCReference {
     
-    /**
-     * 引用的别名,用于区分不同的引用.类似spring的beanId
-     * @return
-     */
-    String value();
+//    /**
+//     * 引用的别名,用于区分不同的引用.类似spring的beanId
+//     * @return
+//     */
+//    String value();
     
     /**
      * 是否开启异步

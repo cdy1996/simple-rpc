@@ -19,7 +19,7 @@ import java.util.concurrent.Executor;
  * 2019/5/25 0025 16:09
  */
 @Slf4j
-@Order(3)
+@Order(4)
 public class NacosPropertySource implements PropertySource {
     
     private ConfigService configService;

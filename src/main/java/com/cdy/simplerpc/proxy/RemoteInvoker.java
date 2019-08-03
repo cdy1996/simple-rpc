@@ -15,8 +15,8 @@ import com.cdy.simplerpc.remoting.ClusterClient;
 public class RemoteInvoker implements Invoker{
     
     
-    private Client client;
-    private PropertySources propertySources;
+    private final Client client;
+    private final PropertySources propertySources;
     
     public RemoteInvoker(PropertySources propertySources, IServiceDiscovery serviceDiscovery) {
         this.propertySources = propertySources;

@@ -20,8 +20,8 @@ import java.util.Properties;
 @Slf4j
 public class NacosRegistry implements IServiceRegistry {
     
-    private NamingService namingService;
-    private PropertySources propertySources;
+    private final NamingService namingService;
+    private final PropertySources propertySources;
     
     public NacosRegistry(PropertySources propertySources) {
         this.propertySources = propertySources;
