@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.test;
 
+import com.cdy.simplerpc.ClientBootStrap;
 import com.cdy.simplerpc.annotation.RPCReference;
 import com.cdy.simplerpc.config.AnnotationPropertySource;
 import com.cdy.simplerpc.config.LocalPropertySource;
@@ -70,32 +71,36 @@ public class ClientTest {
             }
         });
     
-        clientTest2.test2();
+        clientTest2.test();
         System.in.read();
     }
-//
-//    @Test
-//    public void mutiTest() throws Exception {
-//        ClientTest2 test2 = new ClientTest2();
-//        ClientTest3 test3 = new ClientTest3();
-//
-//        PropertySources propertySources = new PropertySources();
-//        propertySources.addPropertySources(new LocalPropertySource("D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties"));
-//
-//
-//        ClientBootStrap clientBootStrap = new ClientBootStrap();
-//        IServiceDiscovery discovery = new SimpleDiscoveryImpl();
-//        discovery.setBalance(new SimpleBalance());
-//        clientBootStrap.setPropertySources(propertySources);
-//
-//        clientBootStrap.setServiceDiscovery(discovery);
-//        ClientTest2 inject2 = clientBootStrap.inject(Collections.EMPTY_LIST, test2);
-//        ClientTest3 inject3 = clientBootStrap.inject(Collections.EMPTY_LIST, test3);
-//
-//        inject3.test();
-//        inject2.test2();
-//        System.in.read();
-//    }
+
+    @Test
+    public void bootstrapTest() throws Exception {
+        ClientTest2 test2 = new ClientTest2();
+        ClientTest3 test3 = new ClientTest3();
+
+        
+        PropertySources propertySources = new PropertySources();
+        propertySources.addPropertySources(new LocalPropertySource("D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties"));
+    
+    
+        ClientBootStrap clientBootStrap = ClientBootStrap.build("D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties")
+                .discovery("nacos-1", "127.0.0.1:8848", "529469ac-0341-4276-a256-14dcf863935c")
+                .discovery("zookeeper-1", "127.0.0.1:2181", "/registry")
+                .type("nacos-1")
+                .start();
+    
+        clientBootStrap.refer(test2);
+        clientBootStrap.refer(test3);
+    
+        clientBootStrap.inject(test2);
+        clientBootStrap.inject(test3);
+        
+        test2.test();
+        test3.test();
+        System.in.read();
+    }
 //
 //    @Test
 //    public void nacosTest() throws Exception {
@@ -123,7 +128,7 @@ class ClientTest2 {
     @RPCReference
     private TestService testService;
 
-    public void test2() {
+    public void test() {
         testService.test("12333");
     }
 }

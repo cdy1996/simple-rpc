@@ -4,6 +4,7 @@ import com.cdy.simplerpc.annotation.Order;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -13,15 +14,14 @@ import java.util.Map;
  * 2019/5/25 0025 16:09
  */
 @Slf4j
-@Order(2)
-public class AnnotationPropertySource implements PropertySource{
+@Order(1)
+public class BootstrapPropertySource implements PropertySource{
     
     @Getter
     private final Map<String,String> map;
     
-    
-    public AnnotationPropertySource(Map<String,String> map) {
-        this.map = map;
+    public BootstrapPropertySource() {
+        this.map = new HashMap<>();
     }
     
     @Override

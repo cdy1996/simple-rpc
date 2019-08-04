@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
  * 2019/5/25 0025 16:09
  */
 @Slf4j
-@Order(2)
+@Order(10)
 public class SystemPropertySource implements PropertySource {
     
     @Override

@@ -19,14 +19,14 @@ import java.util.concurrent.Executor;
  * 2019/5/25 0025 16:09
  */
 @Slf4j
-@Order(4)
+@Order(100)
 public class NacosPropertySource implements PropertySource {
     
-    private ConfigService configService;
-    
+    private final ConfigService configService;
     private final String serverAddr;
     private final String dataId;
     private final String group;
+    
     private ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
     
     public NacosPropertySource(String serverAddr, String dataId, String group) {
@@ -56,6 +56,7 @@ public class NacosPropertySource implements PropertySource {
             });
         } catch (NacosException e) {
             log.error("连接nacos配置中心失败");
+            throw new RuntimeException(e);
         }
         
     }

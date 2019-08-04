@@ -24,10 +24,18 @@ public class LocalPropertySource  implements PropertySource{
     
     public LocalPropertySource(String path) {
         this.path = path;
-        try(InputStream inputStream = new FileInputStream(path)) {
-            this.propertyResourceBundle = new PropertyResourceBundle(inputStream);
-        } catch (IOException e) {
-            log.warn("本地配置文件读取失败");
+        if (path.startsWith("classpath")){
+            try (InputStream inputStream = this.getClass().getClassLoader().getResource(path).openStream()) {
+                this.propertyResourceBundle = new PropertyResourceBundle(inputStream);
+            } catch (IOException e) {
+                log.warn("本地配置文件读取失败");
+            }
+        } else {
+            try (InputStream inputStream = new FileInputStream(path)) {
+                this.propertyResourceBundle = new PropertyResourceBundle(inputStream);
+            } catch (IOException e) {
+                log.warn("本地配置文件读取失败");
+            }
         }
     }
     
