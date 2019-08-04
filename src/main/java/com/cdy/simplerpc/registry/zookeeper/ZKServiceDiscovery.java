@@ -30,7 +30,7 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
         super(balance);
         this.propertySources = propertySources;
         try {
-            curatorFramework = CuratorFrameworkFactory.builder().connectString(propertySources.resolveProperty("zkAddress"))
+            curatorFramework = CuratorFrameworkFactory.builder().connectString(propertySources.resolveProperty("serverAddr"))
                     .sessionTimeoutMs(4000)
                     .retryPolicy(new ExponentialBackoffRetry(10000, 5))
                     .build();

@@ -13,39 +13,49 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 集群的装饰层
- *
+ * <p>
  * Created by 陈东一
  * 2019/4/27 0027 16:16
  */
 @Slf4j
 public class ClusterClient extends AbstractClient {
     
-    private final IServiceDiscovery servceDiscovery;
+    private final Map<String, IServiceDiscovery> servceDiscoveryMap;
     private final Map<String, Client> clientMap = new ConcurrentHashMap<>();
     
-    public ClusterClient(IServiceDiscovery servceDiscovery, PropertySources propertySources) {
+    public ClusterClient(PropertySources propertySources, Map<String, IServiceDiscovery> servceDiscoveryMap) {
         super(propertySources);
-        this.servceDiscovery = servceDiscovery;
+        this.servceDiscoveryMap = servceDiscoveryMap;
     }
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
         RPCContext rpcContext1 = RPCContext.current();
         Map<String, Object> rpcContext1Map = rpcContext1.getMap();
-    
+        
+        // 对应注解的类名作为key,可以从属性集中获取
         String annotationKey = (String) rpcContext1Map.get(RPCContext.annotationKey);
         String directAddress = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.url);
-    
+        
         //服务发现
         String serviceName = invocation.getInterfaceClass().getName();
-        String address;
-        if (StringUtil.isBlank(directAddress)) {
-            String protocols = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.protocols);
-            address = servceDiscovery.discovery(serviceName, protocols.split(","));
-        } else {
-            //直连
-            address = directAddress;
+        String address = null;
+        while (StringUtil.isBlank(address)) {
+            if (StringUtil.isBlank(directAddress)) {
+                String protocols = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.protocols);
+                //多订阅时,只能选择一个注册中心
+                if (StringUtil.isBlank(annotationKey)) {
+                    address = servceDiscoveryMap.get(propertySources.resolveProperty(annotationKey + ".discovery.type")).discovery(serviceName, protocols.split(","));
+                } else {
+                    address = servceDiscoveryMap.get(propertySources.resolveProperty("discovery.type")).discovery(serviceName, protocols.split(","));
+                }
+            } else {
+                //直连
+                address = directAddress;
+            }
+            log.warn("没有可以用的服务地址");
         }
+        
         String[] split = address.split("-");
         String protocol = split[0];
         Client client = clientMap.get(serviceName + protocol);
@@ -59,8 +69,8 @@ public class ClusterClient extends AbstractClient {
             }
             clientMap.putIfAbsent(serviceName + protocol, client);
         }
-    
-    
+        
+        
         rpcContext1Map.put("address", address.replace(protocol + "-", ""));
         return client.invoke(invocation);
     }

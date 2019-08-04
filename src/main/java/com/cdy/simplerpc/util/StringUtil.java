@@ -20,6 +20,9 @@ public class StringUtil {
         }
         return false;
     }
+    public static boolean isNotBlank(String string){
+        return !isBlank(string);
+    }
     
     
     /**

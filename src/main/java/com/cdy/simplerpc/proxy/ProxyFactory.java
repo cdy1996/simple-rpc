@@ -10,7 +10,7 @@ import java.lang.reflect.Proxy;
 public class ProxyFactory {
     
     //创建代理对象
-    public Object createProxy(Invoker invoker, Class clazz) {
+    public static Object createProxy(Invoker invoker, Class clazz) {
         return  Proxy.newProxyInstance(invoker.getClass().getClassLoader(),
                 new Class<?>[]{clazz}, new InvokerInvocationHandler(invoker, clazz));
         

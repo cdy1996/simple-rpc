@@ -11,6 +11,6 @@ import lombok.Data;
 public class ServerMetaInfo {
     private final String protocol;
     private final String port;
-    private final String address;
+    private final String ip;
     
 }

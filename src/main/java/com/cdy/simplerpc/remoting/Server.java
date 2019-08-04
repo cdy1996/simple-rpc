@@ -1,11 +1,9 @@
 package com.cdy.simplerpc.remoting;
 
 import com.cdy.simplerpc.filter.Filter;
-import com.cdy.simplerpc.proxy.Invoker;
 
 import java.io.Closeable;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * 服务端接口
@@ -20,10 +18,9 @@ public interface Server extends Closeable {
      * @param serviceName
      * @param services
      * @param filters
-     * @param functions
      * @throws Exception
      */
-    void bind(String serviceName, Object services, List<Filter> filters, Function<Invoker, Invoker>... functions) throws Exception;
+    void bind(String serviceName, Object services, List<Filter> filters) throws Exception;
     
     /**
      * 注册

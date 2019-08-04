@@ -19,7 +19,7 @@ public class SimpleDiscoveryImpl extends AbstractDiscovery {
     //注册信息存放在内存中
     private Map<String, List<String>> map = new HashMap<>();
     
-    public SimpleDiscoveryImpl(IBalance balance, Map<String, List<String>> map) {
+    public SimpleDiscoveryImpl(IBalance balance) {
         super(balance);
         File file = new File("/simple-rpc");
     

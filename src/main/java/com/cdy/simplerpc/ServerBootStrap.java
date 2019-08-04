@@ -1,9 +1,11 @@
 //package com.cdy.simplerpc;
 //
 //import com.cdy.simplerpc.annotation.RPCService;
+//import com.cdy.simplerpc.config.PropertySources;
 //import com.cdy.simplerpc.filter.Filter;
 //import com.cdy.simplerpc.proxy.Invoker;
 //import com.cdy.simplerpc.registry.IServiceRegistry;
+//import com.cdy.simplerpc.registry.nacos.NacosRegistry;
 //import com.cdy.simplerpc.remoting.Server;
 //import com.cdy.simplerpc.remoting.ServerFactory;
 //import lombok.extern.slf4j.Slf4j;
@@ -38,12 +40,24 @@
 //        return this;
 //    }
 //
-//    public void setRegistry(IServiceRegistry registry) {
-//        this.registry = registry;
+//    public ServerBootStrap port(String port) {
+//
 //    }
 //
-//    @SafeVarargs
-//    public final <T> void bind(String protocol, String port, List<Filter> filters, T object, Function<Invoker, Invoker>... function) throws Exception {
+//    public ServerBootStrap protocol(String protocol) {
+//
+//    }
+//
+//
+//    public ServerBootStrap address(String address) {
+//
+//    }
+//
+//    public final <T> void bind(String protocol, String port, List<Filter> filters, T object) throws Exception {
+//        PropertySources propertySources = new PropertySources();
+//        NacosRegistry nacosRegistry = new NacosRegistry(propertySources);
+//
+//
 //        executor.execute(() -> {
 //            filters.addAll(this.filters);
 //            try {
@@ -79,9 +93,9 @@
 //
 //    public void closeAll() {
 //        servers.forEach((k, v) -> {
-//                    if (v instanceof Closeable) {
+//                    if (v != null) {
 //                        try {
-//                            ((Closeable) v).close();
+//                            v.close();
 //                        } catch (IOException e) {
 //                            log.error(e.getMessage(), e);
 //                        }

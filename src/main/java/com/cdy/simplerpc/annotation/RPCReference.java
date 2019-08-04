@@ -1,6 +1,7 @@
 package com.cdy.simplerpc.annotation;
 
 import com.cdy.simplerpc.config.ConfigConstants;
+import com.cdy.simplerpc.util.StringUtil;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -21,6 +22,12 @@ public @interface RPCReference {
 //     * @return
 //     */
 //    String value();
+    
+    /**
+     * 运行中的注册中心 id
+     * @return
+     */
+    String type() default "";
     
     /**
      * 是否开启异步
@@ -49,7 +56,10 @@ public @interface RPCReference {
             Map<String, String> map = new HashMap<>();
             map.put(key+"."+ConfigConstants.async, annotation.async()+"");
             map.put(key+"."+ConfigConstants.timeout, annotation.timeout()+"");
-            map.put(key+"."+ConfigConstants.url, annotation.url()+"");
+            map.put(key+"."+ConfigConstants.type, annotation.type()+"");
+            if (!StringUtil.isBlank(annotation.url())) {
+                map.put(key + "." + ConfigConstants.url, annotation.url() + "");
+            }
             map.put(key+"."+ConfigConstants.protocols, String.join(",",annotation.protocols()));
             return map;
         }

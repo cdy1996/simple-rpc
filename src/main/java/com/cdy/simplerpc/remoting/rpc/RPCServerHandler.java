@@ -12,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
-import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
-
 /**
  * 服务端消息处理
  * Created by 陈东一
@@ -22,6 +20,12 @@ import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
 @Slf4j
 @ChannelHandler.Sharable
 public class RPCServerHandler extends SimpleChannelInboundHandler<RPCRequest> {
+    
+    private final Map<String, Invoker> handlerMap;
+    
+    public RPCServerHandler(Map<String, Invoker> handlerMap) {
+        this.handlerMap = handlerMap;
+    }
     
     @Override
     public void channelRead0(ChannelHandlerContext ctx, RPCRequest msg1) throws Exception {

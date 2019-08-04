@@ -18,11 +18,12 @@ public class ZKServiceRegistry implements IServiceRegistry {
     
     private final CuratorFramework curatorFramework;
     private final PropertySources propertySources;
+    private final String zkRegistryPath;
     
-    
-    public ZKServiceRegistry(PropertySources propertySources) {
+    public ZKServiceRegistry(PropertySources propertySources, String prefix) {
         this.propertySources = propertySources;
-        curatorFramework = CuratorFrameworkFactory.builder().connectString(propertySources.resolveProperty("zkAddress"))
+        this.zkRegistryPath = propertySources.resolveProperty(prefix+".zkRegistryPath");
+        curatorFramework = CuratorFrameworkFactory.builder().connectString(propertySources.resolveProperty(prefix+".zkAddress"))
                 .sessionTimeoutMs(4000)
                 .retryPolicy(new ExponentialBackoffRetry(10000, 5))
                 .build();
@@ -31,7 +32,7 @@ public class ZKServiceRegistry implements IServiceRegistry {
     
     @Override
     public void register(String name, String address) throws Exception {
-        String servicePath = propertySources.resolveProperty("zkRegistryPath") + "/" + name;
+        String servicePath =  zkRegistryPath + "/" + name;
         
         if (curatorFramework.checkExists().forPath(servicePath) == null) {
             curatorFramework.create().creatingParentContainersIfNeeded()

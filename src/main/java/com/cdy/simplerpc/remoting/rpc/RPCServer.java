@@ -16,6 +16,8 @@ import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
 /**
@@ -27,11 +29,11 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
 public class RPCServer extends AbstractServer {
     
     private Channel channel;
-    private static final EventLoopGroup boss = new NioEventLoopGroup();
-    private static final EventLoopGroup work = new NioEventLoopGroup();
+    private final EventLoopGroup boss = new NioEventLoopGroup();
+    private final EventLoopGroup work = new NioEventLoopGroup();
     
-    public RPCServer(IServiceRegistry registry, ServerMetaInfo serverMetaInfo) {
-        super(registry, serverMetaInfo);
+    public RPCServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registry) {
+        super(serverMetaInfo, registry);
     }
     
     @Override
@@ -48,7 +50,7 @@ public class RPCServer extends AbstractServer {
                                 .addLast(new LengthFieldPrepender(4))
                                 .addLast("encoder", new ObjectEncoder())
                                 .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast(new RPCServerHandler());
+                                .addLast(new RPCServerHandler(getHandlerMap()));
                         
                     }
                 })

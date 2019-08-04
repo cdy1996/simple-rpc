@@ -18,6 +18,7 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import javax.servlet.http.HttpServlet;
 import java.io.File;
+import java.util.List;
 
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
@@ -32,9 +33,9 @@ public class HttpServer extends AbstractServer {
     private Server server;
     private final HttpServlet servlet;
     
-    public HttpServer(IServiceRegistry registry, ServerMetaInfo serverMetaInfo) {
-        super(registry, serverMetaInfo);
-        this.servlet = new ServletHandler();
+    public HttpServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registryList) {
+        super( serverMetaInfo, registryList);
+        this.servlet = new ServletHandler(getHandlerMap());
     }
     
     @Override

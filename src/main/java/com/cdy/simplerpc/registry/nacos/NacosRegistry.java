@@ -23,11 +23,11 @@ public class NacosRegistry implements IServiceRegistry {
     private final NamingService namingService;
     private final PropertySources propertySources;
     
-    public NacosRegistry(PropertySources propertySources) {
+    public NacosRegistry(PropertySources propertySources, String prefix) {
         this.propertySources = propertySources;
         Properties properties = new Properties();
-        properties.setProperty("serverAddr", propertySources.resolveProperty("serverAddr"));
-        properties.setProperty("namespace", propertySources.resolveProperty("namespaceId"));
+        properties.setProperty("serverAddr", propertySources.resolveProperty(prefix+".serverAddr"));
+        properties.setProperty("namespace", propertySources.resolveProperty(prefix+".namespaceId"));
     
         try {
             namingService = NamingFactory.createNamingService(properties);

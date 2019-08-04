@@ -1,9 +1,14 @@
 package com.cdy.simplerpc.remoting;
 
+import com.cdy.simplerpc.config.ConfigConstants;
+import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.http.HttpServer;
 import com.cdy.simplerpc.remoting.rpc.RPCServer;
+import com.cdy.simplerpc.util.StringUtil;
+
+import java.util.List;
 
 /**
  * 服务创建工厂
@@ -13,14 +18,27 @@ import com.cdy.simplerpc.remoting.rpc.RPCServer;
  */
 public class ServerFactory {
     
-    public static Server createServer(IServiceRegistry registry, String protocol, String port, String ip) {
-        switch (protocol) {
-            case "rpc":
-                return new RPCServer(registry, new ServerMetaInfo("rpc" , port, ip));
-            case "http":
-                return new HttpServer(registry, new ServerMetaInfo("http" ,port, ip));
-            default:
-                throw new RPCException("没有合适的协议");
+    public static Server createServer(List<IServiceRegistry> registryList, PropertySources propertySources, String protocol) {
+        return  createServer(registryList, propertySources,protocol, null);
+    }
+    
+    public static Server createServer(List<IServiceRegistry> registryList, PropertySources propertySources, String protocol, String key) {
+        String port,ip;
+        if (StringUtil.isBlank(key)) {
+            port = propertySources.resolveProperty("registry.port");
+            ip = propertySources.resolveProperty("registry.ip");
+        } else {
+            port = propertySources.resolveProperty(key + "." + ConfigConstants.port);
+            ip = propertySources.resolveProperty(key + "." + ConfigConstants.ip);
         }
+    
+        // todo spi
+        if ("rpc".equalsIgnoreCase(protocol)) {
+            return new RPCServer(new ServerMetaInfo(protocol, port, ip), registryList);
+        } else if ("http".equalsIgnoreCase(protocol)) {
+            return new HttpServer(new ServerMetaInfo(protocol, port, ip), registryList);
+        }
+        throw new RPCException("没有合适的协议");
+       
     }
 }

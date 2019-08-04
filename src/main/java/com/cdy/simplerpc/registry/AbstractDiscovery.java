@@ -20,9 +20,14 @@ public abstract class AbstractDiscovery implements IServiceDiscovery{
         this.balance = balance;
     }
     
-    //缓存所有的服务对应的地址列表
+    /**
+     * 缓存所有的服务对应的地址列表
+     *
+     *  key -> serviceName value -> 服务地址列表
+     * 设计成static, 是为了让多个服务发现共用一个缓存
+     */
     @Getter
-    private Map<String, List<String>> cache = new ConcurrentHashMap<>();
+    private static Map<String, List<String>> cache = new ConcurrentHashMap<>();
     
     
     

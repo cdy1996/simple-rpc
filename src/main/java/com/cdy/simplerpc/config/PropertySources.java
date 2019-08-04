@@ -14,6 +14,7 @@ import java.util.TreeSet;
  */
 public class PropertySources implements PropertySource {
  
+    //todo 可能有线程安全问题
     private final TreeSet<PropertySource> propertySources = new TreeSet<>(Order.orderComparator);
     
     

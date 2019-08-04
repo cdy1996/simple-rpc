@@ -7,7 +7,6 @@ import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
-import io.netty.channel.ChannelHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServlet;
@@ -17,8 +16,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
 
-import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
-
 /**
  * 服务端处理
  * Created by 陈东一
@@ -27,7 +24,12 @@ import static com.cdy.simplerpc.remoting.AbstractServer.handlerMap;
 @Slf4j
 public class ServletHandler extends HttpServlet {
     
-
+    private final Map<String, Invoker> handlerMap;
+    
+    public ServletHandler(Map<String, Invoker> handlerMap) {
+        this.handlerMap=handlerMap;
+    }
+    
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         

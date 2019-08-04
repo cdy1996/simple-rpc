@@ -6,6 +6,8 @@ import com.cdy.simplerpc.registry.IServiceDiscovery;
 import com.cdy.simplerpc.remoting.Client;
 import com.cdy.simplerpc.remoting.ClusterClient;
 
+import java.util.Map;
+
 /**
  * 远程执行器
  *
@@ -18,9 +20,9 @@ public class RemoteInvoker implements Invoker{
     private final Client client;
     private final PropertySources propertySources;
     
-    public RemoteInvoker(PropertySources propertySources, IServiceDiscovery serviceDiscovery) {
+    public RemoteInvoker(PropertySources propertySources, Map<String, IServiceDiscovery> servceDiscoveryMap) {
         this.propertySources = propertySources;
-        this.client = new ClusterClient(serviceDiscovery, propertySources);
+        this.client = new ClusterClient(propertySources, servceDiscoveryMap);
     }
     
     public Object invokeRemote(Invocation invocation) throws Exception {
