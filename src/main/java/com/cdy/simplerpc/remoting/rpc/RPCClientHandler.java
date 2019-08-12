@@ -51,7 +51,7 @@ public class RPCClientHandler extends SimpleChannelInboundHandler<byte[]> {
             return;
         }
         rpcFuture.setAttach(rpcresponse.getAttach());
-        rpcFuture.setResultData(rpcresponse.getResultData());
+        rpcFuture.complete(rpcresponse.getResultData());
         
     }
 }

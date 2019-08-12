@@ -13,11 +13,11 @@ import java.util.concurrent.CompletableFuture;
  * 2018/9/1 22:15
  */
 public class RPCFuture<T> extends CompletableFuture<T>  {
-    @Getter @Setter
-    private T resultData;
+//    @Getter @Setter
+//    private T resultData;
     @Getter @Setter
     private Map<String, Object> attach = new HashMap<>();
-    private final Object lock= new Object();
+//    private final Object lock= new Object();
     
     public RPCFuture() {
     }
