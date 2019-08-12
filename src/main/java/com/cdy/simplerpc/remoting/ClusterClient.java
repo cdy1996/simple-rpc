@@ -13,6 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 集群的装饰层
+ * todo
+ * 失败切换 重试其他服务
+ * 快速失败 只请求一次
+ * 快速恢复 记录失败请求, 定时重发, 消息类的通知
+ * 广播请求 想所有服务发出请求
  * <p>
  * Created by 陈东一
  * 2019/4/27 0027 16:16

@@ -2,6 +2,7 @@ package com.cdy.simplerpc.util;
 
 import com.netflix.loadbalancer.Server;
 import io.netty.util.internal.SocketUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -15,10 +16,7 @@ import java.net.InetSocketAddress;
 public class StringUtil {
     
     public static boolean isBlank(String string){
-        if (string == null || "".equals(string)) {
-            return true;
-        }
-        return false;
+        return StringUtils.isBlank(string);
     }
     public static boolean isNotBlank(String string){
         return !isBlank(string);
@@ -30,12 +28,23 @@ public class StringUtil {
      * @param inputStream
      */
     public static String inputStreamToString(InputStream inputStream) throws Exception {
-        try (ByteArrayOutputStream swapStream = new ByteArrayOutputStream();) {
+        try (ByteArrayOutputStream swapStream = new ByteArrayOutputStream()) {
             byte[] bytes = new byte[1024];
             if (inputStream.read(bytes) != -1) {
                 swapStream.write(bytes);
             }
             return swapStream.toString("UTF-8");
+        } finally {
+            inputStream.close();
+        }
+    }
+    public static byte[] inputStreamToBytes(InputStream inputStream) throws Exception {
+        try (ByteArrayOutputStream swapStream = new ByteArrayOutputStream()) {
+            byte[] bytes = new byte[1024];
+            if (inputStream.read(bytes) != -1) {
+                swapStream.write(bytes);
+            }
+            return swapStream.toByteArray();
         } finally {
             inputStream.close();
         }

@@ -4,6 +4,7 @@ import com.cdy.simplerpc.exception.RPCException;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.EntityBuilder;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -20,7 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cdy.simplerpc.util.StringUtil.inputStreamToString;
+import static com.cdy.simplerpc.util.StringUtil.inputStreamToBytes;
 
 /**
  * httpclient 工具类
@@ -41,11 +42,14 @@ public class HttpClientUtil {
     /**
      * 设置post请求的参数
      */
-    public static void setPostParams(HttpPost httpPost, String json) throws Exception {
+    private static void setPostParams(HttpPost httpPost, String json) throws Exception {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         nvps.add(new BasicNameValuePair("params", json));
         httpPost.setEntity(new UrlEncodedFormEntity(nvps, "utf-8"));
         
+    }
+    private static void setPostParams(HttpPost httpPost, byte[] bytes) throws Exception {
+        httpPost.setEntity(EntityBuilder.create().setBinary(bytes).setContentEncoding("UTF-8").build());
     }
     
     public static CloseableHttpClient getHttpClient() {
@@ -64,7 +68,7 @@ public class HttpClientUtil {
         return getHttpsClient(createSSLConnSocketFactory());
     }
     
-    public static CloseableHttpClient getHttpsClient(SSLConnectionSocketFactory sslSocketFactory) {
+    private static CloseableHttpClient getHttpsClient(SSLConnectionSocketFactory sslSocketFactory) {
         return HttpClients.custom().setSSLSocketFactory(sslSocketFactory)
                 .setConnectionManager(manager)
                 .setRetryHandler(new DefaultHttpRequestRetryHandler(0,false))
@@ -91,7 +95,7 @@ public class HttpClientUtil {
         manager.close();
     }
     
-    public static String execute(CloseableHttpClient client, String uri, String params, Integer timeout) throws Exception {
+    public static byte[] execute(CloseableHttpClient client, String uri, Object params, Integer timeout) throws Exception {
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(timeout)  //连接时间
                 .setConnectionRequestTimeout(timeout) //connect Manager(连接池)获取Connection 超时时间
@@ -99,7 +103,13 @@ public class HttpClientUtil {
                 .build();
         HttpPost httpPost = new HttpPost(uri);
         httpPost.setConfig(requestConfig);
-        setPostParams(httpPost, params);
+        if (params instanceof String){
+            setPostParams(httpPost, (String)params);
+        } else if (params instanceof byte[]){
+            setPostParams(httpPost, (byte[])params);
+        } else {
+            throw new RPCException("不支持的传输类型");
+        }
         CloseableHttpResponse response = null;
         try {
             response = client.execute(httpPost);
@@ -109,7 +119,7 @@ public class HttpClientUtil {
     
         HttpEntity entity = response.getEntity();
         if (response.getStatusLine().getStatusCode() == 200) {
-            return inputStreamToString(entity.getContent());
+            return inputStreamToBytes(entity.getContent());
         } else {
             throw new RPCException("调用失败 ==> " + response.getStatusLine().getStatusCode());
         }

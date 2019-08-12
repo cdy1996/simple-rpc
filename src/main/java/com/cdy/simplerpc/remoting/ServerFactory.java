@@ -6,6 +6,7 @@ import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.http.HttpServer;
 import com.cdy.simplerpc.remoting.rpc.RPCServer;
+import com.cdy.simplerpc.serialize.JdkSerialize;
 import com.cdy.simplerpc.util.StringUtil;
 
 import java.util.List;
@@ -23,7 +24,7 @@ public class ServerFactory {
     }
     
     public static Server createServer(List<IServiceRegistry> registryList, PropertySources propertySources, String protocol, String key) {
-        String port,ip;
+        String port,ip,serialize;
         if (StringUtil.isBlank(key)) {
             port = propertySources.resolveProperty("registry.port");
             ip = propertySources.resolveProperty("registry.ip");
@@ -34,9 +35,9 @@ public class ServerFactory {
     
         // todo spi
         if ("rpc".equalsIgnoreCase(protocol)) {
-            return new RPCServer(new ServerMetaInfo(protocol, port, ip), registryList);
+            return new RPCServer(new ServerMetaInfo(protocol, port, ip), registryList, new JdkSerialize());
         } else if ("http".equalsIgnoreCase(protocol)) {
-            return new HttpServer(new ServerMetaInfo(protocol, port, ip), registryList);
+            return new HttpServer(new ServerMetaInfo(protocol, port, ip), registryList, new JdkSerialize());
         }
         throw new RPCException("没有合适的协议");
        

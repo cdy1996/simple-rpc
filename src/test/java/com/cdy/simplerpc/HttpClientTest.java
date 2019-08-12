@@ -15,8 +15,8 @@ public class HttpClientTest {
     
     @Test
     public void test() throws Exception {
-        String execute = HttpClientUtil.execute(HttpClientUtil.getHttpClient(), "http://localhost:80/gradle/count", null, 1000);
-        System.out.println(execute);
+        byte[] execute = HttpClientUtil.execute(HttpClientUtil.getHttpClient(), "http://localhost:80/gradle/count", null, 1000);
+        System.out.println(new String(execute));
     }
     
     public static void main(String[] args) {

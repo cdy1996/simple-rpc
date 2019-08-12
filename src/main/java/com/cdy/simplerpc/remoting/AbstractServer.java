@@ -5,6 +5,7 @@ import com.cdy.simplerpc.filter.FilterChain;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.proxy.ProxyFactory;
 import com.cdy.simplerpc.registry.IServiceRegistry;
+import com.cdy.simplerpc.serialize.ISerialize;
 import lombok.Getter;
 
 import java.util.List;
@@ -27,10 +28,12 @@ public abstract class AbstractServer implements Server {
     private final Map<String, Invoker> handlerMap = new ConcurrentHashMap<>();
     private final List<IServiceRegistry> registries;
     private final ServerMetaInfo serverMetaInfo;
+    protected final ISerialize serialize;
     
-    public AbstractServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registries) {
+    public AbstractServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registries, ISerialize serialize) {
         this.registries = registries;
         this.serverMetaInfo = serverMetaInfo;
+        this.serialize = serialize;
     }
     
     @Override

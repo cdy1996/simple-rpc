@@ -1,6 +1,5 @@
 package com.cdy.simplerpc.remoting.http.httpClient;
 
-import com.cdy.serialization.JsonUtil;
 import com.cdy.simplerpc.config.ConfigConstants;
 import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.RPCException;
@@ -9,6 +8,7 @@ import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
+import com.cdy.simplerpc.serialize.JsonSerialize;
 import com.cdy.simplerpc.util.StringUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -27,8 +27,9 @@ public class HTTPClient extends AbstractClient {
     
     
     public HTTPClient(PropertySources propertySources) {
-        super(propertySources);
+        super(propertySources, new JsonSerialize());
     }
+    
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
@@ -53,28 +54,28 @@ public class HTTPClient extends AbstractClient {
         if ("true".equalsIgnoreCase(async)) {
             return CompletableFuture.supplyAsync(() -> {
                 try {
-                    return send(rpcRequest, server, client, timeout);
+                    return send(rpcRequest, server, client, timeout, context);
                 } catch (Exception e) {
                     throw new RPCException(e);
                 }
             });
         } else {
-            return send(rpcRequest, server, client, timeout);
+            return send(rpcRequest, server, client, timeout, context);
         }
        
     }
     
-    private Object send(RPCRequest rpcRequest, StringUtil.TwoResult<String, Integer> server, CloseableHttpClient client, String timeout) throws Exception {
-        String result = HttpClientUtil.execute(client,
+    private Object send(RPCRequest rpcRequest, StringUtil.TwoResult<String, Integer> server,
+                        CloseableHttpClient client, String timeout, RPCContext context) throws Exception {
+        byte[] result = HttpClientUtil.execute(client,
                 "http://" + server.getFirst() + ":" + server.getSecond() + "/simpleRPC",
-                JsonUtil.toString(rpcRequest),
+                getSerialize().serialize(rpcRequest, RPCRequest.class),
                 Integer.valueOf(timeout));
-        
-        
-        RPCResponse rpcResponse = JsonUtil.parseObject(result, RPCResponse.class);
+    
+    
+        RPCResponse rpcResponse = (RPCResponse) getSerialize().deserialize(result, RPCResponse.class);
         // 隐式接受参数
-        RPCContext rpcContext = RPCContext.current();
-        rpcContext.setMap(rpcResponse.getAttach());
+        context.setMap(rpcResponse.getAttach());
         return rpcResponse.getResultData();
     }
     

@@ -1,17 +1,19 @@
 package com.cdy.simplerpc.remoting.http;
 
-import com.cdy.serialization.JsonUtil;
-import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
+import com.cdy.simplerpc.serialize.ISerialize;
+import com.cdy.simplerpc.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Map;
@@ -26,47 +28,64 @@ public class ServletHandler extends HttpServlet {
     
     private final Map<String, Invoker> handlerMap;
     
-    public ServletHandler(Map<String, Invoker> handlerMap) {
-        this.handlerMap=handlerMap;
+    private final ISerialize serialize;
+    
+    public ServletHandler(Map<String, Invoker> handlerMap, ISerialize serialize) {
+        this.handlerMap = handlerMap;
+        this.serialize = serialize;
     }
     
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        
-        String params = req.getParameter("params");
-        RPCRequest msg1 = JsonUtil.parseObject(params, RPCRequest.class);
-    
-        log.info("接受到请求" + msg1);
-    
-        RPCContext context = RPCContext.current();
-        Map<String, Object> contextMap = context.getMap();
-        
-        String className = msg1.getClassName();
-        Object result = null;
-
-        if (handlerMap.containsKey(className)) {
+        try {
+            
+            RPCRequest rpcRequest = null;
+//            if (req.getContentType().contains("json")) {
+//                String params = req.getParameter("params");
+//                rpcRequest = (RPCRequest) serialize.deserialize(params, RPCRequest.class);
+//            } else if (req.getContentType().contains("octet-stream")) {
+            Part params = req.getPart("params");
+            rpcRequest = (RPCRequest) serialize.deserialize(StringUtil.inputStreamToBytes(params.getInputStream()), RPCRequest.class);
+//            }
+            
+            log.info("接受到请求" + rpcRequest);
+            RPCContext context = RPCContext.current();
+            Map<String, Object> contextMap = context.getMap();
+            
+            String className = rpcRequest.getClassName();
             Invoker o = handlerMap.get(className);
-            Invocation invocation = new Invocation(msg1.getMethodName(), msg1.getParams(), msg1.getTypes());
-            contextMap.putAll(msg1.getAttach());
-            try {
-                result = o.invoke(invocation);
-            } catch (Exception e) {
-                // 理论上不会抛异常 因为可能的异常都在异常过滤器中处理掉了
-                throw new RPCException(e);
+            Invocation invocation = new Invocation(rpcRequest.getMethodName(), rpcRequest.getParams(), rpcRequest.getTypes());
+            contextMap.putAll(rpcRequest.getAttach());
+            Object result = o.invoke(invocation);
+            
+            RPCResponse rpcResponse = new RPCResponse();
+            rpcResponse.setAttach(contextMap);
+            rpcResponse.setRequestId(rpcRequest.getRequestId());
+            rpcResponse.setResultData(result);
+
+//            if (result instanceof byte[] || result instanceof File || result instanceof OutputStream) {
+            try (ServletOutputStream outputStream = resp.getOutputStream()) {
+                resp.setContentType("application/octet-stream");
+                resp.setCharacterEncoding("UTF-8");
+                outputStream.write((byte[]) serialize.serialize(rpcResponse, RPCResponse.class));
+                outputStream.flush();
             }
-        }
-    
-        RPCResponse rpcResponse = new RPCResponse();
-        rpcResponse.setAttach(contextMap);
-        rpcResponse.setRequestId(msg1.getRequestId());
-        rpcResponse.setResultData(result);
-        
-        try (PrintWriter writer = resp.getWriter()) {
-            resp.setContentType("application/json");
-            resp.setCharacterEncoding("UTF-8");
-            String json = JsonUtil.toString(rpcResponse);
-            writer.write(json);
-            writer.flush();
+//            } else {
+//                try (PrintWriter writer = resp.getWriter()) {
+//                    resp.setContentType("application/json");
+//                    resp.setCharacterEncoding("UTF-8");
+//                    writer.write((String) serialize.serialize(rpcResponse, RPCResponse.class));
+//                    writer.flush();
+//                }
+//            }
+            
+        } catch (Exception e) {
+            try (PrintWriter writer = resp.getWriter()) {
+                resp.setContentType("application/octet-stream");
+                resp.setCharacterEncoding("UTF-8");
+                writer.write(e.toString());
+                writer.flush();
+            }
         }
     }
 }

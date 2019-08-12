@@ -3,6 +3,7 @@ package com.cdy.simplerpc.remoting.rpc;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.AbstractServer;
 import com.cdy.simplerpc.remoting.ServerMetaInfo;
+import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.util.StringUtil;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -32,8 +33,8 @@ public class RPCServer extends AbstractServer {
     private final EventLoopGroup boss = new NioEventLoopGroup();
     private final EventLoopGroup work = new NioEventLoopGroup();
     
-    public RPCServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registry) {
-        super(serverMetaInfo, registry);
+    public RPCServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registry, ISerialize serialize) {
+        super(serverMetaInfo, registry, serialize);
     }
     
     @Override
@@ -50,7 +51,7 @@ public class RPCServer extends AbstractServer {
                                 .addLast(new LengthFieldPrepender(4))
                                 .addLast("encoder", new ObjectEncoder())
                                 .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast(new RPCServerHandler(getHandlerMap()));
+                                .addLast(new RPCServerHandler(getHandlerMap(), serialize));
                         
                     }
                 })

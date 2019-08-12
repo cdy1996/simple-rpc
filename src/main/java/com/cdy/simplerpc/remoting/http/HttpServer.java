@@ -3,6 +3,7 @@ package com.cdy.simplerpc.remoting.http;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.AbstractServer;
 import com.cdy.simplerpc.remoting.ServerMetaInfo;
+import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.LifecycleException;
@@ -24,6 +25,11 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
 
 /**
  * http服务端
+ *
+ * client   -> json ->     server
+ * client   -> byte[] ->   server
+ *
+ *
  * Created by 陈东一
  * 2019/1/27 0027 0:35
  */
@@ -33,11 +39,12 @@ public class HttpServer extends AbstractServer {
     private Server server;
     private final HttpServlet servlet;
     
-    public HttpServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registryList) {
-        super( serverMetaInfo, registryList);
-        this.servlet = new ServletHandler(getHandlerMap());
+    public HttpServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registryList, ISerialize serialize) {
+        super(serverMetaInfo, registryList, serialize);
+        this.servlet = new ServletHandler(getHandlerMap(), serialize);
     }
     
+
     @Override
     public void openServer() throws Exception {
         StringUtil.TwoResult<String, Integer> server = getServer(getAddress());

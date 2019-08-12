@@ -183,7 +183,18 @@
             <scope>test</scope>
             <optional>true</optional>
         </dependency>
-
+        <dependency>
+            <groupId>com.baidu</groupId>
+            <artifactId>jprotobuf</artifactId>
+            <version>2.1.2</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.caucho</groupId>
+            <artifactId>hessian</artifactId>
+            <version>4.0.38</version>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>

@@ -2,12 +2,8 @@ package com.cdy.simplerpc.remoting.rpc;
 
 import com.cdy.simplerpc.config.ConfigConstants;
 import com.cdy.simplerpc.config.PropertySources;
-import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
-import com.cdy.simplerpc.remoting.AbstractClient;
-import com.cdy.simplerpc.remoting.RPCContext;
-import com.cdy.simplerpc.remoting.RPCFuture;
-import com.cdy.simplerpc.remoting.RPCRequest;
+import com.cdy.simplerpc.remoting.*;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -22,8 +18,8 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.cdy.simplerpc.util.StringUtil.getServer;
@@ -62,7 +58,7 @@ public class RPCClient extends AbstractClient {
                                 .addLast(new LengthFieldPrepender(4))
                                 .addLast("encoder", new ObjectEncoder())
                                 .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast(new RPCClientHandler(addressChannel,responseFuture));
+                                .addLast(new RPCClientHandler(addressChannel,responseFuture, serialize));
                     }
                 })
                 .option(ChannelOption.TCP_NODELAY, true);
@@ -95,30 +91,26 @@ public class RPCClient extends AbstractClient {
         String timeout = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.timeout);
     
     
-        RPCFuture future = new RPCFuture(Long.valueOf(timeout));
+        RPCFuture<RPCResponse> future = new RPCFuture<>();
         responseFuture.put(rpcRequest.getRequestId(), future);
-        
+    
+        Channel finalChannel = channel;
+        send(rpcRequest, finalChannel);
         if ("true".equalsIgnoreCase(async)) {
-            Channel finalChannel = channel;
-            return CompletableFuture.supplyAsync(() -> {
-                try {
-                    return send(rpcRequest, finalChannel, future);
-                } catch (Exception e) {
-                    throw new RPCException(e);
-                }
+            future.whenComplete((response, exception)->{
+                // 隐式接受参数
+                context.setMap(response.getAttach());
             });
+            return future;
         } else {
-            return send(rpcRequest, channel, future);
+            RPCResponse rpcResponse = future.get(Long.parseLong(timeout), TimeUnit.SECONDS);
+            context.setMap(rpcResponse.getAttach());
+            return rpcResponse;
         }
     }
     
-    private Object send(RPCRequest rpcRequest, Channel channel, RPCFuture future) throws InterruptedException {
+    private void send(RPCRequest rpcRequest, Channel channel) {
         channel.writeAndFlush(rpcRequest);
-        Object result = future.get();
-        // 隐式接受参数
-        RPCContext rpcContext = RPCContext.current();
-        rpcContext.setMap(future.getAttach());
-        return result;
     }
 
     private Channel connect(String address) throws Exception {
