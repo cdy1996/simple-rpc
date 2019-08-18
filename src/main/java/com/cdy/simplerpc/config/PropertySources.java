@@ -6,6 +6,8 @@ import com.cdy.simplerpc.util.StringUtil;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import static com.cdy.simplerpc.annotation.OrderComparator.orderComparator;
+
 /**
  * 配置聚合,用于配置覆盖
  *
@@ -23,7 +25,7 @@ import java.util.TreeSet;
 public class PropertySources implements PropertySource {
  
     //todo 可能有线程安全问题
-    private final TreeSet<PropertySource> propertySources = new TreeSet<>(Order.orderComparator);
+    private final TreeSet<PropertySource> propertySources = new TreeSet<>(orderComparator);
     
     
     public void addPropertySources(PropertySource propertySource) {

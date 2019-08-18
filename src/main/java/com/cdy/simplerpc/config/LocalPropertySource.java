@@ -41,8 +41,8 @@ public class LocalPropertySource  implements PropertySource{
     
     @Override
     public String resolveProperty(String key){
-        Object object = propertyResourceBundle.getObject(key);
-        return String.valueOf(object);
+        Object object = propertyResourceBundle.handleGetObject(key);
+        return (String)object;
     
     }
 
