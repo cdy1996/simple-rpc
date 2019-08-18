@@ -12,9 +12,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -49,9 +46,11 @@ public class RPCServer extends AbstractServer {
                         ch.pipeline()
                                 .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
                                 .addLast(new LengthFieldPrepender(4))
-                                .addLast("encoder", new ObjectEncoder())
-                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast(new RPCServerHandler(getHandlerMap(), serialize));
+//                                .addLast("encoder", new ObjectEncoder())
+//                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
+                                .addLast("encoder", SerializeCoderFactory.getEncoder(getSerialize(), true))
+                                .addLast("dencoder", SerializeCoderFactory.getDecoder(getSerialize(), true))
+                                .addLast(new RPCServerHandler(getHandlerMap()));
                         
                     }
                 })

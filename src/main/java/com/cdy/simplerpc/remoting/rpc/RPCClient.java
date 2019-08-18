@@ -3,7 +3,11 @@ package com.cdy.simplerpc.remoting.rpc;
 import com.cdy.simplerpc.config.ConfigConstants;
 import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.proxy.Invocation;
-import com.cdy.simplerpc.remoting.*;
+import com.cdy.simplerpc.remoting.AbstractClient;
+import com.cdy.simplerpc.remoting.RPCContext;
+import com.cdy.simplerpc.remoting.RPCFuture;
+import com.cdy.simplerpc.remoting.RPCRequest;
+import com.cdy.simplerpc.serialize.ISerialize;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -11,9 +15,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
-import io.netty.handler.codec.serialization.ClassResolvers;
-import io.netty.handler.codec.serialization.ObjectDecoder;
-import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
@@ -36,7 +37,7 @@ public class RPCClient extends AbstractClient {
      */
     public static final AttributeKey<String> ATTRIBUTE_KEY_ADDRESS = AttributeKey.valueOf("address");
     
-    private final Bootstrap bootstrap = new Bootstrap();
+    private final Bootstrap bootstrap ;
     private static final EventLoopGroup boss = new NioEventLoopGroup();
     private final AtomicInteger requestId = new AtomicInteger(0);
     //服务端地址
@@ -44,11 +45,11 @@ public class RPCClient extends AbstractClient {
     private final Map<String, RPCFuture> responseFuture = new ConcurrentHashMap<>();
     
     
-    public RPCClient(PropertySources propertySources) {
-        super(propertySources);
+    public RPCClient(PropertySources propertySources, ISerialize serialize) {
+        super(propertySources, serialize);
     
-        Bootstrap bootstrap = new Bootstrap();
-        bootstrap.group(boss)
+        this.bootstrap = new Bootstrap();
+        this.bootstrap.group(boss)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -56,15 +57,17 @@ public class RPCClient extends AbstractClient {
                         ch.pipeline()
                                 .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
                                 .addLast(new LengthFieldPrepender(4))
-                                .addLast("encoder", new ObjectEncoder())
-                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast(new RPCClientHandler(addressChannel,responseFuture, serialize));
+//                                .addLast("encoder", new ObjectEncoder())
+//                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
+                                .addLast("encoder", SerializeCoderFactory.getEncoder(getSerialize(), false))
+                                .addLast("dencoder", SerializeCoderFactory.getDecoder(getSerialize(), false))
+                                .addLast(new RPCClientHandler(addressChannel,responseFuture));
                     }
                 })
                 .option(ChannelOption.TCP_NODELAY, true);
 //                                    .childOption(ChannelOption.SO_KEEPALIVE, true);
     }
-    
+
     @Override
     public Object invoke(Invocation invocation) throws Exception {
      
@@ -84,14 +87,12 @@ public class RPCClient extends AbstractClient {
             addressChannel.putIfAbsent(address, channel);
         }
     
-        addressChannel.put(address, channel);
-    
         String annotationKey = (String) contextMap.get(RPCContext.annotationKey);
         String async = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.async);
         String timeout = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.timeout);
     
     
-        RPCFuture<RPCResponse> future = new RPCFuture<>();
+        RPCFuture<Object> future = new RPCFuture<>();
         responseFuture.put(rpcRequest.getRequestId(), future);
     
         Channel finalChannel = channel;
@@ -99,13 +100,13 @@ public class RPCClient extends AbstractClient {
         if ("true".equalsIgnoreCase(async)) {
             future.whenComplete((response, exception)->{
                 // 隐式接受参数
-                context.setMap(response.getAttach());
+                context.setMap(future.getAttach());
             });
             return future;
         } else {
-            RPCResponse rpcResponse = future.get(Long.parseLong(timeout), TimeUnit.SECONDS);
-            context.setMap(rpcResponse.getAttach());
-            return rpcResponse;
+            Object result = future.get(Long.parseLong(timeout), TimeUnit.SECONDS);
+            context.setMap(future.getAttach());
+            return result;
         }
     }
     

@@ -2,7 +2,6 @@ package com.cdy.simplerpc.remoting;
 
 import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.serialize.ISerialize;
-import com.cdy.simplerpc.serialize.JdkSerialize;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,7 +18,7 @@ public abstract class AbstractClient implements Client {
     
     public AbstractClient(PropertySources propertySources) {
         this.propertySources = propertySources;
-        this.serialize = new JdkSerialize();
+        this.serialize = null;
     }
     
     public AbstractClient(PropertySources propertySources, ISerialize serialize) {

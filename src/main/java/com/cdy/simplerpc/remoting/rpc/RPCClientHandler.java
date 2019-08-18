@@ -2,7 +2,6 @@ package com.cdy.simplerpc.remoting.rpc;
 
 import com.cdy.simplerpc.remoting.RPCFuture;
 import com.cdy.simplerpc.remoting.RPCResponse;
-import com.cdy.simplerpc.serialize.ISerialize;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -19,17 +18,15 @@ import static com.cdy.simplerpc.remoting.rpc.RPCClient.ATTRIBUTE_KEY_ADDRESS;
  * 2018/9/1 22:24
  */
 @Slf4j
-public class RPCClientHandler extends SimpleChannelInboundHandler<byte[]> {
+public class RPCClientHandler extends SimpleChannelInboundHandler<RPCResponse> {
     
 
     private final Map<String, Channel> addressChannel ;
     private final Map<String, RPCFuture> responseFuture ;
-    private final ISerialize serialize;
     
-    public RPCClientHandler(Map<String, Channel> addressChannel, Map<String, RPCFuture> responseFuture, ISerialize serialize) {
+    public RPCClientHandler(Map<String, Channel> addressChannel, Map<String, RPCFuture> responseFuture) {
         this.addressChannel = addressChannel;
         this.responseFuture = responseFuture;
-        this.serialize = serialize;
     }
     
     
@@ -43,9 +40,8 @@ public class RPCClientHandler extends SimpleChannelInboundHandler<byte[]> {
     }
     
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, byte[] msg) throws Exception {
-        RPCResponse rpcresponse = (RPCResponse) serialize.deserialize(msg, RPCResponse.class);
-        log.info("接收到内容" + rpcresponse);
+    public void channelRead0(ChannelHandlerContext ctx, RPCResponse rpcresponse) throws Exception {
+        log.info("接收到内容 {}" ,rpcresponse);
         RPCFuture rpcFuture = responseFuture.remove(rpcresponse.getRequestId());
         if(rpcFuture == null){
             return;

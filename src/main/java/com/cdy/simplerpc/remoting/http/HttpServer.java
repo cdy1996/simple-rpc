@@ -6,11 +6,6 @@ import com.cdy.simplerpc.remoting.ServerMetaInfo;
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.LifecycleException;
-import org.apache.catalina.connector.Connector;
-import org.apache.catalina.core.AprLifecycleListener;
-import org.apache.catalina.core.StandardServer;
-import org.apache.catalina.startup.Tomcat;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -18,7 +13,6 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 import javax.servlet.http.HttpServlet;
-import java.io.File;
 import java.util.List;
 
 import static com.cdy.simplerpc.util.StringUtil.getServer;
@@ -105,8 +99,7 @@ public class HttpServer extends AbstractServer {
         server.setHandler(context);
         
         // http://localhost:8080/hello
-        context.addServlet(new ServletHolder(servlet), "/**");
-        
+        context.addServlet(new ServletHolder(servlet), "/simpleRPC");
         server.start();// 开启服务
     
 //        server.join();
@@ -114,36 +107,36 @@ public class HttpServer extends AbstractServer {
     
     
     
-    private void tomcatStart(String host, Integer port) throws LifecycleException {
-        Tomcat tomcat = new Tomcat();//创建tomcat实例，用来启动tomcat
-//        tomcat.setHostname(split[0]);//设置主机名
-//        tomcat.setPort(Integer.parseInt(split[1]));//设置端口
-        tomcat.setBaseDir("/tomcat/");//tomcat存储自身信息的目录，比如日志等信息，根目录
-        
-        
-        String DEFAULT_PROTOCOL = "org.apache.coyote.http11.Http11NioProtocol";
-        Connector connector = new Connector(DEFAULT_PROTOCOL);//设置协议，默认就是这个协议connector.setURIEncoding("UTF-8");//设置编码
-        connector.setPort(port);//设置端口
-        connector.setURIEncoding("UTF-8");
-        tomcat.getService().addConnector(connector);
-        
-        org.apache.catalina.Context ctx = tomcat.addContext("/simple-RPC", null);//网络访问路径
-        tomcat.addServlet(ctx, "myServlet", servlet); //配置servlet
-        ctx.addServletMappingDecoded("/**", "myServlet");//配置servlet映射路径
-        
-        
-        StandardServer server = (StandardServer) tomcat.getServer();
-        AprLifecycleListener subscrible = new AprLifecycleListener();
-        server.addLifecycleListener(subscrible);
-        
-        //设置appBase为项目所在目录
-        
-        tomcat.getHost().setAppBase(System.getProperty("user.dir") + File.separator + ".");
-        tomcat.addWebapp("", "webapp");
-        
-        
-        tomcat.start();//启动tomcat
-        
-        tomcat.getServer().await();
-    }
+//    private void tomcatStart(String host, Integer port) throws LifecycleException {
+//        Tomcat tomcat = new Tomcat();//创建tomcat实例，用来启动tomcat
+////        tomcat.setHostname(split[0]);//设置主机名
+////        tomcat.setPort(Integer.parseInt(split[1]));//设置端口
+//        tomcat.setBaseDir("/tomcat/");//tomcat存储自身信息的目录，比如日志等信息，根目录
+//
+//
+//        String DEFAULT_PROTOCOL = "org.apache.coyote.http11.Http11NioProtocol";
+//        Connector connector = new Connector(DEFAULT_PROTOCOL);//设置协议，默认就是这个协议connector.setURIEncoding("UTF-8");//设置编码
+//        connector.setPort(port);//设置端口
+//        connector.setURIEncoding("UTF-8");
+//        tomcat.getService().addConnector(connector);
+//
+//        org.apache.catalina.Context ctx = tomcat.addContext("/simple-RPC", null);//网络访问路径
+//        tomcat.addServlet(ctx, "myServlet", servlet); //配置servlet
+//        ctx.addServletMappingDecoded("/**", "myServlet");//配置servlet映射路径
+//
+//
+//        StandardServer server = (StandardServer) tomcat.getServer();
+//        AprLifecycleListener subscrible = new AprLifecycleListener();
+//        server.addLifecycleListener(subscrible);
+//
+//        //设置appBase为项目所在目录
+//
+//        tomcat.getHost().setAppBase(System.getProperty("user.dir") + File.separator + ".");
+//        tomcat.addWebapp("", "webapp");
+//
+//
+//        tomcat.start();//启动tomcat
+//
+//        tomcat.getServer().await();
+//    }
 }

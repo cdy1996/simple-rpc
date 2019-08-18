@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.remoting.http.httpClient;
+package com.cdy.simplerpc.remoting.http;
 
 import com.cdy.simplerpc.config.ConfigConstants;
 import com.cdy.simplerpc.config.PropertySources;
@@ -8,6 +8,7 @@ import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
+import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.serialize.JsonSerialize;
 import com.cdy.simplerpc.util.StringUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -15,7 +16,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static com.cdy.simplerpc.remoting.http.httpClient.HttpClientUtil.getHttpClient;
+import static com.cdy.simplerpc.remoting.http.HttpClientUtil.getHttpClient;
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
 /**
@@ -26,10 +27,9 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
 public class HTTPClient extends AbstractClient {
     
     
-    public HTTPClient(PropertySources propertySources) {
-        super(propertySources, new JsonSerialize());
+    public HTTPClient(PropertySources propertySources, ISerialize serialize) {
+        super(propertySources, serialize);
     }
-    
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
@@ -67,13 +67,22 @@ public class HTTPClient extends AbstractClient {
     
     private Object send(RPCRequest rpcRequest, StringUtil.TwoResult<String, Integer> server,
                         CloseableHttpClient client, String timeout, RPCContext context) throws Exception {
-        byte[] result = HttpClientUtil.execute(client,
-                "http://" + server.getFirst() + ":" + server.getSecond() + "/simpleRPC",
-                getSerialize().serialize(rpcRequest, RPCRequest.class),
-                Integer.valueOf(timeout));
+        byte[] serialize = getSerialize().serialize(rpcRequest, RPCRequest.class);
+        byte[] result;
+        if (getSerialize() instanceof JsonSerialize){
+            result = HttpClientUtil.execute(client,
+                    "http://" + server.getFirst() + ":" + server.getSecond() + "/simpleRPC",
+                    new String(serialize, "utf-8"),
+                    Integer.valueOf(timeout));
+        } else {
+            result = HttpClientUtil.execute(client,
+                    "http://" + server.getFirst() + ":" + server.getSecond() + "/simpleRPC",
+                    serialize,
+                    Integer.valueOf(timeout));
+        }
     
     
-        RPCResponse rpcResponse = (RPCResponse) getSerialize().deserialize(result, RPCResponse.class);
+        RPCResponse rpcResponse = getSerialize().deserialize(result, RPCResponse.class);
         // 隐式接受参数
         context.setMap(rpcResponse.getAttach());
         return rpcResponse.getResultData();

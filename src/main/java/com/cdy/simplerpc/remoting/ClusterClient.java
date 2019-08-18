@@ -5,6 +5,8 @@ import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.registry.IServiceDiscovery;
+import com.cdy.simplerpc.serialize.ISerialize;
+import com.cdy.simplerpc.serialize.SerializeFactory;
 import com.cdy.simplerpc.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,31 +50,36 @@ public class ClusterClient extends AbstractClient {
         while (StringUtil.isBlank(address)) {
             if (StringUtil.isBlank(directAddress)) {
                 String protocols = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.protocols);
-                //多订阅时,只能选择一个注册中心
-                if (StringUtil.isBlank(annotationKey)) {
-                    address = servceDiscoveryMap.get(propertySources.resolveProperty(annotationKey + ".discovery.type")).discovery(serviceName, protocols.split(","));
-                } else {
-                    address = servceDiscoveryMap.get(propertySources.resolveProperty("discovery.type")).discovery(serviceName, protocols.split(","));
+                if (StringUtil.isBlank(protocols)) { //注解没定义就取配置文件中的全局配置
+                    protocols = propertySources.resolveProperty("discovery."+ConfigConstants.protocols);
                 }
+                String discoveryType = propertySources.resolveProperty(annotationKey + ".discovery.type");
+                if (StringUtil.isBlank(discoveryType)) {
+                    discoveryType = propertySources.resolveProperty("discovery.type");
+                }
+                //多订阅时,只能选择一个注册中心
+                address = servceDiscoveryMap.get(discoveryType).discovery(serviceName, protocols.split(","));
             } else {
                 //直连
                 address = directAddress;
             }
-            log.warn("没有可以用的服务地址");
+            if (StringUtil.isBlank(address)) {
+                log.warn("没有可以用的服务地址");
+            }
         }
         
         String[] split = address.split("-");
         String protocol = split[0];
-        Client client = clientMap.get(serviceName + protocol);
+        Client client = clientMap.get(serviceName +":"+ protocol);
         if (client == null) {
             try {
                 String replace = ClusterClient.class.getName().replace(ClusterClient.class.getSimpleName(), "");
                 Class<?> clazz = Class.forName(replace + protocol.toLowerCase() + "." + protocol.toUpperCase() + "Client");
-                client = (Client) clazz.getConstructor().newInstance(propertySources);
+                client = (Client) clazz.getConstructor(PropertySources.class, ISerialize.class).newInstance(propertySources, SerializeFactory.createSerialize(propertySources));
             } catch (ClassNotFoundException e) {
                 throw new RPCException("不支持的协议" + protocol);
             }
-            clientMap.putIfAbsent(serviceName + protocol, client);
+            clientMap.putIfAbsent(serviceName + ":" + protocol, client);
         }
         
         
