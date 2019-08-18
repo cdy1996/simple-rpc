@@ -36,10 +36,19 @@ public class SimpleDiscoveryImpl extends AbstractDiscovery {
                     }
                     List<String> cacheUrls = map.get(seriviceName);
                     if (cacheUrls == null) {
-                        cacheUrls = new ArrayList<>(urls);
+                        cacheUrls = new ArrayList<>();
+                        for (String e : urls) {
+                            if (!cacheUrls.contains(e)) {
+                                cacheUrls.add(e);
+                            }
+                        }
                         map.put(seriviceName, cacheUrls);
                     } else {
-                        cacheUrls.addAll(urls);
+                        for (String e : urls) {
+                            if (!cacheUrls.contains(e)) {
+                                cacheUrls.add(e);
+                            }
+                        }
                     }
                 }
             

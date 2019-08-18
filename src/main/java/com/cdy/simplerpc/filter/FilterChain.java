@@ -1,12 +1,13 @@
 package com.cdy.simplerpc.filter;
 
-import com.cdy.simplerpc.annotation.Order;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.proxy.InvokerAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.cdy.simplerpc.annotation.OrderComparator.orderComparator;
 
 /**
  * 客户端过滤器装饰器
@@ -24,7 +25,7 @@ public class FilterChain extends InvokerAdapter {
     
     public FilterChain(Invoker invoker, List<Filter> filterList) {
         super(invoker);
-        filterList.stream().sorted(Order.orderComparator).forEach(e -> {
+        filterList.stream().sorted(orderComparator).forEach(e -> {
             e.setInvoker(invoker);
             filters.add(e);
         });

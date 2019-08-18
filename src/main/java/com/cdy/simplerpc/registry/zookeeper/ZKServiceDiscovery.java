@@ -59,7 +59,7 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
             if (!(protocols == null || protocols.length==0)) {
                 cacheList = cacheList.stream().filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith)).collect(Collectors.toList());
             }
-            cacheList = cache.putIfAbsent(serviceName, cacheList);
+            cache.putIfAbsent(serviceName, cacheList);
             subscrible(serviceName);
         }
         return cacheList;

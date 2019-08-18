@@ -23,7 +23,7 @@ public class LocalInvoker<T> implements Invoker {
         Object result;
         Method method = t.getClass().getMethod(invocation.getMethodName(), invocation.getTypes());
         result = method.invoke(t, invocation.getArgs());
-        log.info("执行结果" + result);
+        log.info("执行结果 {}" , result);
         return result;
         
     }

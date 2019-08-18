@@ -42,7 +42,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
         Invocation invocation = new Invocation(method, args, clazz);
         
         //方便后续获取对应的元信息
-        RPCContext.current().getMap().put(RPCContext.annotationKey, clazz);
+        RPCContext.current().getMap().put(RPCContext.annotationKey, clazz.getSimpleName());
         return invoker.invoke(invocation);
     }
     

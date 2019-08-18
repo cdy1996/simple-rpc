@@ -39,12 +39,12 @@ public class ZKServiceRegistry implements IServiceRegistry {
                     .withMode(CreateMode.PERSISTENT)
                     .forPath(servicePath, "0".getBytes());
         }
-        log.info("serviceName 路径创建成功" + servicePath);
+        log.info("serviceName 路径 {} 创建成功 ", servicePath);
         
         String addressPath = servicePath + "/" + address;
         String addNode = curatorFramework.create().withMode(CreateMode.EPHEMERAL)
                 .forPath(addressPath, "0".getBytes());
-        log.info("address 路径创建成功 " + addNode);
+        log.info("address 路径  {} 创建成功 ", addNode);
         
     }
 }

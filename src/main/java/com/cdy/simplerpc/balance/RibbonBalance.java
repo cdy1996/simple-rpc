@@ -1,14 +1,17 @@
 package com.cdy.simplerpc.balance;
 
+import com.cdy.simplerpc.event.Publisher;
+import com.cdy.simplerpc.event.RPCEventListener;
+import com.cdy.simplerpc.event.RemoveInvokerRefreshEvent;
 import com.netflix.loadbalancer.*;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static com.cdy.simplerpc.util.StringUtil.*;
+import static com.cdy.simplerpc.util.StringUtil.getServerWithSchema;
+import static com.cdy.simplerpc.util.StringUtil.toServer;
 
 /**
  * ribbon实现负载均衡
@@ -22,6 +25,7 @@ public class RibbonBalance implements IBalance {
     private final ConcurrentHashMap<String, BaseLoadBalancer> loadBalancerMap
             = new ConcurrentHashMap<>();
     
+    
     public RibbonBalance() {
         this.iRule = new RandomRule();
     }
@@ -32,7 +36,7 @@ public class RibbonBalance implements IBalance {
     
     @Override
     public String loadBalance(String serviceName, List<String> list) {
-        log.info("可用地址"+list);
+        log.info("可用地址 {}", list);
         BaseLoadBalancer baseLoadBalancer = loadBalancerMap.get(serviceName);
         if (baseLoadBalancer == null) {
             baseLoadBalancer = generateBalancer(list);
@@ -50,6 +54,13 @@ public class RibbonBalance implements IBalance {
                 .withRule(iRule)
                 .withPing(new DummyPing())
                 .buildFixedServerListLoadBalancer(collect);
+    }
+    
+    public void refresh(){
+        Publisher publisher = new Publisher();
+        publisher.registry((RPCEventListener<RemoveInvokerRefreshEvent>) eventObject -> {
+        
+        });
     }
     
     
