@@ -33,13 +33,13 @@ public @interface RPCReference {
      * 是否开启异步
      * @return
      */
-    boolean async() default false;
+    String async() default "false";
     
     /**
      * 服务调用的超时时间
      * @return
      */
-    long timeout() default 5000L;
+    String timeout() default "5000";
     
     /**
      * 直连的url地址
@@ -47,20 +47,28 @@ public @interface RPCReference {
      */
     String url() default "";
     
-    String[] protocols() default {"rpc","http"};
+    String[] protocols() default {};
     
     
     class ReferenceAnnotationInfo {
 
         public static Map<String,String> getConfig(String key, RPCReference annotation) {
             Map<String, String> map = new HashMap<>();
-            map.put(key+"."+ConfigConstants.async, annotation.async()+"");
-            map.put(key+"."+ConfigConstants.timeout, annotation.timeout()+"");
-            map.put(key+"."+ConfigConstants.type, annotation.type()+"");
+            if (StringUtil.isNotBlank(annotation.async())) {
+                map.put(key+"."+ConfigConstants.async, annotation.async()+"");
+            }
+            if (StringUtil.isNotBlank(annotation.timeout())) {
+                map.put(key + "." + ConfigConstants.timeout, annotation.timeout() + "");
+            }
+            if (StringUtil.isNotBlank(annotation.type())) {
+                map.put(key + "." + ConfigConstants.type, annotation.type() + "");
+            }
             if (!StringUtil.isBlank(annotation.url())) {
                 map.put(key + "." + ConfigConstants.url, annotation.url() + "");
             }
-            map.put(key+"."+ConfigConstants.protocols, String.join(",",annotation.protocols()));
+            if (annotation.protocols().length !=0) {
+                map.put(key+"."+ConfigConstants.protocols, String.join(",",annotation.protocols()));
+            }
             return map;
         }
         

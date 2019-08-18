@@ -37,9 +37,9 @@ public @interface RPCService {
      * todo 之后改成自动获取网卡的数据
      * @return
      */
-    String ip() default "127.0.0.1";
+    String ip() default "";
     
-    String[] protocols() default {"rpc"};
+    String[] protocols() default {};
     
     String port() default "";
     
@@ -62,7 +62,9 @@ public @interface RPCService {
             if (!StringUtil.isBlank(annotation.ip())) {
                 map.put(key+"."+ConfigConstants.ip, annotation.ip()+"");
             }
-            map.put(key+"."+ConfigConstants.protocols, String.join(",",annotation.protocols()));
+            if (annotation.protocols().length != 0) {
+                map.put(key+"."+ConfigConstants.protocols, String.join(",",annotation.protocols()));
+            }
             return map;
         }
         
