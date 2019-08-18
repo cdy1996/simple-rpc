@@ -86,9 +86,10 @@ public class ClientTest {
     
     
         ClientBootStrap clientBootStrap = ClientBootStrap.build("D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties")
-                .discovery("nacos-1", "127.0.0.1:8848", "529469ac-0341-4276-a256-14dcf863935c")
-                .discovery("zookeeper-1", "127.0.0.1:2181", "/registry")
-                .type("nacos-1")
+//                .discovery("nacos-1", "127.0.0.1:8848", "529469ac-0341-4276-a256-14dcf863935c")
+//                .discovery("zookeeper-1", "127.0.0.1:2181", "/registry")
+//                .type("nacos-1")
+                .protocols("rpc")
                 .start();
     
         clientBootStrap.refer(test2);
@@ -98,7 +99,7 @@ public class ClientTest {
         clientBootStrap.inject(test3);
         
         test2.test();
-        test3.test();
+//        test3.test();
         System.in.read();
     }
 //

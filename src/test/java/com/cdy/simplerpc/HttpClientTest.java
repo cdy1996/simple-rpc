@@ -1,7 +1,7 @@
 package com.cdy.simplerpc;
 
 import com.cdy.simplerpc.remoting.ClusterClient;
-import com.cdy.simplerpc.remoting.http.httpClient.HttpClientUtil;
+import com.cdy.simplerpc.remoting.http.HttpClientUtil;
 import org.junit.Test;
 
 /**

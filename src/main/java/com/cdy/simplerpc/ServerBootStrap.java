@@ -28,7 +28,7 @@ public class ServerBootStrap<T> {
     private final PropertySources propertySources;
     private final BootstrapPropertySource bootstrapPropertySource;
     private final List<Filter> filters;
-    private final List<String> types;
+    private final Set<String> types;
     private final Map<String, Server> servers;
     private final T target;
     
@@ -37,7 +37,7 @@ public class ServerBootStrap<T> {
         this.propertySources = propertySources;
         this.bootstrapPropertySource = new BootstrapPropertySource();
         this.filters = new ArrayList<>();
-        this.types = new ArrayList<>();
+        this.types = new HashSet<>();
         this.servers = new HashMap<>();
         this.target = t;
         propertySources.addPropertySources(this.bootstrapPropertySource);
@@ -67,7 +67,8 @@ public class ServerBootStrap<T> {
     }
     
     public ServerBootStrap protocols(String protocols) {
-        bootstrapPropertySource.getMap().put("registry.protocols", protocols);
+//        bootstrapPropertySource.getMap().put("registry.protocols", protocols);
+        types.add(protocols);
         return this;
     }
     
@@ -89,9 +90,9 @@ public class ServerBootStrap<T> {
     
     public ServerBootStrap start() throws Exception {
         if (!types.isEmpty()) {
-            bootstrapPropertySource.getMap().put("registry.types",  String.join(",", types));
+            bootstrapPropertySource.getMap().put("registry.protocols", String.join(",", types));
         }
-    
+        
         //扫描注解属性
         RPCService annotation = target.getClass().getAnnotation(RPCService.class);
         Map<String, String> config = RPCService.ServiceAnnotationInfo.getConfig(target.getClass().getSimpleName(), annotation);
@@ -103,15 +104,25 @@ public class ServerBootStrap<T> {
         
         
         //多协议
-        for (String protocol : annotation.protocols()) {
-            Server server = ServerFactory.createServer(serviceRegistryList, propertySources, protocol);
-            String serviceName = target.getClass().getName();
-            server.bind(serviceName, target, Collections.emptyList());
-            server.openServer();
-            server.register(serviceName);
-            
+        if (annotation.protocols().length == 0) {
+            String protocols = propertySources.resolveProperty("registry.protocols");
+            for (String protocol : protocols.split(",")) {
+                openAndRegistry(serviceRegistryList, protocol);
+            }
+        } else {
+            for (String protocol : annotation.protocols()) {
+                openAndRegistry(serviceRegistryList, protocol);
+            }
         }
         return this;
+    }
+    
+    private void openAndRegistry(List<IServiceRegistry> serviceRegistryList, String protocol) throws Exception {
+        Server server = ServerFactory.createServer(serviceRegistryList, propertySources, protocol);
+        String serviceName = target.getClass().getInterfaces()[0].getName();
+        server.bind(serviceName, target, Collections.emptyList());
+        server.openServer();
+        server.register(serviceName);
     }
     
     public void closeAll() {
@@ -122,7 +133,7 @@ public class ServerBootStrap<T> {
                         } catch (IOException e) {
                             log.error(e.getMessage(), e);
                         }
-
+                        
                     }
                 }
         );

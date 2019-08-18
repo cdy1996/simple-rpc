@@ -30,12 +30,15 @@ public class ClientBootStrap {
     private final PropertySources propertySources;
     private final BootstrapPropertySource bootstrapPropertySource;
     private final Map<String, IServiceDiscovery> serviceRegistryMap;
+    private final Set<String> types;
     
     public ClientBootStrap(PropertySources propertySources) {
         this.filters = new ArrayList<>();
         this.propertySources = propertySources;
         this.bootstrapPropertySource = new BootstrapPropertySource();
         this.serviceRegistryMap = new HashMap<>();
+        this.types = new HashSet<>();
+        this.propertySources.addPropertySources(this.bootstrapPropertySource);
     }
     
     
@@ -74,6 +77,11 @@ public class ClientBootStrap {
 
     
     public ClientBootStrap start(){
+        if (!types.isEmpty()) {
+            bootstrapPropertySource.getMap().put("discovery.protocols", String.join(",", types));
+        }
+        
+        
         String types = propertySources.resolveProperty("discovery.types");
         for (String type : types.split(",")) {
             IServiceDiscovery discovery = DiscoveryFactory.createDiscovery(propertySources, type);
@@ -116,5 +124,10 @@ public class ClientBootStrap {
         }
         
        return this;
+    }
+    
+    public ClientBootStrap protocols(String protocols) {
+        types.add(protocols);
+        return this;
     }
 }

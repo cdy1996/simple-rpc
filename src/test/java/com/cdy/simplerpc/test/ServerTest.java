@@ -11,10 +11,8 @@ import com.cdy.simplerpc.remoting.Server;
 import com.cdy.simplerpc.remoting.ServerFactory;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.lang.annotation.Annotation;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -71,16 +69,27 @@ public class ServerTest {
     
         ServerBootStrap rpc = ServerBootStrap
                 .build(new TestServiceImpl(), "D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties")
-                .registry("nacos-1", "127.0.0.1:8848", "529469ac-0341-4276-a256-14dcf863935c")
-                .registry("zookeeper-1", "127.0.0.1:2181", "/registry")
+//                .registry("nacos-1", "127.0.0.1:8848", "529469ac-0341-4276-a256-14dcf863935c")
+//                .registry("zookeeper-1", "127.0.0.1:2181", "/registry")
                 .port("8080")
                 .ip("127.0.0.1")
+//                .protocols("http")
                 .protocols("rpc")
                 .start();
     
         System.in.read();
         rpc.closeAll();
     }
+    
+    @Test
+    public void test() throws Exception {
+        System.setProperty("sun.misc.ProxyGenerator.saveGeneratedFiles", "true");
+    
+        Annotation[] annotations = LocalPropertySource.class.getAnnotations();
+        System.out.println("!23");
+    }
+    
 
     
 }
+//
