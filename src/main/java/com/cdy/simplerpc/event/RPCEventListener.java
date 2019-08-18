@@ -7,7 +7,7 @@ import java.util.EventListener;
  * Created by 陈东一
  * 2019/4/14 0014 12:11
  */
-public interface RPCEventListener extends EventListener {
+public interface RPCEventListener<EVENT extends RPCEvent> extends EventListener {
 
-    void handle(RPCEvent eventObject);
+    void handle(EVENT eventObject);
 }
