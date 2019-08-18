@@ -5,9 +5,9 @@ package com.cdy.simplerpc.serialize;
  * Created by 陈东一
  * 2019/8/12 0012 17:01
  */
-public interface ISerialize<OUT> {
+public interface ISerialize {
     
-    <IN>OUT serialize(IN in, Class<IN> inClass);
+    <IN>byte[] serialize(IN in, Class<IN> inClass);
     
-    <IN>IN deserialize(OUT out, Class<IN> inClass);
+    <IN>IN deserialize(byte[] out, Class<IN> inClass);
 }

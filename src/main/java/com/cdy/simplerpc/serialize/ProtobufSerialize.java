@@ -11,7 +11,7 @@ import java.io.IOException;
  * Created by 陈东一
  * 2019/8/12 0012 17:01
  */
-public class ProtobufSerialize implements ISerialize<byte[]>  {
+public class ProtobufSerialize implements ISerialize  {
     
     @Override
     public <IN>byte[] serialize(IN in, Class<IN> inClass){

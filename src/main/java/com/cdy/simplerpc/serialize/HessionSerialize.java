@@ -13,17 +13,24 @@ import java.io.IOException;
  * Created by 陈东一
  * 2019/8/12 0012 17:01
  */
-public class HessionSerialize implements ISerialize<byte[]>{
+public class HessionSerialize implements ISerialize{
     
     @Override
     public <IN>byte[] serialize(IN in, Class<IN> inClass){
-        try {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            HessianOutput hessianOutput = new HessianOutput(os);
+        HessianOutput hessianOutput = null;
+        try ( ByteArrayOutputStream os = new ByteArrayOutputStream();){
+           
+            hessianOutput = new HessianOutput(os);
             hessianOutput.writeObject(in);
             return os.toByteArray();
         } catch (IOException e) {
             throw new SerializeException(e);
+        } finally {
+            if (hessianOutput!=null) {
+                try {
+                    hessianOutput.close();
+                } catch (IOException ignored) {}
+            }
         }
     }
     

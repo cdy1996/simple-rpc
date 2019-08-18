@@ -10,7 +10,7 @@ import java.io.Serializable;
  * Created by 陈东一
  * 2019/8/12 0012 17:01
  */
-public class JdkSerialize implements ISerialize<byte[]> {
+public class JdkSerialize implements ISerialize {
     
     
     @Override
