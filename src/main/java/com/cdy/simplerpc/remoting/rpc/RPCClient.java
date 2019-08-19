@@ -13,8 +13,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
@@ -55,8 +54,9 @@ public class RPCClient extends AbstractClient {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline()
-                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
-                                .addLast(new LengthFieldPrepender(4))
+                                .addLast(new DelimiterBasedFrameDecoder(Integer.MAX_VALUE, SerializeCoderFactory.buffer))
+//                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
+//                                .addLast(new LengthFieldPrepender(4))
 //                                .addLast("encoder", new ObjectEncoder())
 //                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
                                 .addLast("encoder", SerializeCoderFactory.getEncoder(getSerialize(), false))

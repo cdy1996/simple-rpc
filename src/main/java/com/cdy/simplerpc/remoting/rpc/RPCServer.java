@@ -10,8 +10,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.netty.handler.codec.LengthFieldPrepender;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -29,7 +28,7 @@ public class RPCServer extends AbstractServer {
     private Channel channel;
     private final EventLoopGroup boss = new NioEventLoopGroup();
     private final EventLoopGroup work = new NioEventLoopGroup();
-    
+   
     public RPCServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registry, ISerialize serialize) {
         super(serverMetaInfo, registry, serialize);
     }
@@ -37,6 +36,8 @@ public class RPCServer extends AbstractServer {
     @Override
     public void openServer() throws Exception {
         // 监听端口 并通讯
+      
+        
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(boss, work)
                 .channel(NioServerSocketChannel.class)
@@ -44,8 +45,9 @@ public class RPCServer extends AbstractServer {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline()
-                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
-                                .addLast(new LengthFieldPrepender(4))
+                                .addLast(new DelimiterBasedFrameDecoder(Integer.MAX_VALUE, SerializeCoderFactory.buffer))
+//                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
+//                                .addLast(new LengthFieldPrepender(4))
 //                                .addLast("encoder", new ObjectEncoder())
 //                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
                                 .addLast("encoder", SerializeCoderFactory.getEncoder(getSerialize(), true))

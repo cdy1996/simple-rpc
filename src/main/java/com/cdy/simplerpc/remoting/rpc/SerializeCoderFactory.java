@@ -4,11 +4,13 @@ import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
 import com.cdy.simplerpc.serialize.ISerialize;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -16,7 +18,17 @@ import java.util.List;
  * Created by 陈东一
  * 2019/8/18 0018 16:41
  */
+@Slf4j
 public class SerializeCoderFactory {
+    
+    public static ByteBuf buffer = Unpooled.buffer();
+    static {
+        try {
+            buffer.writeBytes("@@@".getBytes("utf-8"));
+        } catch (UnsupportedEncodingException e) {
+            log.error(e.getMessage(), e);
+        }
+    }
     
     public static ByteToMessageDecoder getDecoder(ISerialize serialize, boolean server){
         if (server) {
@@ -69,8 +81,10 @@ public class SerializeCoderFactory {
         @Override
         protected void encode(ChannelHandlerContext ctx, RPCRequest msg, ByteBuf out) throws Exception {
             log.info("序列化编码 {}", msg);
+            // todo 大文件分段处理
             Object serialize = this.serialize.serialize(msg, RPCRequest.class);
             out.writeBytes((byte[]) serialize);
+            out.writeBytes(buffer);
             ctx.flush();
         }
     }
@@ -107,12 +121,13 @@ public class SerializeCoderFactory {
         }
         
         
-        
         @Override
         protected void encode(ChannelHandlerContext ctx, RPCResponse msg, ByteBuf out) throws Exception {
             log.info("序列化编码 {}", msg);
+            // todo 大文件分段处理
             Object serialize = this.serialize.serialize(msg, RPCResponse.class);
             out.writeBytes((byte[]) serialize);
+            out.writeBytes(buffer);
             ctx.flush();
         }
     }
