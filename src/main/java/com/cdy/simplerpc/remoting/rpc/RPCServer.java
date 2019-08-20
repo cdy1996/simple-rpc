@@ -1,19 +1,15 @@
 package com.cdy.simplerpc.remoting.rpc;
 
+import com.cdy.simplerpc.proxy.Invocation;
+import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.registry.IServiceRegistry;
-import com.cdy.simplerpc.remoting.AbstractServer;
-import com.cdy.simplerpc.remoting.ServerMetaInfo;
+import com.cdy.simplerpc.remoting.*;
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.util.StringUtil;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.*;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
@@ -24,10 +20,8 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
  */
 @Slf4j
 public class RPCServer extends AbstractServer {
-    
-    private Channel channel;
-    private final EventLoopGroup boss = new NioEventLoopGroup();
-    private final EventLoopGroup work = new NioEventLoopGroup();
+    com.cdy.simplerpc.rpc.RPCServer<RPCPackage> rpcServer;
+   
    
     public RPCServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registry, ISerialize serialize) {
         super(serverMetaInfo, registry, serialize);
@@ -35,53 +29,48 @@ public class RPCServer extends AbstractServer {
     
     @Override
     public void openServer() throws Exception {
-        // 监听端口 并通讯
-      
+        rpcServer = new com.cdy.simplerpc.rpc.RPCServer();
+        rpcServer.setSerialize(getSerialize());
+//        rpcServer.setEncoder( new SerializeCoderFactory.SerializeEncoderHandler(serialize, RPCPackage.class));
+//        rpcServer.setDencoder( new SerializeCoderFactory.SerializeDecoderHandler(serialize, RPCPackage.class));
+        rpcServer.addProcessor((t,ctx)->{
+            RPCRequest request = (RPCRequest) t.getTarget();
+            log.info("接受到请求 {}",  request);
+    
+            RPCResponse rpcResponse = new RPCResponse();
+            try {
+                RPCContext context = RPCContext.current();
+                Map<String, Object> contextMap = context.getMap();
+                rpcResponse.setAttach(contextMap);
+                rpcResponse.setRequestId(request.getRequestId());
         
-        ServerBootstrap bootstrap = new ServerBootstrap();
-        bootstrap.group(boss, work)
-                .channel(NioServerSocketChannel.class)
-                .childHandler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline()
-                                .addLast(new DelimiterBasedFrameDecoder(Integer.MAX_VALUE, SerializeCoderFactory.buffer))
-//                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
-//                                .addLast(new LengthFieldPrepender(4))
-//                                .addLast("encoder", new ObjectEncoder())
-//                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast("encoder", SerializeCoderFactory.getEncoder(getSerialize(), true))
-                                .addLast("dencoder", SerializeCoderFactory.getDecoder(getSerialize(), true))
-                                .addLast(new RPCServerHandler(getHandlerMap()));
-                        
-                    }
-                })
-                .option(ChannelOption.SO_BACKLOG, 128)
-                .childOption(ChannelOption.SO_KEEPALIVE, true);
+                String className = request.getClassName();
+                Object result = null;
+                if (getHandlerMap().containsKey(className)) {
+                    Invoker o = getHandlerMap().get(className);
+                    Invocation invocation = new Invocation(request.getMethodName(), request.getParams(), request.getTypes());
+                    //接受传过来的上下文
+                    contextMap.putAll(request.getAttach());
+                    result = o.invoke(invocation);
+                }
+                rpcResponse.setResultData(result);
+                ctx.writeAndFlush(new RPCPackage(rpcResponse));
+            } catch (Exception e) {
+                rpcResponse.setResultData(e);
+                ctx.writeAndFlush(rpcResponse);
+            }
+        });
         
         StringUtil.TwoResult<String, Integer> server = getServer(getAddress());
         String ip = server.getFirst();
         int port = server.getSecond();
-        ChannelFuture channelFuture = bootstrap.bind(ip, port);
-        channelFuture.syncUninterruptibly();
-        this.channel = channelFuture.channel();
+        rpcServer.openServer(ip, port);
         
     }
     
     @Override
     public void close() {
-        try {
-            channel.close();
-        } catch (Throwable e) {
-            log.warn(e.getMessage(), e);
-        }
-        
-        try {
-            boss.shutdownGracefully();
-            work.shutdownGracefully();
-        } catch (Throwable e) {
-            log.warn(e.getMessage(), e);
-        }
+        rpcServer.close();
     }
     
 }
