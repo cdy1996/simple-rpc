@@ -14,7 +14,7 @@ public abstract class AbstractClient implements Client {
     
     protected final PropertySources propertySources;
     @Getter @Setter
-    protected final ISerialize serialize;
+    protected ISerialize serialize;
     
     public AbstractClient(PropertySources propertySources) {
         this.propertySources = propertySources;

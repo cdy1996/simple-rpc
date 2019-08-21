@@ -5,6 +5,8 @@ import com.cdy.simplerpc.proxy.Invoker;
 import com.cdy.simplerpc.proxy.LocalInvoker;
 import lombok.Setter;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * 过滤器适配器
  * Created by 陈东一
@@ -33,10 +35,22 @@ public abstract class FilterAdapter implements Filter {
             beforeClientInvoke(invocation);
         }
         Object o = next.doFilter(invocation);
-        if (isServer) {
-            afterServerInvoke(invocation, o);
+        if (o instanceof CompletableFuture){
+            CompletableFuture<Object> future = (CompletableFuture<Object>) o;
+            future.whenComplete((result, exception)->{
+                if (isServer) {
+                    afterServerInvoke(invocation, result==null?exception:result);
+                } else {
+                    afterClientInvoke(invocation, result==null?exception:result);
+                }
+            });
         } else {
-            afterClientInvoke(invocation, o);
+
+            if (isServer) {
+                afterServerInvoke(invocation, o);
+            } else {
+                afterClientInvoke(invocation, o);
+            }
         }
         return o;
     }

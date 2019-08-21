@@ -15,11 +15,12 @@ import java.util.Map;
 public class RPCRequest  implements Serializable {
     
     private static final long serialVersionUID = -7860988372110599223L;
-    private String requestId;
     private String className;
     private String methodName;
     private Class<?>[] types;
     private Object[] params;
-    private Map<String, Object> attach = new HashMap<>();
+
+    // 只用于http模块
+//    private Map<String, Object> attach = new HashMap<>();
     
 }

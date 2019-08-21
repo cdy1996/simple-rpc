@@ -5,6 +5,7 @@ import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.registry.IServiceDiscovery;
+import com.cdy.simplerpc.rpc.RPCContext;
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.serialize.SerializeFactory;
 import com.cdy.simplerpc.util.StringUtil;
@@ -37,11 +38,11 @@ public class ClusterClient extends AbstractClient {
     
     @Override
     public Object invoke(Invocation invocation) throws Exception {
-        RPCContext rpcContext1 = RPCContext.current();
-        Map<String, Object> rpcContext1Map = rpcContext1.getMap();
+        RPCContext context = RPCContext.current();
+        Map<String, Object> map = context.getAttach();
         
         // 对应注解的类名作为key,可以从属性集中获取
-        String annotationKey = (String) rpcContext1Map.get(RPCContext.annotationKey);
+        String annotationKey = (String) map.get(com.cdy.simplerpc.rpc.RPCContext.annotationKey);
         String directAddress = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.url);
         
         //服务发现
@@ -83,7 +84,7 @@ public class ClusterClient extends AbstractClient {
         }
         
         
-        rpcContext1Map.put("address", address.replace(protocol + "-", ""));
+        map.put("address", address.replace(protocol + "-", ""));
         return client.invoke(invocation);
     }
     

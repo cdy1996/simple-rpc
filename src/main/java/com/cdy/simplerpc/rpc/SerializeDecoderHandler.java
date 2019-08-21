@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.remoting.rpc;
+package com.cdy.simplerpc.rpc;
 
 import com.cdy.simplerpc.serialize.ISerialize;
 import io.netty.buffer.ByteBuf;

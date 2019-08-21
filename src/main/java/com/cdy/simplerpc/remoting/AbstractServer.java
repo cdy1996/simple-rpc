@@ -30,7 +30,7 @@ public abstract class AbstractServer implements Server {
     private final List<IServiceRegistry> registries;
     private final ServerMetaInfo serverMetaInfo;
     @Getter @Setter
-    protected final ISerialize serialize;
+    protected ISerialize serialize;
     
     public AbstractServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registries, ISerialize serialize) {
         this.registries = registries;

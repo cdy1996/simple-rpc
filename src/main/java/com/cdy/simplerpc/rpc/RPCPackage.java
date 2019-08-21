@@ -1,8 +1,11 @@
-package com.cdy.simplerpc.remoting.rpc;
+package com.cdy.simplerpc.rpc;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 传输对象
@@ -10,19 +13,13 @@ import java.io.Serializable;
  * 2018/9/1 22:15
  */
 @Data
+@AllArgsConstructor
 public class RPCPackage implements Serializable {
     
     private static final long serialVersionUID = 5849581362089890989L;
    
-    private Long requestId;
+    private String requestId;
     private Object target;
-    
-    public RPCPackage(Object target) {
-        this.target = target;
-    }
-    
-    public RPCPackage(Long requestId, Object target) {
-        this.requestId = requestId;
-        this.target = target;
-    }
+    private Map<String, Object> map;
+
 }

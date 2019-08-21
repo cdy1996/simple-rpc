@@ -1,9 +1,6 @@
 package com.cdy.simplerpc.serialize;
 
-import com.cdy.serialization.JsonUtil;
 import com.cdy.simplerpc.exception.SerializeException;
-
-import java.io.UnsupportedEncodingException;
 
 /**
  * json序列化实现
@@ -15,8 +12,8 @@ public class JsonSerialize implements ISerialize {
     @Override
     public <IN>byte[] serialize(IN in, Class<IN> inClass){
         try {
-            return JsonUtil.toString(in).getBytes("utf-8");
-        } catch (UnsupportedEncodingException e) {
+            return null;//JsonUtil.toString(in).getBytes(UTF8);
+        } catch (Exception e) {
             throw new SerializeException(e);
         }
     }
@@ -24,8 +21,8 @@ public class JsonSerialize implements ISerialize {
     @Override
     public <IN>IN deserialize(byte[] out, Class<IN> inClass){
         try {
-            return JsonUtil.parseObject(new String(out, "utf-8"), inClass);
-        } catch (UnsupportedEncodingException e) {
+            return null;//JsonUtil.parseObject(new String(out, UTF8), inClass);
+        } catch (Exception e) {
             throw new SerializeException(e);
         }
     }

@@ -1,7 +1,7 @@
 package com.cdy.simplerpc.proxy;
 
 
-import com.cdy.simplerpc.remoting.RPCContext;
+import com.cdy.simplerpc.rpc.RPCContext;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -42,7 +42,7 @@ public class InvokerInvocationHandler implements InvocationHandler {
         Invocation invocation = new Invocation(method, args, clazz);
         
         //方便后续获取对应的元信息
-        RPCContext.current().getMap().put(RPCContext.annotationKey, clazz.getSimpleName());
+        RPCContext.current().getAttach().put(RPCContext.annotationKey, clazz.getSimpleName());
         return invoker.invoke(invocation);
     }
     

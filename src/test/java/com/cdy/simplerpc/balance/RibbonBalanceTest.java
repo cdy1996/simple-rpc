@@ -1,10 +1,10 @@
-package com.cdy.simplerpc;
+package com.cdy.simplerpc.balance;
 
 import com.netflix.client.DefaultLoadBalancerRetryHandler;
 import com.netflix.loadbalancer.*;
 import com.netflix.loadbalancer.reactive.LoadBalancerCommand;
 import com.netflix.loadbalancer.reactive.ServerOperation;
-import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
 import rx.Observable;
 
 import java.io.IOException;
@@ -13,37 +13,37 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ribbon测试
- * Created by 陈东一
- * 2019/2/7 0007 19:51
- */
-@Slf4j
-public class RibbonTest {
-    
+import static org.junit.Assert.*;
+
+public class RibbonBalanceTest {
+
+    @Test
+    public void loadBalance() {
+    }
+
     public static void main(String[] args) {
-    
+
         List<Server> list = new ArrayList<>();
         list.add(new Server("127.0.0 1", 8899));
         list.add(new Server("127.0.0 1", 8888));
         BaseLoadBalancer baseLoadBalancer = LoadBalancerBuilder.newBuilder()
                 .withRule(new RandomRule())
                 .buildFixedServerListLoadBalancer(list);
-    
-    
+
+
         LoadBalancerStats loadBalancerStats = baseLoadBalancer.getLoadBalancerStats();
-        
-        
+
+
     }
-    
-    
+
+
     public String call(String path, BaseLoadBalancer baseLoadBalancer){
-    
+
         LoadBalancerCommand<String> command = LoadBalancerCommand.<String>builder()
                 .withLoadBalancer(baseLoadBalancer)
                 .withRetryHandler(new DefaultLoadBalancerRetryHandler(0, 1, true))
                 .build();
-    
+
         return command.submit(new ServerOperation<String>() {
             @Override
             public Observable<String> call(Server server) {
@@ -58,7 +58,7 @@ public class RibbonTest {
             }
         }).toBlocking().first();
     }
-    
+
 //    public String test() throws Exception {
 //        // 1、设置请求的服务器
 //        ConfigurationManager.getConfigInstance().setProperty("sample-clien.ribbon.listOfServers",

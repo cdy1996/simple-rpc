@@ -15,9 +15,10 @@ import java.util.Map;
 public class RPCResponse implements Serializable {
     
     private static final long serialVersionUID = -7439160687592749322L;
-    private String requestId;
     private Object resultData;
-    private Map<String, Object> attach = new HashMap<>();
+
+    //只用于http模块
+//    private Map<String, Object> attach = new HashMap<>();
     
   
 }

@@ -115,9 +115,9 @@ public class HttpServer extends AbstractServer {
 //
 //
 //        String DEFAULT_PROTOCOL = "org.apache.coyote.http11.Http11NioProtocol";
-//        Connector connector = new Connector(DEFAULT_PROTOCOL);//设置协议，默认就是这个协议connector.setURIEncoding("UTF-8");//设置编码
+//        Connector connector = new Connector(DEFAULT_PROTOCOL);//设置协议，默认就是这个协议connector.setURIEncoding(UTF8);//设置编码
 //        connector.setPort(port);//设置端口
-//        connector.setURIEncoding("UTF-8");
+//        connector.setURIEncoding(UTF8);
 //        tomcat.getService().addConnector(connector);
 //
 //        org.apache.catalina.Context ctx = tomcat.addContext("/simple-RPC", null);//网络访问路径

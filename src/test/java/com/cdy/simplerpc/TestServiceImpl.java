@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.test;
+package com.cdy.simplerpc;
 
 import com.cdy.simplerpc.annotation.RPCService;
 

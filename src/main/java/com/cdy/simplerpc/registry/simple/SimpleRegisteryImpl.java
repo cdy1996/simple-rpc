@@ -6,6 +6,8 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.util.Collections;
 
+import static com.cdy.simplerpc.util.StringUtil.UTF8;
+
 /**
  * 简单注册中心
  * Created by 陈东一
@@ -19,6 +21,6 @@ public class SimpleRegisteryImpl implements IServiceRegistry {
         if (!file.exists()) {
                 file.createNewFile();
         }
-        FileUtils.writeLines(file, "utf-8", Collections.singleton(address), true);
+        FileUtils.writeLines(file, UTF8, Collections.singleton(address), true);
     }
 }

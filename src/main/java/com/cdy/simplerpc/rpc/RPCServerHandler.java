@@ -12,17 +12,17 @@ import java.util.function.Supplier;
  * 2018/9/1 22:00
  */
 @Slf4j
-public class RPCServerHandler<T> extends SimpleChannelInboundHandler<T> {
+public class RPCServerHandler<T,R> extends SimpleChannelInboundHandler<RPCContext> {
     
-    private Supplier<HandlerProcessor<T>> supplier;
+    private Supplier<HandlerProcessor<T,R>> supplier;
 
     
-    public RPCServerHandler(Supplier<HandlerProcessor<T>> supplier) {
+    public RPCServerHandler(Supplier<HandlerProcessor<T,R>> supplier) {
         this.supplier = supplier;
     }
     
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, T t) {
-        supplier.get().process(t, ctx);
+    public void channelRead0(ChannelHandlerContext ctx, RPCContext t) {
+        supplier.get().process((T)t.getTarget(), t);
     }
 }

@@ -20,7 +20,9 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import static com.cdy.simplerpc.util.StringUtil.UTF8;
 import static com.cdy.simplerpc.util.StringUtil.inputStreamToBytes;
 
 /**
@@ -45,11 +47,11 @@ public class HttpClientUtil {
     private static void setPostParams(HttpPost httpPost, String json) throws Exception {
         List<NameValuePair> nvps = new ArrayList<NameValuePair>();
         nvps.add(new BasicNameValuePair("params", json));
-        httpPost.setEntity(new UrlEncodedFormEntity(nvps, "utf-8"));
+        httpPost.setEntity(new UrlEncodedFormEntity(nvps, UTF8));
         
     }
     private static void setPostParams(HttpPost httpPost, byte[] bytes) throws Exception {
-        httpPost.setEntity(EntityBuilder.create().setBinary(bytes).setContentEncoding("UTF-8").build());
+        httpPost.setEntity(EntityBuilder.create().setBinary(bytes).setContentEncoding(UTF8).build());
     }
     
     public static CloseableHttpClient getHttpClient() {
@@ -95,7 +97,7 @@ public class HttpClientUtil {
         manager.close();
     }
     
-    public static byte[] execute(CloseableHttpClient client, String uri, Object params, Integer timeout) throws Exception {
+    public static byte[] execute(String uri, Map<String, String> header, Object params, Integer timeout) throws Exception {
         RequestConfig requestConfig = RequestConfig.custom()
                 .setConnectTimeout(timeout)  //连接时间
                 .setConnectionRequestTimeout(timeout) //connect Manager(连接池)获取Connection 超时时间
@@ -103,6 +105,8 @@ public class HttpClientUtil {
                 .build();
         HttpPost httpPost = new HttpPost(uri);
         httpPost.setConfig(requestConfig);
+
+        header.forEach(httpPost::addHeader);
         if (params instanceof String){
             setPostParams(httpPost, (String)params);
         } else if (params instanceof byte[]){
@@ -112,18 +116,16 @@ public class HttpClientUtil {
         }
         CloseableHttpResponse response = null;
         try {
-            response = client.execute(httpPost);
+            response = getHttpClient().execute(httpPost);
         } catch (IOException e) {
             throw new RPCException(e);
         }
-    
         HttpEntity entity = response.getEntity();
         if (response.getStatusLine().getStatusCode() == 200) {
             return inputStreamToBytes(entity.getContent());
         } else {
             throw new RPCException("调用失败 ==> " + response.getStatusLine().getStatusCode());
         }
-        
-       
+
     }
 }

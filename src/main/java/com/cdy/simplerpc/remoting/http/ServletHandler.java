@@ -1,10 +1,11 @@
 package com.cdy.simplerpc.remoting.http;
 
+import com.alibaba.nacos.client.utils.JSONUtils;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.proxy.Invoker;
-import com.cdy.simplerpc.remoting.RPCContext;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
+import com.cdy.simplerpc.rpc.RPCContext;
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.serialize.JsonSerialize;
 import com.cdy.simplerpc.util.StringUtil;
@@ -17,7 +18,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+
+import static com.cdy.simplerpc.util.StringUtil.UTF8;
 
 /**
  * 服务端处理
@@ -47,29 +51,27 @@ public class ServletHandler extends HttpServlet{
         try {
             byte[] bytes;
             if (serialize instanceof JsonSerialize) {
-                bytes = req.getParameter("params").getBytes("utf-8");
+                bytes = req.getParameter("params").getBytes(StandardCharsets.UTF_8);
             } else {
                 bytes = StringUtil.inputStreamToBytes(req.getInputStream());
             }
             RPCRequest rpcRequest = serialize.deserialize(bytes, RPCRequest.class);
         
             log.info("接受到请求 {}" ,rpcRequest);
-            String requestId = rpcRequest.getRequestId();
-            RPCContext context = RPCContext.current();
-            Map<String, Object> contextMap = context.getMap();
-        
+            RPCContext context = new RPCContext();
+            String contextString = req.getHeader("context");
+            Map<String, Object> contextMap = (Map<String, Object>) JSONUtils.deserializeObject(contextString, Map.class);
+            context.setAttach(contextMap);
+            RPCContext.set(context);
+
             rpcResponse = new RPCResponse();
-            rpcResponse.setAttach(contextMap);
-            rpcResponse.setRequestId(requestId);
-        
+
             String className = rpcRequest.getClassName();
             Invoker o = handlerMap.get(className);
             Invocation invocation = new Invocation(rpcRequest.getMethodName(), rpcRequest.getParams(), rpcRequest.getTypes());
-            contextMap.putAll(rpcRequest.getAttach());
             Object result = o.invoke(invocation);
         
             rpcResponse.setResultData(result);
-        
             write(resp, rpcResponse);
         } catch (Exception e) {
             rpcResponse.setResultData(e);
@@ -84,16 +86,16 @@ public class ServletHandler extends HttpServlet{
         if (serialize instanceof JsonSerialize) {
             try (PrintWriter writer = resp.getWriter()) {
                 resp.setContentType("application/json");
-                resp.setCharacterEncoding("UTF-8");
+                resp.setCharacterEncoding(UTF8);
                 if (e instanceof RPCResponse) {
-                    writer.write(new String(serialize.serialize((RPCResponse) e, RPCResponse.class), "utf-8"));
+                    writer.write(new String(serialize.serialize((RPCResponse) e, RPCResponse.class), StandardCharsets.UTF_8));
                 }
                 writer.flush();
             }
         } else {
             try (ServletOutputStream outputStream = resp.getOutputStream()) {
                 resp.setContentType("application/octet-stream");
-                resp.setCharacterEncoding("UTF-8");
+                resp.setCharacterEncoding(UTF8);
                 if (e instanceof RPCResponse) {
                     outputStream.write(serialize.serialize((RPCResponse) e, RPCResponse.class));
                 }

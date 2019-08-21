@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.remoting;
+package com.cdy.simplerpc.rpc;
 
 import lombok.Getter;
 import lombok.Setter;

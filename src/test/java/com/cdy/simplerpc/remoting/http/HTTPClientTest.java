@@ -1,8 +1,7 @@
-package com.cdy.simplerpc;
+package com.cdy.simplerpc.remoting.http;
 
 import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.remoting.ClusterClient;
-import com.cdy.simplerpc.remoting.http.HttpClientUtil;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.EntityBuilder;
@@ -12,21 +11,17 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-/**
- * httpclient测试
- *
- * Created by 陈东一
- * 2019/3/3 0003 17:27
- */
-public class HttpClientTest {
-    
-    
+import static com.cdy.simplerpc.util.StringUtil.UTF8;
+import static org.junit.Assert.*;
+
+public class HTTPClientTest {
+
     @Test
     public void test() throws Exception {
-        byte[] execute = HttpClientUtil.execute(HttpClientUtil.getHttpClient(), "http://localhost:80/gradle/count", null, 1000);
+        byte[] execute = HttpClientUtil.execute("http://localhost:80/gradle/count", null, null, 1000);
         System.out.println(new String(execute));
     }
-    
+
     @Test
     public void execute(){
         RequestConfig requestConfig = RequestConfig.custom()
@@ -36,23 +31,23 @@ public class HttpClientTest {
                 .build();
         HttpPost httpPost = new HttpPost("http://127.0.0.1:8080/simpleRPC");
         httpPost.setConfig(requestConfig);
-        httpPost.setEntity(EntityBuilder.create().setBinary("weeqeqw".getBytes()).setContentEncoding("UTF-8").build());
+        httpPost.setEntity(EntityBuilder.create().setBinary("weeqeqw".getBytes()).setContentEncoding(UTF8).build());
 //        httpPost.setHeader("Content-Type", "multipart/form-data");
-    
+
 //        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 //        builder.addTextBody("json", jsonParam.toString(), ContentType.MULTIPART_FORM_DATA);
-    
+
         CloseableHttpResponse response = null;
         try {
             response = HttpClientUtil.getHttpClient().execute(httpPost);
         } catch (IOException e) {
             throw new RPCException(e);
         }
-    
+
         HttpEntity entity = response.getEntity();
         System.out.println(entity);
     }
-    
+
     public static void main(String[] args) {
         System.out.println(ClusterClient.class.getName().replace(ClusterClient.class.getSimpleName(), ""));
     }

@@ -4,7 +4,7 @@ import com.cdy.simplerpc.annotation.Order;
 import com.cdy.simplerpc.monitor.MonitorEntity;
 import com.cdy.simplerpc.monitor.MonitorSend;
 import com.cdy.simplerpc.proxy.Invocation;
-import com.cdy.simplerpc.remoting.RPCContext;
+import com.cdy.simplerpc.rpc.RPCContext;
 
 import java.util.Date;
 import java.util.Map;
@@ -27,7 +27,7 @@ public class MonitorFilter extends FilterAdapter {
     protected void beforeServerInvoke(Invocation invocation) {
         // 记录来自客户端的调用的信息
         // 客户端的ip 调用的方法名称和参数
-        Map<String, Object> map = RPCContext.current().getMap();
+        Map<String, Object> map = RPCContext.current().getAttach();
         map.get("traceId");//todo
         map.get("spanId");
         
@@ -44,15 +44,15 @@ public class MonitorFilter extends FilterAdapter {
     
     @Override
     protected void afterServerInvoke(Invocation invocation, Object o) {
-        Map<String, Object> rpcContext1Map = RPCContext.current().getMap();
-        MonitorEntity end = MonitorEntity.end((String) rpcContext1Map.get(RPCContext.address),new Date(), o);
+        Map<String, Object> rpcContext1Map = RPCContext.current().getAttach();
+        MonitorEntity end = MonitorEntity.end((String) rpcContext1Map.get(com.cdy.simplerpc.rpc.RPCContext.address),new Date(), o);
         monitorSend.send(end);
     }
     
     @Override
     protected void afterClientInvoke(Invocation invocation, Object o) {
-        Map<String, Object> rpcContext1Map = RPCContext.current().getMap();
-        MonitorEntity end = MonitorEntity.end((String) rpcContext1Map.get(RPCContext.address), new Date(), o);
+        Map<String, Object> rpcContext1Map = RPCContext.current().getAttach();
+        MonitorEntity end = MonitorEntity.end((String) rpcContext1Map.get(com.cdy.simplerpc.rpc.RPCContext.address), new Date(), o);
         monitorSend.send(end);
     }
 }

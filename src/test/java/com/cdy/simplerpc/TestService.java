@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.test;
+package com.cdy.simplerpc;
 
 /**
  * 测试

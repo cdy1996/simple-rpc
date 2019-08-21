@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.cdy.simplerpc.util.StringUtil.UTF8;
+
 /**
  * 简单发现
  * Created by 陈东一
@@ -30,7 +32,7 @@ public class SimpleDiscoveryImpl extends AbstractDiscovery {
                 if (name.endsWith(".rpc")) {
                     List<String> urls;
                     try {
-                        urls = FileUtils.readLines(listFile, "utf-8");
+                        urls = FileUtils.readLines(listFile, UTF8);
                     } catch (IOException e) {
                         throw new DiscoveryException(e);
                     }

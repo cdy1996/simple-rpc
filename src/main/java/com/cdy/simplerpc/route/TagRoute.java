@@ -1,6 +1,6 @@
 package com.cdy.simplerpc.route;
 
-import com.cdy.simplerpc.remoting.RPCContext;
+import com.cdy.simplerpc.rpc.RPCContext;
 
 import java.util.List;
 import java.util.Map;
@@ -21,7 +21,7 @@ public class TagRoute implements IRoute {
     @Override
     public List<String> route(List<String> list) {
         RPCContext current = RPCContext.current();
-        List<String> tags = (List<String>) current.getMap().get("tags");
+        List<String> tags = (List<String>) current.getAttach().get("tags");
         
         // 配置中心配置如下
         // 服务端地址需要a,b,c这些标签

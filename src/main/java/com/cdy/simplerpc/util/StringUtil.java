@@ -14,7 +14,9 @@ import java.net.InetSocketAddress;
  * 2019/1/27 0027 14:44
  */
 public class StringUtil {
-    
+
+    public static final String UTF8 = "UTF-8";
+
     public static boolean isBlank(String string){
         return StringUtils.isBlank(string);
     }
@@ -33,7 +35,7 @@ public class StringUtil {
             if (inputStream.read(bytes) != -1) {
                 swapStream.write(bytes);
             }
-            return swapStream.toString("UTF-8");
+            return swapStream.toString(UTF8);
         } finally {
             inputStream.close();
         }
