@@ -3,8 +3,11 @@ package com.cdy.simplerpc.registry;
 import com.cdy.simplerpc.balance.BalanceFactory;
 import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.registry.nacos.NacosDiscovery;
+import com.cdy.simplerpc.registry.nacos.NacosRegistry;
 import com.cdy.simplerpc.registry.simple.SimpleDiscoveryImpl;
+import com.cdy.simplerpc.registry.simple.SimpleRegisteryImpl;
 import com.cdy.simplerpc.registry.zookeeper.ZKServiceDiscovery;
+import com.cdy.simplerpc.registry.zookeeper.ZKServiceRegistry;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -15,18 +18,14 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class DiscoveryFactory {
-    
-    public static IServiceDiscovery createDiscovery(PropertySources propertySources) {
-        return createDiscovery(propertySources, null);
-    }
-    
+
     public static IServiceDiscovery createDiscovery(PropertySources propertySources, String type) {
-        log.info("创建发现中心 {}", type);
         // todo spi
-        if ("nacos".equalsIgnoreCase(type)) {
-            return new NacosDiscovery(BalanceFactory.createBalance(propertySources), propertySources);
-        } else if ("zookeeper".equalsIgnoreCase(type)) {
-            return new ZKServiceDiscovery(BalanceFactory.createBalance(propertySources), propertySources);
+        log.info("创建发现中心 {}", type);
+        if (type.startsWith("nacos")) {
+            return new NacosDiscovery(BalanceFactory.createBalance(propertySources), propertySources,  type.replace("nacos-",""));
+        } else if (type.startsWith("zookeeper")) {
+            return new ZKServiceDiscovery(BalanceFactory.createBalance(propertySources), propertySources, type.replace("zookeeper-",""));
         } else {
             return new SimpleDiscoveryImpl(BalanceFactory.createBalance(propertySources));
         }

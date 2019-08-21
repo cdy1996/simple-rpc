@@ -44,7 +44,7 @@ public class ClientBootStrapTest {
                 continue;
             }
             Class<?> referenceClass = field.getType();
-            Map<String, String> config = RPCReference.ReferenceAnnotationInfo.getConfig(referenceClass.getSimpleName(), annotation);
+            Map<String, String> config = RPCReference.ReferenceAnnotationInfo.getConfig(referenceClass.getName(), annotation);
             //将注解信息添加到配置中,方便被覆盖
             AnnotationPropertySource annotationPropertySource = new AnnotationPropertySource(config);
             propertySources.addPropertySources(annotationPropertySource);

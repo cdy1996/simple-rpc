@@ -29,12 +29,12 @@ public class NacosDiscovery extends AbstractDiscovery {
     private final NamingService namingService;
     private final PropertySources propertySources;
     
-    public NacosDiscovery(IBalance balance, PropertySources propertySources) {
+    public NacosDiscovery(IBalance balance, PropertySources propertySources, String prefix) {
         super(balance);
         this.propertySources = propertySources;
         Properties properties = new Properties();
-        properties.setProperty("serverAddr", propertySources.resolveProperty("serverAddr"));
-        properties.setProperty("namespace",  propertySources.resolveProperty("namespace"));
+        properties.setProperty("serverAddr", propertySources.resolveProperty(prefix+"serverAddr"));
+        properties.setProperty("namespace",  propertySources.resolveProperty(prefix+"namespace"));
     
         try {
             namingService = NamingFactory.createNamingService(properties);

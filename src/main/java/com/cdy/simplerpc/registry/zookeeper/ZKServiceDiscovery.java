@@ -25,12 +25,14 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
     
     private final PropertySources propertySources;
     private final CuratorFramework curatorFramework;
+    private final String registryPath;
     
-    public ZKServiceDiscovery(IBalance balance, PropertySources propertySources) {
+    public ZKServiceDiscovery(IBalance balance, PropertySources propertySources, String prefix) {
         super(balance);
         this.propertySources = propertySources;
         try {
-            curatorFramework = CuratorFrameworkFactory.builder().connectString(propertySources.resolveProperty("serverAddr"))
+            registryPath = propertySources.resolveProperty(prefix + "zkRegistryPath");
+            curatorFramework = CuratorFrameworkFactory.builder().connectString(propertySources.resolveProperty(prefix+"serverAddr"))
                     .sessionTimeoutMs(4000)
                     .retryPolicy(new ExponentialBackoffRetry(10000, 5))
                     .build();
@@ -50,7 +52,7 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
     
     @Override
     public List<String> listServer(String serviceName, String ...protocols) throws Exception {
-        String path = propertySources.resolveProperty("zkRegistryPath") + "/" + serviceName;
+        String path =registryPath + "/" + serviceName;
         // 第一次初始化缓存或者是为空需要重新获取
         Map<String, List<String>> cache = getCache();
         List<String> cacheList = cache.get(serviceName);
@@ -76,7 +78,7 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
     
     
     private void rootListener(String servicePath) throws Exception{
-        PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, propertySources.resolveProperty("zkRegistryPath")+"/"+servicePath, true);
+        PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, registryPath+"/"+servicePath, true);
         //Normal--初始化为空  BUILD_INITIAL_CACHE--rebuild  POST_INITIALIZED_EVENT--初始化后发送事件
         pathChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
         pathChildrenCache.getListenable().addListener((curatorFramework1, pathChildrenCacheEvent) -> {

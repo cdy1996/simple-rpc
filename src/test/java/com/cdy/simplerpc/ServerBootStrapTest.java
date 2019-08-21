@@ -39,7 +39,7 @@ public class ServerBootStrapTest {
         //扫描注解属性
         TestServiceImpl object = new TestServiceImpl();
         RPCService annotation = object.getClass().getAnnotation(RPCService.class);
-        Map<String, String> config = RPCService.ServiceAnnotationInfo.getConfig(object.getClass().getSimpleName(), annotation);
+        Map<String, String> config = RPCService.ServiceAnnotationInfo.getConfig(object.getClass().getName(), annotation);
         propertySources.addPropertySources(new AnnotationPropertySource(config));
 
         // 多注册中心

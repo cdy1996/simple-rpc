@@ -37,11 +37,11 @@ public abstract class FilterAdapter implements Filter {
         Object o = next.doFilter(invocation);
         if (o instanceof CompletableFuture){
             CompletableFuture<Object> future = (CompletableFuture<Object>) o;
-            future.whenComplete((result, exception)->{
+            return future.whenComplete((result, exception) -> {
                 if (isServer) {
-                    afterServerInvoke(invocation, result==null?exception:result);
+                    afterServerInvoke(invocation, result == null ? exception : result);
                 } else {
-                    afterClientInvoke(invocation, result==null?exception:result);
+                    afterClientInvoke(invocation, result == null ? exception : result);
                 }
             });
         } else {

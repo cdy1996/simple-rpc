@@ -14,13 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class RegistryFactory {
-    
-    
-    public static IServiceRegistry createRegistry(PropertySources propertySources) {
-        
-        return createRegistry(propertySources, null);
-    }
-    
+
     public static IServiceRegistry createRegistry(PropertySources propertySources, String type) {
         // todo spi
         log.info("创建注册中心 {}", type);

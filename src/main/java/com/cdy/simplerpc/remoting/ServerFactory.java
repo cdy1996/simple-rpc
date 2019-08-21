@@ -38,9 +38,9 @@ public class ServerFactory {
     
         // todo spi
         if ("rpc".equalsIgnoreCase(protocol)) {
-            return new RPCServer(new ServerMetaInfo(protocol, port, ip), registryList,  SerializeFactory.createSerialize(propertySources));
+            return new RPCServer(new ServerMetaInfo(protocol, port, ip), registryList,  SerializeFactory.createSerialize(propertySources), propertySources);
         } else if ("http".equalsIgnoreCase(protocol)) {
-            return new HttpServer(new ServerMetaInfo(protocol, port, ip), registryList, SerializeFactory.createSerialize(propertySources));
+            return new HttpServer(new ServerMetaInfo(protocol, port, ip), registryList, SerializeFactory.createSerialize(propertySources), propertySources);
         }
         throw new RPCException("没有合适的协议");
        

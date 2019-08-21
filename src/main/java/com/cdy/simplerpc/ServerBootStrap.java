@@ -95,7 +95,7 @@ public class ServerBootStrap<T> {
         
         //扫描注解属性
         RPCService annotation = target.getClass().getAnnotation(RPCService.class);
-        Map<String, String> config = RPCService.ServiceAnnotationInfo.getConfig(target.getClass().getSimpleName(), annotation);
+        Map<String, String> config = RPCService.ServiceAnnotationInfo.getConfig(target.getClass().getName(), annotation);
         propertySources.addPropertySources(new AnnotationPropertySource(config));
         
         // 多注册中心
