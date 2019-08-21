@@ -16,8 +16,7 @@ public class SystemPropertySource implements PropertySource {
     
     @Override
     public String resolveProperty(String key){
-        return System.getProperty(key);
-    
+        return System.getProperty(key, null);
     }
     
 }

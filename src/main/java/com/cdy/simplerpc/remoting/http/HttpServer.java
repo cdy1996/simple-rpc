@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.remoting.http;
 
+import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.remoting.AbstractServer;
 import com.cdy.simplerpc.remoting.ServerMetaInfo;
@@ -33,8 +34,8 @@ public class HttpServer extends AbstractServer {
     private Server server;
     private final HttpServlet servlet;
     
-    public HttpServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registryList, ISerialize serialize) {
-        super(serverMetaInfo, registryList, serialize);
+    public HttpServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registryList, ISerialize serialize, PropertySources propertySources) {
+        super(serverMetaInfo, registryList, serialize, propertySources);
         this.servlet = new ServletHandler(getHandlerMap(), serialize);
     }
     
@@ -66,7 +67,7 @@ public class HttpServer extends AbstractServer {
         connector.setPort(port);// 连接的端口号
         server.addConnector(connector);// 添加连接
         QueuedThreadPool threadPool = new QueuedThreadPool();
-        threadPool.setMaxThreads(3000);
+        threadPool.setMaxThreads(Integer.parseInt(propertySources.resolveProperty("http.maxThread","300")));//todo
         server.setThreadPool(threadPool);
         // 配置服务
         

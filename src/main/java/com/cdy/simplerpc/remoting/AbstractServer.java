@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.remoting;
 
+import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterChain;
 import com.cdy.simplerpc.proxy.Invoker;
@@ -29,13 +30,15 @@ public abstract class AbstractServer implements Server {
     private final Map<String, Invoker> handlerMap = new ConcurrentHashMap<>();
     private final List<IServiceRegistry> registries;
     private final ServerMetaInfo serverMetaInfo;
+    protected final PropertySources propertySources;
     @Getter @Setter
     protected ISerialize serialize;
     
-    public AbstractServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registries, ISerialize serialize) {
+    public AbstractServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registries, ISerialize serialize, PropertySources propertySources) {
         this.registries = registries;
         this.serverMetaInfo = serverMetaInfo;
         this.serialize = serialize;
+        this.propertySources = propertySources;
     }
     
     @Override
