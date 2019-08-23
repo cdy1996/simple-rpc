@@ -7,9 +7,7 @@ import com.cdy.simplerpc.config.LocalPropertySource;
 import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterChain;
-import com.cdy.simplerpc.proxy.Invoker;
-import com.cdy.simplerpc.proxy.ProxyFactory;
-import com.cdy.simplerpc.proxy.RemoteInvoker;
+import com.cdy.simplerpc.proxy.*;
 import com.cdy.simplerpc.registry.DiscoveryFactory;
 import com.cdy.simplerpc.registry.IServiceDiscovery;
 import com.cdy.simplerpc.util.StringUtil;
@@ -126,7 +124,15 @@ public class ClientBootStrap {
        return this;
     }
 
-    
+    public GenericService generic(String className){
+        Invoker invoker = new RemoteInvoker(propertySources, serviceRegistryMap);
+        GenericService genericService = ProxyFactory.createProxy(GenericService.class,
+                new GenericInvocationHandler(new FilterChain(invoker), className));
+       return genericService;
+
+    }
+
+
     public ClientBootStrap protocols(String protocols) {
         types.add(protocols);
         return this;

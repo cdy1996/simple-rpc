@@ -43,8 +43,7 @@ public class RPCServer extends AbstractServer {
                 Object result = null;
                 if (getHandlerMap().containsKey(className)) {
                     Invoker o = getHandlerMap().get(className);
-                    Invocation invocation = new Invocation(request.getMethodName(), request.getParams(), request.getTypes());
-                    result = o.invoke(invocation);
+                    result = o.invoke(request.toInvocation());
                 }
                 rpcResponse.setResultData(result);
             } catch (Exception e) {

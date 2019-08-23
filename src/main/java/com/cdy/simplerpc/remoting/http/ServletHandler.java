@@ -68,8 +68,7 @@ public class ServletHandler extends HttpServlet{
 
             String className = rpcRequest.getClassName();
             Invoker o = handlerMap.get(className);
-            Invocation invocation = new Invocation(rpcRequest.getMethodName(), rpcRequest.getParams(), rpcRequest.getTypes());
-            Object result = o.invoke(invocation);
+            Object result = o.invoke(rpcRequest.toInvocation());
         
             rpcResponse.setResultData(result);
             write(resp, rpcResponse);

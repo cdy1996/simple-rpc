@@ -42,11 +42,11 @@ public class ClusterClient extends AbstractClient {
         Map<String, Object> map = context.getAttach();
         
         // 对应注解的类名作为key,可以从属性集中获取
-        String annotationKey = (String) map.get(com.cdy.simplerpc.rpc.RPCContext.annotationKey);
+        String annotationKey = (String) map.get(RPCContext.annotationKey);
         String directAddress = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.url);
         
         //服务发现
-        String serviceName = invocation.getInterfaceClass().getName();
+        String serviceName = invocation.getGeneric()?invocation.getInterfaceClassName():invocation.getInterfaceClass().getName();
         String address = null;
         while (StringUtil.isBlank(address)) {
             if (StringUtil.isBlank(directAddress)) {

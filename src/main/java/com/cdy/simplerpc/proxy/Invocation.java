@@ -19,6 +19,8 @@ public class Invocation {
     private Method method;
     /**
      * 服务端调用本地时的方法名
+     *
+     * 泛化调用时客户端也会使用
      */
     private String methodName;
     /**
@@ -34,14 +36,27 @@ public class Invocation {
      * 客户端调用远程时的接口名
      */
     private Class interfaceClass;
-    
 
-    
+
+    private Boolean generic;
+
+    private String interfaceClassName;
+
+    private Arg[] argsByte;
+
+
     //用于构造代理对象
     public Invocation(Method method, Object[] args, Class interfaceClass) {
         this.method = method;
         this.args = args;
         this.interfaceClass = interfaceClass;
+    }
+
+    //客户端泛化对象
+    public Invocation(String method, Arg[] args, String interfaceClass) {
+        this.methodName = method;
+        this.argsByte = args;
+        this.interfaceClassName = interfaceClass;
     }
     
     //用于服务端的接受参数和调用
@@ -53,10 +68,16 @@ public class Invocation {
     
     public RPCRequest toRequest(){
         RPCRequest rpcRequest = new RPCRequest();
-        rpcRequest.setClassName(getMethod().getDeclaringClass().getName());
-        rpcRequest.setMethodName(getMethod().getName());
-        rpcRequest.setTypes(getMethod().getParameterTypes());
-        rpcRequest.setParams(getArgs());
+        if (getGeneric()){
+            rpcRequest.setClassName(getInterfaceClassName());
+            rpcRequest.setMethodName(getMethodName());
+            rpcRequest.setArgsByte(getArgsByte());
+        } else {
+            rpcRequest.setClassName(getMethod().getDeclaringClass().getName());
+            rpcRequest.setMethodName(getMethod().getName());
+            rpcRequest.setTypes(getMethod().getParameterTypes());
+            rpcRequest.setParams(getArgs());
+        }
         return rpcRequest;
     }
     

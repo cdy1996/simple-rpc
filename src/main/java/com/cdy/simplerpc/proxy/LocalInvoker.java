@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
  * 2019/1/24 0024 23:27
  */
 @Slf4j
-public class LocalInvoker<T> implements Invoker {
+public class LocalInvoker<T> implements Invoker<T> {
     
     private final T t;
 
