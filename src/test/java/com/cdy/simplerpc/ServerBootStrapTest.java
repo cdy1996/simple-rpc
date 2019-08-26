@@ -68,13 +68,14 @@ public class ServerBootStrapTest {
 //        propertySources.addPropertySources(new LocalPropertySource("D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties"));
 
         ServerBootStrap rpc = ServerBootStrap
-                .build(new TestServiceImpl(), "D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties")
+                .build( "D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties")
 //                .registry("nacos-1", "127.0.0.1:8848", "529469ac-0341-4276-a256-14dcf863935c")
 //                .registry("zookeeper-1", "127.0.0.1:2181", "/registry")
-                .port("8080")
-                .ip("127.0.0.1")
+                .target(new TestServiceImpl())
+                .port("8080") //暴露默认端口
+                .ip("127.0.0.1") //暴露默认ip
 //                .protocols("http")
-                .protocols("rpc")
+                .protocols("rpc") //暴露默认协议
                 .start();
 
         System.in.read();

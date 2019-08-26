@@ -33,7 +33,7 @@ public class NettyClient<T,R> {
      */
     public static final AttributeKey<String> ATTRIBUTE_KEY_ADDRESS = AttributeKey.valueOf("address");
     private final Bootstrap bootstrap;
-    private static final EventLoopGroup boss = new NioEventLoopGroup();
+    private final EventLoopGroup boss = new NioEventLoopGroup();
     private final AtomicInteger requestId = new AtomicInteger(0);
     //服务端地址
     private final Map<String, RPCFuture<R>> responseFuture = new ConcurrentHashMap<>();

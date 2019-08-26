@@ -14,6 +14,8 @@ import com.cdy.simplerpc.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static com.cdy.simplerpc.util.StringUtil.getServer;
 
@@ -25,7 +27,9 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
 @Slf4j
 public class RPCServer extends AbstractServer {
 
-    NettyServer<RPCRequest,RPCResponse> nettyServer;
+    static ConcurrentHashMap<String, NettyServer<RPCRequest, RPCResponse>> servers = new ConcurrentHashMap<>();
+
+    List<NettyServer<RPCRequest, RPCResponse>> serverList = new CopyOnWriteArrayList<>();
 
     public RPCServer(ServerMetaInfo serverMetaInfo, List<IServiceRegistry> registry, ISerialize serialize, PropertySources propertySource) {
         super(serverMetaInfo, registry, serialize, propertySource);
@@ -33,35 +37,42 @@ public class RPCServer extends AbstractServer {
     
     @Override
     public void openServer() throws Exception {
-        nettyServer = new NettyServer<>();
-        nettyServer.setSerialize(getSerialize());
-        nettyServer.addProcessor((request, ctx)->{
-            log.info("接受到请求 {}", request);
-            RPCResponse rpcResponse = new RPCResponse();
-            try {
-                String className = request.getClassName();
-                Object result = null;
-                if (getHandlerMap().containsKey(className)) {
-                    Invoker o = getHandlerMap().get(className);
-                    result = o.invoke(request.toInvocation());
+
+        NettyServer<RPCRequest, RPCResponse> nettyServer = servers.get(getAddress());
+        if (nettyServer == null) {
+            nettyServer = new NettyServer<>();
+            nettyServer.setSerialize(getSerialize());
+            nettyServer.addProcessor((request, ctx)->{
+                log.info("接受到请求 {}", request);
+                RPCResponse rpcResponse = new RPCResponse();
+                try {
+                    String className = request.getClassName();
+                    Object result = null;
+                    if (getHandlerMap().containsKey(className)) {
+                        Invoker o = getHandlerMap().get(className);
+                        result = o.invoke(request.toInvocation());
+                    }
+                    rpcResponse.setResultData(result);
+                } catch (Exception e) {
+                    rpcResponse.setResultData(e);
                 }
-                rpcResponse.setResultData(result);
-            } catch (Exception e) {
-                rpcResponse.setResultData(e);
-            }
-            return rpcResponse;
-        });
-        
-        StringUtil.TwoResult<String, Integer> server = getServer(getAddress());
-        String ip = server.getFirst();
-        int port = server.getSecond();
-        nettyServer.openServer(ip, port);
+                return rpcResponse;
+            });
+
+            StringUtil.TwoResult<String, Integer> serverAddress = getServer(getAddress());
+            String ip = serverAddress.getFirst();
+            int port = serverAddress.getSecond();
+            nettyServer.openServer(ip, port);
+            servers.putIfAbsent(getAddress(), nettyServer);
+        }
+
+        serverList.add(nettyServer);
         
     }
     
     @Override
     public void close() {
-        nettyServer.close();
+        serverList.forEach(NettyServer::close);
     }
     
 }

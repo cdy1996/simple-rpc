@@ -1,16 +1,14 @@
 package com.cdy.simplerpc;
 
 import com.cdy.simplerpc.annotation.RPCReference;
-import com.cdy.simplerpc.config.AnnotationPropertySource;
-import com.cdy.simplerpc.config.BootstrapPropertySource;
-import com.cdy.simplerpc.config.LocalPropertySource;
-import com.cdy.simplerpc.config.PropertySources;
+import com.cdy.simplerpc.config.*;
 import com.cdy.simplerpc.filter.Filter;
 import com.cdy.simplerpc.filter.FilterChain;
 import com.cdy.simplerpc.proxy.*;
 import com.cdy.simplerpc.registry.DiscoveryFactory;
 import com.cdy.simplerpc.registry.IServiceDiscovery;
 import com.cdy.simplerpc.util.StringUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -22,19 +20,20 @@ import java.util.*;
  * Created by 陈东一
  * 2019/1/22 0022 22:11
  */
+@Slf4j
 public class ClientBootStrap {
     
     private final List<Filter> filters;
     private final PropertySources propertySources;
     private final BootstrapPropertySource bootstrapPropertySource;
-    private final Map<String, IServiceDiscovery> serviceRegistryMap;
+    private final Map<String, IServiceDiscovery> serviceDiscoveryMap;
     private final Set<String> types;
     
     public ClientBootStrap(PropertySources propertySources) {
         this.filters = new ArrayList<>();
         this.propertySources = propertySources;
         this.bootstrapPropertySource = new BootstrapPropertySource();
-        this.serviceRegistryMap = new HashMap<>();
+        this.serviceDiscoveryMap = new HashMap<>();
         this.types = new HashSet<>();
         this.propertySources.addPropertySources(this.bootstrapPropertySource);
     }
@@ -54,7 +53,9 @@ public class ClientBootStrap {
         return new ClientBootStrap(propertySources);
     }
     
-    public static ClientBootStrap build(PropertySources propertySources) {
+    public static ClientBootStrap build(PropertySource propertySource) {
+        PropertySources propertySources = new PropertySources();
+        propertySources.addPropertySources(propertySource);
         return new ClientBootStrap(propertySources);
     }
     
@@ -83,7 +84,7 @@ public class ClientBootStrap {
         String types = propertySources.resolveProperty("discovery.types");
         for (String type : types.split(",")) {
             IServiceDiscovery discovery = DiscoveryFactory.createDiscovery(propertySources, type);
-            serviceRegistryMap.put(type, discovery);
+            serviceDiscoveryMap.put(type, discovery);
         }
         return this;
     }
@@ -97,6 +98,10 @@ public class ClientBootStrap {
             }
             Class<?> referenceClass = field.getType();
             Map<String, String> config = RPCReference.ReferenceAnnotationInfo.getConfig(referenceClass.getName(), annotation);
+            String type = config.get(referenceClass.getName() + "." + ConfigConstants.type);
+            if (serviceDiscoveryMap.get(type) ==null) {
+                serviceDiscoveryMap.put(type, DiscoveryFactory.createDiscovery(propertySources, type));
+            }
             //将注解信息添加到配置中,方便被覆盖
             AnnotationPropertySource annotationPropertySource = new AnnotationPropertySource(config);
             propertySources.addPropertySources(annotationPropertySource);
@@ -111,13 +116,13 @@ public class ClientBootStrap {
             if (annotation == null) {
                 continue;
             }
-            Invoker invoker = new RemoteInvoker(propertySources, serviceRegistryMap);
+            Invoker invoker = new RemoteInvoker(propertySources, serviceDiscoveryMap);
             Object proxy = ProxyFactory.createProxy(new FilterChain(invoker), field.getType());
             try {
                 field.setAccessible(true);
                 field.set(o, proxy);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
             }
         }
         
@@ -125,7 +130,7 @@ public class ClientBootStrap {
     }
 
     public GenericService generic(String className){
-        Invoker invoker = new RemoteInvoker(propertySources, serviceRegistryMap);
+        Invoker invoker = new RemoteInvoker(propertySources, serviceDiscoveryMap);
         GenericService genericService = ProxyFactory.createProxy(GenericService.class,
                 new GenericInvocationHandler(new FilterChain(invoker), className));
        return genericService;

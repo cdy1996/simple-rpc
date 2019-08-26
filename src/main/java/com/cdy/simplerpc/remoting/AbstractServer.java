@@ -27,7 +27,7 @@ public abstract class AbstractServer implements Server {
      *     static是因为本地要共享同一个实例
      */
     @Getter
-    private final Map<String, Invoker> handlerMap = new ConcurrentHashMap<>();
+    private final static Map<String, Invoker> handlerMap = new ConcurrentHashMap<>();
     private final List<IServiceRegistry> registries;
     private final ServerMetaInfo serverMetaInfo;
     protected final PropertySources propertySources;

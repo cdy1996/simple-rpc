@@ -24,7 +24,7 @@ public @interface RPCReference {
 //    String value();
     
     /**
-     * 运行中的注册中心 id
+     * 运行中的注册中心
      * @return
      */
     String type() default "";

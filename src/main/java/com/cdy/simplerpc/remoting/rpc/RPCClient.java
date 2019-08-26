@@ -7,10 +7,14 @@ import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
 import com.cdy.simplerpc.rpc.NettyClient;
+import com.cdy.simplerpc.rpc.NettyServer;
 import com.cdy.simplerpc.rpc.RPCContext;
 import com.cdy.simplerpc.serialize.ISerialize;
 
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -20,9 +24,10 @@ import java.util.concurrent.TimeUnit;
  */
 public class RPCClient extends AbstractClient {
 
-    //服务端地址
-    private final NettyClient<RPCRequest, RPCResponse> nettyClient = new NettyClient<>();
-    
+    static ConcurrentHashMap<String, NettyClient<RPCRequest, RPCResponse>> clients = new ConcurrentHashMap<>();
+
+    List<NettyClient<RPCRequest, RPCResponse>> clientList = new CopyOnWriteArrayList<>();
+
     public RPCClient(PropertySources propertySources, ISerialize serialize) {
         super(propertySources, serialize);
     }
@@ -47,13 +52,20 @@ public class RPCClient extends AbstractClient {
     
 
     private NettyClient<RPCRequest, RPCResponse> connect(String address) throws Exception {
+        NettyClient<RPCRequest, RPCResponse> client = clients.get(address);
+        if (client == null){
+            client = new NettyClient<>();
+            client.connect(address);
+            clientList.add(client);
+            clients.putIfAbsent(address, client);
+        }
 
-        return nettyClient.connect(address);
+        return client;
     }
     
     @Override
     public void close() {
-        nettyClient.close();
+        clientList.forEach(NettyClient::close);
     }
     
 }

@@ -17,6 +17,7 @@ import static com.cdy.simplerpc.annotation.OrderComparator.orderComparator;
  *   -> 注解配置
  *   -> 系统配置
  *   -> 环境配置
+ *   -> spring配置
  *   -> 远程配置
  *
  * Created by 陈东一
