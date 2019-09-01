@@ -26,6 +26,10 @@ public class SerializeDecoderHandler<T> extends ByteToMessageDecoder {
     
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) {
+        if (in.readableBytes() <=0){
+            return;
+        }
+        
         byte[] bytes = new byte[in.readableBytes()];
         in.readBytes(bytes);
         T deserialize = serialize.deserialize(bytes, clazz);

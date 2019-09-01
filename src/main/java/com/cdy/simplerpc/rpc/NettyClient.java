@@ -36,6 +36,7 @@ public class NettyClient<T, R> {
      * 上下文传递服务端address的key
      */
     public static final AttributeKey<String> ATTRIBUTE_KEY_ADDRESS = AttributeKey.valueOf("address");
+    @Setter protected ISerialize serialize = new JdkSerialize();
     private final Bootstrap bootstrap;
     private final EventLoopGroup boss = new NioEventLoopGroup();
     private final AtomicInteger requestId = new AtomicInteger(0);
@@ -43,60 +44,22 @@ public class NettyClient<T, R> {
     private final Map<String, RPCFuture<R>> responseFuture = new ConcurrentHashMap<>();
     private volatile Channel channel;
     
-    @Setter
-    ISerialize serialize = new JdkSerialize();
-    
-    private NettyClient() {
-        
+    protected NettyClient() {
         this.bootstrap = new Bootstrap();
         this.bootstrap.group(boss)
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ByteBuf delimiter = Unpooled.copiedBuffer("@@@".getBytes());
-                        ch.pipeline()
-                        // 创建分隔符缓冲对象
-                                .addLast(new DelimiterBasedFrameDecoder(Integer.MAX_VALUE, delimiter/*SerializeCoderFactory.buffer*/))
-//                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
-//                                .addLast(new LengthFieldPrepender(4))
-//                                .addLast("encoder", new ObjectEncoder())
-//                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast("serialize-encoder", new SerializeEncoderHandler<>(serialize, RPCPackage.class))
-                                .addLast("encoder", new RPCPackageEncoder())
-                                .addLast("serialize-dencoder", new SerializeDecoderHandler<>(serialize, RPCPackage.class))
-                                .addLast("dencoder", new RPCPackageClientDecoder())
-                                .addLast(new SimpleChannelInboundHandler<RPCContext>() {
-                                    @Override
-                                    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-                                        Channel channel = ctx.channel();
-                                        Attribute<String> attr = channel.attr(ATTRIBUTE_KEY_ADDRESS);
-                                        String address = attr.get();
-                                        log.warn("与服务端断开连接,尝试进行重新连接");
-                                        super.channelInactive(ctx);
-//                                        addressChannel.remove(address);
-                                        //重新连接
-                                        connect(NettyClient.this, address);
-                                    }
-                                    
-                                    @Override
-                                    protected void channelRead0(ChannelHandlerContext ctx, RPCContext msg) throws Exception {
-                                        // 接收响应消息
-                                        RPCFuture<R> rpcFuture = responseFuture.remove(msg.getRequestId());
-                                        if (rpcFuture == null) {
-                                            return;
-                                        }
-                                        rpcFuture.setAttach(msg.getAttach());
-                                        rpcFuture.complete((R) msg.getTarget());
-                                    }
-                                });
+                        pipeline(ch);
                     }
                 })
-//                .option(ChannelOption.TCP_NODELAY, true)
+//              .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true);
-//                                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+//              .childOption(ChannelOption.SO_KEEPALIVE, true);
     }
-   
+    
+    
     
     public CompletableFuture<R> invokeAsync(T t) throws Exception {
     
@@ -131,12 +94,7 @@ public class NettyClient<T, R> {
         
         return invokeAsync(t).get(timeout, timeUnit);
     }
-    
-    private void send(RPCContext context, Channel channel) {
-        ChannelFuture channelFuture = channel.writeAndFlush(context);
-        channelFuture.addListener(future ->
-                log.info("客户端发送完成 -> {}", context));
-    }
+   
     
     public static <T, R> NettyClient<T, R> connect(String address) throws Exception {
         NettyClient<T, R> nettyClient = new NettyClient<>();
@@ -145,18 +103,80 @@ public class NettyClient<T, R> {
     }
     
     
-    private synchronized void connect(NettyClient nettyClient, String address) throws InterruptedException {
+    public void close() {
+        boss.shutdownGracefully();
+    }
+    
+    
+    
+    protected void pipeline(SocketChannel ch) {
+        ByteBuf delimiter = Unpooled.copiedBuffer("@@@".getBytes());
+        ch.pipeline()
+                // 创建分隔符缓冲对象
+                .addLast(new DelimiterBasedFrameDecoder(Integer.MAX_VALUE, delimiter))
+//                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
+//                                .addLast(new LengthFieldPrepender(4))
+//                                .addLast("encoder", new ObjectEncoder())
+//                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
+                .addLast("serialize-encoder", new SerializeEncoderHandler<>(serialize, RPCPackage.class))
+                .addLast("encoder", new RPCPackageEncoder())
+                .addLast("serialize-decoder", new SerializeDecoderHandler<>(serialize, RPCPackage.class))
+                .addLast("decoder", new RPCPackageClientDecoder())
+                .addLast(new RPCClientHandler());
+    }
+    
+    
+    protected RPCClientHandler getRPCClientHandler(){
+        return new RPCClientHandler();
+    }
+    
+    
+    protected synchronized void connect(NettyClient nettyClient, String address) throws InterruptedException {
         ChannelFuture connect = nettyClient.bootstrap.connect(toSocketAddress(getServer(address)));
         ChannelFuture sync = connect.sync();
         nettyClient.channel = sync.channel();
         Attribute<String> attr = nettyClient.channel.attr(ATTRIBUTE_KEY_ADDRESS);
         attr.set(address);
         log.info("成功连接远程服务 -> "+address);
-    
+        
     }
     
-    public void close() {
-        boss.shutdownGracefully();
+    private void send(RPCContext context, Channel channel) {
+        ChannelFuture channelFuture = channel.writeAndFlush(context);
+        channelFuture.addListener(future ->
+                log.info("客户端发送完成 -> {}", context));
     }
+   
     
+    @ChannelHandler.Sharable
+    private class RPCClientHandler extends SimpleChannelInboundHandler<RPCContext> {
+        @Override
+        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+            Channel channel = ctx.channel();
+            Attribute<String> attr = channel.attr(ATTRIBUTE_KEY_ADDRESS);
+            String address = attr.get();
+            log.warn("与服务端断开连接,尝试进行重新连接");
+            super.channelInactive(ctx);
+//                                        addressChannel.remove(address);
+            //重新连接
+            connect(NettyClient.this, address);
+        }
+        
+        @Override
+        protected void channelRead0(ChannelHandlerContext ctx, RPCContext msg) throws Exception {
+            // 接收响应消息
+            RPCFuture<R> rpcFuture = responseFuture.remove(msg.getRequestId());
+            if (rpcFuture == null) {
+                return;
+            }
+            rpcFuture.setAttach(msg.getAttach());
+            rpcFuture.complete((R) msg.getTarget());
+        }
+    
+        @Override
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+            super.exceptionCaught(ctx, cause);
+            log.error(cause.getMessage(),cause);
+        }
+    }
 }

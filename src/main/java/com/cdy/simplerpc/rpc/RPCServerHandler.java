@@ -51,4 +51,10 @@ public class RPCServerHandler<T,R> extends SimpleChannelInboundHandler<RPCContex
         log.info("服务端接受处理 -> "+t);
         supplier.get().process((T)t.getTarget(), t);
     }
+    
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        super.exceptionCaught(ctx, cause);
+        log.error(cause.getMessage(),cause);
+    }
 }

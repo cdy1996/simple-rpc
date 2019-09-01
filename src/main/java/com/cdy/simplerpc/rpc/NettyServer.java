@@ -25,11 +25,11 @@ import java.util.function.Supplier;
 @Slf4j
 public class NettyServer<T, R> {
     
+    @Setter protected ISerialize serialize = new JdkSerialize();
+
     private Channel channel;
     private final EventLoopGroup boss = new NioEventLoopGroup();
     private final EventLoopGroup work = new NioEventLoopGroup();
-    @Setter
-    private ISerialize serialize = new JdkSerialize();
     private HandlerProcessor<R, Void> handlerProcessor = (t, context) -> {
         log.info("发送处理流程 -> " + context);
         context.setTarget(t);
@@ -55,19 +55,7 @@ public class NettyServer<T, R> {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
-                        ByteBuf delimiter = Unpooled.copiedBuffer("@@@".getBytes());
-                        ch.pipeline()
-                                .addLast(new DelimiterBasedFrameDecoder(Integer.MAX_VALUE, delimiter))
-//                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
-//                                .addLast(new LengthFieldPrepender(4))
-//                                .addLast("encoder", new ObjectEncoder())
-//                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
-                                .addLast("serialize-encoder", new SerializeEncoderHandler<>(serialize, RPCPackage.class))
-                                .addLast("encoder", new RPCPackageEncoder())
-                                .addLast("serialize-dencoder", new SerializeDecoderHandler<>(serialize, RPCPackage.class))
-                                .addLast("dencoder", new RPCPackageServerDecoder())
-                                .addLast(new RPCServerHandler<>(supplier));
-//                                .addLast(new RPCServerHandler<T,R>(new AtomicReference<Supplier<HandlerProcessor<T,Void>>>(supplier)));
+                        pipeline(ch);
                     }
                 })
                 .option(ChannelOption.SO_BACKLOG, 128)
@@ -94,4 +82,23 @@ public class NettyServer<T, R> {
         }
     }
     
+    protected void pipeline(SocketChannel ch) {
+        ByteBuf delimiter = Unpooled.copiedBuffer("@@@".getBytes());
+        ch.pipeline()
+                .addLast(new DelimiterBasedFrameDecoder(Integer.MAX_VALUE, delimiter))
+//                                .addLast(new LengthFieldBasedFrameDecoder(Integer.MAX_VALUE, 0, 4, 0, 4))
+//                                .addLast(new LengthFieldPrepender(4))
+//                                .addLast("encoder", new ObjectEncoder())
+//                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
+                .addLast("serialize-encoder", new SerializeEncoderHandler<>(serialize, RPCPackage.class))
+                .addLast("encoder", new RPCPackageEncoder())
+                .addLast("serialize-decoder", new SerializeDecoderHandler<>(serialize, RPCPackage.class))
+                .addLast("decoder", new RPCPackageServerDecoder())
+                .addLast(getRPCServerHandler());
+//                                .addLast(new RPCServerHandler<T,R>(new AtomicReference<Supplier<HandlerProcessor<T,Void>>>(supplier)));
+    }
+    
+    protected RPCServerHandler getRPCServerHandler(){
+        return new RPCServerHandler<>(supplier);
+    }
 }
