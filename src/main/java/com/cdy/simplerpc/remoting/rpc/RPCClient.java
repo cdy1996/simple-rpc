@@ -7,7 +7,6 @@ import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
 import com.cdy.simplerpc.rpc.NettyClient;
-import com.cdy.simplerpc.rpc.NettyServer;
 import com.cdy.simplerpc.rpc.RPCContext;
 import com.cdy.simplerpc.serialize.ISerialize;
 
@@ -24,7 +23,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class RPCClient extends AbstractClient {
 
-    static ConcurrentHashMap<String, NettyClient<RPCRequest, RPCResponse>> clients = new ConcurrentHashMap<>();
+    ConcurrentHashMap<String, NettyClient<RPCRequest, RPCResponse>> clients = new ConcurrentHashMap<>();
 
     List<NettyClient<RPCRequest, RPCResponse>> clientList = new CopyOnWriteArrayList<>();
 
@@ -37,9 +36,9 @@ public class RPCClient extends AbstractClient {
         RPCContext context = RPCContext.current();
         Map<String, Object> contextMap = context.getAttach();
         RPCRequest rpcRequest = invocation.toRequest();
-        String address = (String) contextMap.get(com.cdy.simplerpc.rpc.RPCContext.address);
+        String address = (String) contextMap.get(RPCContext.address);
 
-        String annotationKey = (String) contextMap.get(com.cdy.simplerpc.rpc.RPCContext.annotationKey);
+        String annotationKey = (String) contextMap.get(RPCContext.annotationKey);
         String async = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.async);
         String timeout = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.timeout);
 
@@ -54,8 +53,7 @@ public class RPCClient extends AbstractClient {
     private NettyClient<RPCRequest, RPCResponse> connect(String address) throws Exception {
         NettyClient<RPCRequest, RPCResponse> client = clients.get(address);
         if (client == null){
-            client = new NettyClient<>();
-            client.connect(address);
+            client = NettyClient.connect(address);
             clientList.add(client);
             clients.putIfAbsent(address, client);
         }

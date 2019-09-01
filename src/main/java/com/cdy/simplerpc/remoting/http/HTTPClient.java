@@ -11,17 +11,11 @@ import com.cdy.simplerpc.remoting.RPCResponse;
 import com.cdy.simplerpc.rpc.RPCContext;
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.serialize.JsonSerialize;
-import com.cdy.simplerpc.util.StringUtil;
-import org.apache.http.impl.client.CloseableHttpClient;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-
-import static com.cdy.simplerpc.remoting.http.HttpClientUtil.getHttpClient;
-import static com.cdy.simplerpc.util.StringUtil.getServer;
 
 /**
  * 客户端
@@ -49,9 +43,9 @@ public class HTTPClient extends AbstractClient {
         RPCRequest rpcRequest = invocation.toRequest();
 //        rpcRequest.setAttach(contextMap);
         
-        String address = (String) contextMap.get(com.cdy.simplerpc.rpc.RPCContext.address);
+        String address = (String) contextMap.get(RPCContext.address);
 
-        String annotationKey = (String) contextMap.get(com.cdy.simplerpc.rpc.RPCContext.annotationKey);
+        String annotationKey = (String) contextMap.get(RPCContext.annotationKey);
         String async = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.async);
         String timeout = propertySources.resolveProperty(annotationKey + "." + ConfigConstants.timeout);
     

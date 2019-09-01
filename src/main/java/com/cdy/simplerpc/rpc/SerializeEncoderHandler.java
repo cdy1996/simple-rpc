@@ -2,6 +2,7 @@ package com.cdy.simplerpc.rpc;
 
 import com.cdy.simplerpc.serialize.ISerialize;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
  * 2019/8/21 0021 0:38
  */
 @Slf4j
-public class SerializeEncoderHandler<T> extends MessageToByteEncoder<T> {
+public class SerializeEncoderHandler<T> extends MessageToByteEncoder<Object> {
     
     
     private final ISerialize serialize;
@@ -23,14 +24,14 @@ public class SerializeEncoderHandler<T> extends MessageToByteEncoder<T> {
         this.clazz = clazz;
     }
     
-    
     @Override
-    protected void encode(ChannelHandlerContext ctx, T msg, ByteBuf out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) throws Exception {
+        ByteBuf delimiter = Unpooled.copiedBuffer("@@@".getBytes());
         log.info("序列化编码 {}", msg);
         // todo 大文件分段处理
-        Object serialize = this.serialize.serialize(msg, clazz);
+        Object serialize = this.serialize.serialize((T)msg, clazz);
         out.writeBytes((byte[]) serialize);
-        out.writeBytes(SerializeCoderFactory.buffer);
+        out.writeBytes(delimiter);
         ctx.flush();
     }
 }
