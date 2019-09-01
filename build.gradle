@@ -27,6 +27,12 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
+idea{
+    module{
+        inheritOutputDirs = true
+    }
+}
+
 [compileJava,compileTestJava,javadoc]*.options*.encoding = 'UTF-8'
 
 
@@ -83,4 +89,9 @@ dependencies{
 
 
 
+}
+
+
+test{
+    exclude '**/*.class'
 }
