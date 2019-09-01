@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.http;
+package com.cdy.simplerpc.netty.http;
 
 import org.junit.Test;
 

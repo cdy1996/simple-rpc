@@ -6,8 +6,8 @@ import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
-import com.cdy.simplerpc.rpc.NettyClient;
-import com.cdy.simplerpc.rpc.RPCContext;
+import com.cdy.simplerpc.netty.rpc.NettyClient;
+import com.cdy.simplerpc.netty.rpc.RPCContext;
 import com.cdy.simplerpc.serialize.ISerialize;
 
 import java.util.List;

@@ -1,9 +1,6 @@
-package com.cdy.simplerpc.rpc;
-
-import io.netty.channel.ChannelHandlerContext;
+package com.cdy.simplerpc.netty.rpc;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  * todo

@@ -5,7 +5,7 @@ import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.RPCException;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.registry.IServiceDiscovery;
-import com.cdy.simplerpc.rpc.RPCContext;
+import com.cdy.simplerpc.netty.rpc.RPCContext;
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.serialize.SerializeFactory;
 import com.cdy.simplerpc.util.StringUtil;

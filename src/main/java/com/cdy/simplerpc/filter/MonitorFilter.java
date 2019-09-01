@@ -4,7 +4,7 @@ import com.cdy.simplerpc.annotation.Order;
 import com.cdy.simplerpc.monitor.MonitorEntity;
 import com.cdy.simplerpc.monitor.MonitorSend;
 import com.cdy.simplerpc.proxy.Invocation;
-import com.cdy.simplerpc.rpc.RPCContext;
+import com.cdy.simplerpc.netty.rpc.RPCContext;
 
 import java.util.Date;
 import java.util.Map;
@@ -45,14 +45,14 @@ public class MonitorFilter extends FilterAdapter {
     @Override
     protected void afterServerInvoke(Invocation invocation, Object o) {
         Map<String, Object> rpcContext1Map = RPCContext.current().getAttach();
-        MonitorEntity end = MonitorEntity.end((String) rpcContext1Map.get(com.cdy.simplerpc.rpc.RPCContext.address),new Date(), o);
+        MonitorEntity end = MonitorEntity.end((String) rpcContext1Map.get(com.cdy.simplerpc.netty.rpc.RPCContext.address),new Date(), o);
         monitorSend.send(end);
     }
     
     @Override
     protected void afterClientInvoke(Invocation invocation, Object o) {
         Map<String, Object> rpcContext1Map = RPCContext.current().getAttach();
-        MonitorEntity end = MonitorEntity.end((String) rpcContext1Map.get(com.cdy.simplerpc.rpc.RPCContext.address), new Date(), o);
+        MonitorEntity end = MonitorEntity.end((String) rpcContext1Map.get(com.cdy.simplerpc.netty.rpc.RPCContext.address), new Date(), o);
         monitorSend.send(end);
     }
 }

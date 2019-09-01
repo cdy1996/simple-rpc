@@ -1,6 +1,6 @@
-package com.cdy.simplerpc.http;
+package com.cdy.simplerpc.netty.http;
 
-import com.cdy.simplerpc.rpc.*;
+import com.cdy.simplerpc.netty.rpc.*;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpServerCodec;
 import lombok.extern.slf4j.Slf4j;

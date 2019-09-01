@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.rpc;
+package com.cdy.simplerpc.netty.rpc;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;

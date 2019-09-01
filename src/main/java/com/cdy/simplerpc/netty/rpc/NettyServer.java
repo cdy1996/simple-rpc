@@ -1,4 +1,4 @@
-package com.cdy.simplerpc.rpc;
+package com.cdy.simplerpc.netty.rpc;
 
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.serialize.JdkSerialize;

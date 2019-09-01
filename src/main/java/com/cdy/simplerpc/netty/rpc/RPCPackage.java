@@ -1,10 +1,9 @@
-package com.cdy.simplerpc.rpc;
+package com.cdy.simplerpc.netty.rpc;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

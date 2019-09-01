@@ -1,6 +1,6 @@
-package com.cdy.simplerpc.http;
+package com.cdy.simplerpc.netty.http;
 
-import com.cdy.simplerpc.rpc.RPCPackage;
+import com.cdy.simplerpc.netty.rpc.RPCPackage;
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.serialize.JsonSerialize;
 import com.cdy.simplerpc.util.StringUtil;
@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.URI;
 import java.util.List;
 
-import static com.cdy.simplerpc.rpc.NettyClient.ATTRIBUTE_KEY_ADDRESS;
+import static com.cdy.simplerpc.netty.rpc.NettyClient.ATTRIBUTE_KEY_ADDRESS;
 
 /**
  * todo

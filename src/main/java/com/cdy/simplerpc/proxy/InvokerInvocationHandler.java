@@ -1,7 +1,7 @@
 package com.cdy.simplerpc.proxy;
 
 
-import com.cdy.simplerpc.rpc.RPCContext;
+import com.cdy.simplerpc.netty.rpc.RPCContext;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;

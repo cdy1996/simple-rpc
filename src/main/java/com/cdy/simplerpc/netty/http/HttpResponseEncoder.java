@@ -1,6 +1,6 @@
-package com.cdy.simplerpc.http;
+package com.cdy.simplerpc.netty.http;
 
-import com.cdy.simplerpc.rpc.RPCPackage;
+import com.cdy.simplerpc.netty.rpc.RPCPackage;
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.serialize.JsonSerialize;
 import io.netty.buffer.Unpooled;
