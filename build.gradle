@@ -27,9 +27,12 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
-idea{
-    module{
-        inheritOutputDirs = true
+idea {
+
+    module {
+        inheritOutputDirs = false
+        outputDir = compileJava.destinationDir
+        testOutputDir = compileTestJava.destinationDir
     }
 }
 

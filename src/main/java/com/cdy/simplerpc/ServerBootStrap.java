@@ -44,7 +44,7 @@ public class ServerBootStrap {
         if (StringUtil.isNotBlank(path)) {
             propertySources.addPropertySources(new LocalPropertySource(path));
         }
-        return new ServerBootStrap (propertySources);
+        return new ServerBootStrap(propertySources);
     }
     
     public static ServerBootStrap build(PropertySource propertySource) {
@@ -58,12 +58,12 @@ public class ServerBootStrap {
         this.filters.addAll(Arrays.asList(filters));
         return this;
     }
-
-    public ServerBootStrap target(Object ...t) {
+    
+    public ServerBootStrap target(Object... t) {
         this.targets.addAll(Arrays.asList(t));
         return this;
     }
-
+    
     public ServerBootStrap port(String port) {
         bootstrapPropertySource.getMap().put("registry.port", port);
         return this;
@@ -99,14 +99,14 @@ public class ServerBootStrap {
         //扫描注解属性
         for (Object target : targets) {
             RPCService annotation = target.getClass().getAnnotation(RPCService.class);
-            Map<String, String> config = RPCService.ServiceAnnotationInfo.getConfig(target.getClass().getName(), annotation);
+            Map<String, String> config = RPCService.ServiceAnnotationInfo.getConfig(StringUtil.getServiceName(target.getClass()), annotation);
             propertySources.addPropertySources(new AnnotationPropertySource(config));
-
+            
             // 多注册中心
             String types = propertySources.resolveProperty("registry.types");
             List<IServiceRegistry> serviceRegistryList = Arrays.stream(types.split(",")).map(type -> RegistryFactory.createRegistry(propertySources, type)).collect(Collectors.toList());
-
-
+            
+            
             //多协议
             if (annotation.protocols().length == 0) {
                 String protocols = propertySources.resolveProperty("registry.protocols");
@@ -118,15 +118,15 @@ public class ServerBootStrap {
                     openAndRegistry(serviceRegistryList, protocol, target);
                 }
             }
-
+            
         }
         return this;
-
+        
     }
     
     private void openAndRegistry(List<IServiceRegistry> serviceRegistryList, String protocol, Object target) throws Exception {
         Server server = ServerFactory.createServer(serviceRegistryList, propertySources, protocol);
-        String serviceName = target.getClass().getInterfaces()[0].getName();
+        String serviceName = StringUtil.getServiceName(target.getClass());
         server.bind(serviceName, target, Collections.emptyList());
         server.openServer();
         server.register(serviceName);

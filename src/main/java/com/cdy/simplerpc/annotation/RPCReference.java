@@ -42,6 +42,12 @@ public @interface RPCReference {
     String timeout() default "5000";
     
     /**
+     * 集群失败策略
+     * @return
+     */
+    String cluster() default "";
+    
+    /**
      * 直连的url地址
      * @return
      */
@@ -65,6 +71,9 @@ public @interface RPCReference {
             }
             if (!StringUtil.isBlank(annotation.url())) {
                 map.put(key + "." + ConfigConstants.url, annotation.url() + "");
+            }
+            if (!StringUtil.isBlank(annotation.cluster())) {
+                map.put(key + "." + ConfigConstants.cluster, annotation.cluster() + "");
             }
             if (annotation.protocols().length !=0) {
                 map.put(key+"."+ConfigConstants.protocols, String.join(",",annotation.protocols()));

@@ -45,8 +45,7 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
     
     @Override
     public String discovery(String serviceName, String ...protocols) throws Exception {
-        //负载均衡
-        return loadBalance(serviceName, listServer(serviceName, protocols));
+        return loadBalance(serviceName,  getCache().get(serviceName));
     }
     
     
@@ -59,25 +58,27 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
         if (cacheList == null) {
             cacheList= curatorFramework.getChildren().forPath(path);
             if (!(protocols == null || protocols.length==0)) {
-                cacheList = cacheList.stream().filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith)).collect(Collectors.toList());
+                cacheList = cacheList.stream()
+                        .filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith))
+                        .collect(Collectors.toList());
             }
             cache.putIfAbsent(serviceName, cacheList);
-            subscrible(serviceName);
+            subscrible(serviceName, protocols);
         }
         return cacheList;
     }
     
-    private void subscrible(String serviceName) {
+    private void subscrible(String serviceName, String ...protocols) {
         // 服务监听 更新负载均衡中的可用服务
         try {
-            rootListener(serviceName);
+            rootListener(serviceName,protocols);
         } catch (Exception e) {
             log.error("监听异常", e);
         }
     }
     
     
-    private void rootListener(String servicePath) throws Exception{
+    private void rootListener(String servicePath, String ...protocols) throws Exception{
         PathChildrenCache pathChildrenCache = new PathChildrenCache(curatorFramework, registryPath+"/"+servicePath, true);
         //Normal--初始化为空  BUILD_INITIAL_CACHE--rebuild  POST_INITIALIZED_EVENT--初始化后发送事件
         pathChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
@@ -89,7 +90,9 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
             switch (pathChildrenCacheEvent.getType()) {
                 case CHILD_ADDED:
                     log.info("增加新的服务节点 service = {}, server = {} ", serviceName, server);
-                    getCache().get(serviceName).add(server);
+                    if (!(protocols == null || protocols.length==0) && Arrays.stream(protocols).anyMatch(server::startsWith)) {
+                        getCache().get(serviceName).add(server);
+                    }
                      break;
                 case CHILD_REMOVED:
                     log.info("删除的服务节点 service = {}, server = {} ", serviceName, server);

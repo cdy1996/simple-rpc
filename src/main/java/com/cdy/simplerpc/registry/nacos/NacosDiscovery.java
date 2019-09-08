@@ -46,7 +46,7 @@ public class NacosDiscovery extends AbstractDiscovery {
     
     @Override
     public String discovery(String serviceName, String... protocols) throws Exception {
-        return loadBalance(serviceName, listServer(serviceName, protocols));
+        return loadBalance(serviceName, getCache().get(serviceName)); //只读取缓存
         
     }
     
@@ -54,14 +54,17 @@ public class NacosDiscovery extends AbstractDiscovery {
     public List<String> listServer(String serviceName, String... protocols) throws Exception {
         Map<String, List<String>> cache = getCache();
         List<String> cacheList = cache.get(serviceName);
-        if (cacheList == null) {
+        if (cacheList == null) { //启动时需要加载服务列表到缓存
             List<Instance> allInstances = namingService.getAllInstances(serviceName, false);
-            cacheList = allInstances.stream().map(e -> e.getClusterName() + "-" + e.getIp() + ":" + e.getPort()).collect(Collectors.toList());
-            if (!(protocols == null || protocols.length==0)) {
-                cacheList = cacheList.stream().filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith)).collect(Collectors.toList());
+            cacheList = allInstances.stream().map(e -> e.getClusterName() + "-" + e.getIp() + ":" + e.getPort())
+                    .collect(Collectors.toList());
+            if (!(protocols == null || protocols.length==0)) { //过滤需要的协议
+                cacheList = cacheList.stream()
+                        .filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith))
+                        .collect(Collectors.toList());
             }
             cache.putIfAbsent(serviceName, cacheList);
-            subscribe(serviceName);
+            subscribe(serviceName, protocols);
         }
         return cacheList;
     }
@@ -72,6 +75,11 @@ public class NacosDiscovery extends AbstractDiscovery {
             log.info("nacos 服务监听发生变化 {}" ,((NamingEvent) event).getServiceName());
             List<String> collect = ((NamingEvent) event).getInstances().stream().map(e -> e.getClusterName() + "-" + e.getIp() + ":" + e.getPort()).collect(Collectors.toList());
             getCache().get(serviceName).clear();
+            if (!(protocols == null || protocols.length==0)) {
+                collect = collect.stream()
+                        .filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith))
+                        .collect(Collectors.toList());
+            }
             //todo 线程安全问题
             getCache().get(serviceName).addAll(collect);
         });

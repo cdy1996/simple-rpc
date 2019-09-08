@@ -97,8 +97,9 @@ public class ClientBootStrap {
                 continue;
             }
             Class<?> referenceClass = field.getType();
-            Map<String, String> config = RPCReference.ReferenceAnnotationInfo.getConfig(referenceClass.getName(), annotation);
-            String type = config.get(referenceClass.getName() + "." + ConfigConstants.type);
+            String serviceName = StringUtil.getServiceName(referenceClass);
+            Map<String, String> config = RPCReference.ReferenceAnnotationInfo.getConfig(serviceName, annotation);
+            String type = config.get(serviceName + "." + ConfigConstants.type);
             if (serviceDiscoveryMap.get(type) ==null) {
                 serviceDiscoveryMap.put(type, DiscoveryFactory.createDiscovery(propertySources, type));
             }
@@ -116,7 +117,7 @@ public class ClientBootStrap {
             if (annotation == null) {
                 continue;
             }
-            Invoker invoker = new RemoteInvoker(propertySources, serviceDiscoveryMap);
+            Invoker invoker = new RemoteInvoker(propertySources, serviceDiscoveryMap, StringUtil.getServiceName(field.getType()));
             Object proxy = ProxyFactory.createProxy(new FilterChain(invoker), field.getType());
             try {
                 field.setAccessible(true);
@@ -130,7 +131,7 @@ public class ClientBootStrap {
     }
 
     public GenericService generic(String className){
-        Invoker invoker = new RemoteInvoker(propertySources, serviceDiscoveryMap);
+        Invoker invoker = new RemoteInvoker(propertySources, serviceDiscoveryMap, null);
         GenericService genericService = ProxyFactory.createProxy(GenericService.class,
                 new GenericInvocationHandler(new FilterChain(invoker), className));
        return genericService;

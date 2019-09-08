@@ -98,6 +98,14 @@ public class StringUtil {
         return SocketUtils.socketAddress(server.getFirst(), server.getSecond());
     }
     
+    public static String getServiceName(Class<?> target) {
+        if (target.isInterface()){
+            return target.getName();
+        } else {
+            return target.getClass().getInterfaces()[0].getName();
+        }
+    }
+    
     public static class TwoResult<T, E> {
         private T first;
         private E second;

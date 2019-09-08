@@ -1,7 +1,7 @@
 package com.cdy.simplerpc.remoting.http;
 
 import com.cdy.simplerpc.exception.RPCException;
-import com.cdy.simplerpc.remoting.ClusterClient;
+import com.cdy.simplerpc.cluster.ClusterClient;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.EntityBuilder;
@@ -12,7 +12,6 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static com.cdy.simplerpc.util.StringUtil.UTF8;
-import static org.junit.Assert.*;
 
 public class HTTPClientTest {
 

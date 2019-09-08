@@ -12,6 +12,7 @@ public class ConfigConstants {
     public static final String timeout = "timeout";
     public static final String async = "async";
     public static final String type = "type"; //运行时 选择一个注册中心
+    public static final String cluster = "cluster"; //运行时 选择一个集群策略
     
     /* 服务端的属性 */
     public static final String ip = "ip";
@@ -26,5 +27,8 @@ public class ConfigConstants {
     /* 客户单服务端都有的属性 */
     public static final String group = "group";
     public static final String version = "version";
+    
+    
+    
     
 }

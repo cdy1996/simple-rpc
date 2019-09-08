@@ -55,7 +55,7 @@ public class ClientBootStrapTest {
         //所有客户端进行初始化并注入
         hashedMap.forEach((field, target)->{
             // 远程的接口
-            Invoker invoker = new RemoteInvoker(propertySources, serviceRegistryMap);
+            Invoker invoker = new RemoteInvoker(propertySources, serviceRegistryMap, null);
             Object proxy = ProxyFactory.createProxy(new FilterChain(invoker), field.getType());
             try {
                 field.setAccessible(true);
