@@ -3,9 +3,9 @@ package com.cdy.simplerpc.cluster;
 import com.cdy.simplerpc.config.ConfigConstants;
 import com.cdy.simplerpc.config.PropertySources;
 import com.cdy.simplerpc.exception.RPCException;
+import com.cdy.simplerpc.netty.rpc.RPCContext;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.registry.IServiceDiscovery;
-import com.cdy.simplerpc.netty.rpc.RPCContext;
 import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.Client;
 import com.cdy.simplerpc.serialize.ISerialize;
@@ -19,7 +19,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 集群的装饰层
- * todo
+ *
+ * 一个服务的不同协议
+ *
  * 失败切换 重试其他服务
  * 快速失败 只请求一次
  * 快速恢复 记录失败请求, 定时重发, 消息类的通知
@@ -32,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class ClusterClient extends AbstractClient {
     
     private final Map<String, IServiceDiscovery> servceDiscoveryMap;
+    // key -> serviceName:protocol
     private final Map<String, Client> clientMap = new ConcurrentHashMap<>();
     
     public ClusterClient(PropertySources propertySources, Map<String, IServiceDiscovery> servceDiscoveryMap) {

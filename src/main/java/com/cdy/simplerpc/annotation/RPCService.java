@@ -33,16 +33,20 @@ public @interface RPCService {
     
     
     /**
-     * 服务要注册地址
-     * todo 之后改成自动获取网卡的数据
+     * 服务要注册地址 todo 之后改成自动获取网卡的数据
      * @return
      */
     String ip() default "";
-    
+
+    //多协议
     String[] protocols() default {};
-    
+
+    //默认端口
     String port() default "";
-    
+
+    //默认协议
+    String protocol() default "";
+
     class ServiceAnnotationInfo {
     
         /**
@@ -61,6 +65,9 @@ public @interface RPCService {
             }
             if (!StringUtil.isBlank(annotation.ip())) {
                 map.put(key+"."+ConfigConstants.ip, annotation.ip()+"");
+            }
+            if (!StringUtil.isBlank(annotation.protocol())) {
+                map.put(key + "." + ConfigConstants.protocol, annotation.ip() + "");
             }
             if (annotation.protocols().length != 0) {
                 map.put(key+"."+ConfigConstants.protocols, String.join(",",annotation.protocols()));

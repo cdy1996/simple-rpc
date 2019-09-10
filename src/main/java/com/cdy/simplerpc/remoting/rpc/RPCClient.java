@@ -2,12 +2,12 @@ package com.cdy.simplerpc.remoting.rpc;
 
 import com.cdy.simplerpc.config.ConfigConstants;
 import com.cdy.simplerpc.config.PropertySources;
+import com.cdy.simplerpc.netty.rpc.NettyClient;
+import com.cdy.simplerpc.netty.rpc.RPCContext;
 import com.cdy.simplerpc.proxy.Invocation;
 import com.cdy.simplerpc.remoting.AbstractClient;
 import com.cdy.simplerpc.remoting.RPCRequest;
 import com.cdy.simplerpc.remoting.RPCResponse;
-import com.cdy.simplerpc.netty.rpc.NettyClient;
-import com.cdy.simplerpc.netty.rpc.RPCContext;
 import com.cdy.simplerpc.serialize.ISerialize;
 
 import java.util.List;
@@ -18,14 +18,15 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 客户端
+ * 一个服务的一个协议的不同ip和端口号
  * Created by 陈东一
  * 2018/11/25 0025 14:28
  */
 public class RPCClient extends AbstractClient {
 
-    ConcurrentHashMap<String, NettyClient<RPCRequest, RPCResponse>> clients = new ConcurrentHashMap<>();
-
-    List<NettyClient<RPCRequest, RPCResponse>> clientList = new CopyOnWriteArrayList<>();
+    // key -> ip:port
+    private ConcurrentHashMap<String, NettyClient<RPCRequest, RPCResponse>> clients = new ConcurrentHashMap<>();
+    private List<NettyClient<RPCRequest, RPCResponse>> clientList = new CopyOnWriteArrayList<>();
 
     public RPCClient(PropertySources propertySources, ISerialize serialize) {
         super(propertySources, serialize);

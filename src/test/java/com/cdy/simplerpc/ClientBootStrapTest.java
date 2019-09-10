@@ -79,11 +79,16 @@ public class ClientBootStrapTest {
         propertySources.addPropertySources(new LocalPropertySource("D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties"));
 
 
-        ClientBootStrap clientBootStrap = ClientBootStrap.build("D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties")
+        ClientBootStrap clientBootStrap = ClientBootStrap
+                .build()
+//                .build("D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties")
 //                .discovery("nacos-1", "127.0.0.1:8848", "529469ac-0341-4276-a256-14dcf863935c")
 //                .discovery("zookeeper-1", "127.0.0.1:2181", "/registry")
 //                .type("nacos-1")
+                .discovery("simple", null, null)
+                .type("simple")
                 .protocols("rpc")
+                .protocols("http")
                 .start();
 
         clientBootStrap.refer(test2);

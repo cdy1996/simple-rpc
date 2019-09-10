@@ -23,7 +23,8 @@ public class ConfigConstants {
     public static final String url = "url";
     //接受的协议 rpc/http
     public static final String protocols = "protocols";
-    
+    public static final String protocol = "protocol";
+
     /* 客户单服务端都有的属性 */
     public static final String group = "group";
     public static final String version = "version";

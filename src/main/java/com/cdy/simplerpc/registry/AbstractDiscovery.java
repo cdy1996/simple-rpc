@@ -27,7 +27,7 @@ public abstract class AbstractDiscovery implements IServiceDiscovery{
      * 设计成static, 是为了让多个服务发现共用一个缓存
      */
     @Getter
-    private static Map<String, List<String>> cache = new ConcurrentHashMap<>();
+    private Map<String, List<String>> cache = new ConcurrentHashMap<>();
     
     
     

@@ -15,23 +15,20 @@ import java.util.Map;
  */
 @Slf4j
 public class ClusterFactory {
-    
+
     public static ClusterClient createCluster(PropertySources propertySources, Map<String, IServiceDiscovery> servceDiscoveryMap, String type) {
         // todo spi
-        String cluster;
-        if (StringUtil.isBlank(type)) {
-            cluster = propertySources.resolveProperty("discovery.custer");
-        } else {
-            cluster = propertySources.resolveProperty(type + "." + ConfigConstants.cluster);
-        }
+        String defaultCluster = propertySources.resolveProperty("discovery.custer");
+        String cluster = propertySources.resolveProperty(type + "." + ConfigConstants.cluster);
+        cluster = StringUtil.isBlank(cluster) ? defaultCluster : cluster;
         log.info("选择的集群策略为 -> {}", cluster);
         if (cluster.equalsIgnoreCase("failcache")) {
-            return new FailCacheClusterClient(propertySources,servceDiscoveryMap);
+            return new FailCacheClusterClient(propertySources, servceDiscoveryMap);
         } else if (cluster.startsWith("failover")) {
-            return new FailOverClusterClient(propertySources,servceDiscoveryMap);
+            return new FailOverClusterClient(propertySources, servceDiscoveryMap);
         } else {
-            return new FailFastClusterClient(propertySources,servceDiscoveryMap);
+            return new FailFastClusterClient(propertySources, servceDiscoveryMap);
         }
-        
+
     }
 }

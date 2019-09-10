@@ -34,6 +34,8 @@ public interface Server extends Closeable {
      * @throws Exception
      */
     void openServer() throws Exception;
-    
+
+    ServerMetaInfo getServerMetaInfo();
+
  
 }

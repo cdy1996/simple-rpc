@@ -21,9 +21,10 @@ import static com.cdy.simplerpc.util.StringUtil.getServer;
 /**
  * http服务端
  *
+ * 不同服务的相同协议和端口号
+ *
  * client   -> json ->     server
  * client   -> byte[] ->   server
- *
  *
  * Created by 陈东一
  * 2019/1/27 0027 0:35
@@ -42,6 +43,10 @@ public class HttpServer extends AbstractServer {
 
     @Override
     public void openServer() throws Exception {
+        if (open) {
+            return;
+        }
+        open = true;
         StringUtil.TwoResult<String, Integer> server = getServer(getAddress());
         //维持tomcat服务，否则tomcat一启动就会关闭
         jettyStart(server.getFirst(), server.getSecond());
@@ -51,6 +56,7 @@ public class HttpServer extends AbstractServer {
     public void close() {
         try {
             server.stop();
+            open = false;
         } catch (Exception e) {
             log.error(e.getMessage(), e);
         }

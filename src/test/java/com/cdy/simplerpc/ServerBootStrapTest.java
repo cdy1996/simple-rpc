@@ -8,6 +8,7 @@ import com.cdy.simplerpc.registry.IServiceRegistry;
 import com.cdy.simplerpc.registry.RegistryFactory;
 import com.cdy.simplerpc.remoting.Server;
 import com.cdy.simplerpc.remoting.ServerFactory;
+import com.cdy.simplerpc.util.StringUtil;
 import org.junit.Test;
 
 import java.lang.annotation.Annotation;
@@ -48,9 +49,9 @@ public class ServerBootStrapTest {
 
 
         //多协议
-        for (String protocol : annotation.protocols()) {
-            Server server = ServerFactory.createServer(serviceRegistryList, propertySources, protocol);
-            String serviceName = object.getClass().getName();
+        for (String protocolAndPort : annotation.protocols()) {
+            String serviceName = StringUtil.getServiceName(object.getClass());
+            Server server = ServerFactory.createServer(serviceRegistryList, propertySources, protocolAndPort, serviceName);
             server.bind(serviceName, object, Collections.emptyList());
             server.openServer();
             server.register(serviceName);
@@ -68,14 +69,18 @@ public class ServerBootStrapTest {
 //        propertySources.addPropertySources(new LocalPropertySource("D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties"));
 
         ServerBootStrap rpc = ServerBootStrap
-                .build( "D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties")
+                .build()
+//                .build( "D:\\workspace\\ideaworkspace\\blog_project\\simple-rpc\\src\\main\\resources\\simlpe-rpc.properties")
 //                .registry("nacos-1", "127.0.0.1:8848", "529469ac-0341-4276-a256-14dcf863935c")
 //                .registry("zookeeper-1", "127.0.0.1:2181", "/registry")
+                .registry("simple", null, null)
                 .target(new TestServiceImpl())
-                .port("8080") //暴露默认端口
+                .target(new TestService2Impl())
                 .ip("127.0.0.1") //暴露默认ip
-//                .protocols("http")
-                .protocols("rpc") //暴露默认协议
+                .port("8080") //暴露默认端口
+                .protocol("rpc") //暴露默认协议
+                .protocols("rpc", "10001")
+                .protocols("http", "8080")
                 .start();
 
         System.in.read();

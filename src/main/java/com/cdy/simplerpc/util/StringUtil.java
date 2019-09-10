@@ -102,7 +102,7 @@ public class StringUtil {
         if (target.isInterface()){
             return target.getName();
         } else {
-            return target.getClass().getInterfaces()[0].getName();
+            return target.getInterfaces()[0].getName();
         }
     }
     

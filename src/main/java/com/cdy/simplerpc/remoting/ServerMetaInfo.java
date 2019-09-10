@@ -12,5 +12,6 @@ public class ServerMetaInfo {
     private final String protocol;
     private final String port;
     private final String ip;
-    
+    private final String serviceName;
+
 }

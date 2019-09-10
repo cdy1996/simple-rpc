@@ -28,13 +28,19 @@ public class ClientBootStrap {
     private final BootstrapPropertySource bootstrapPropertySource;
     private final Map<String, IServiceDiscovery> serviceDiscoveryMap;
     private final Set<String> types;
-    
+    private final Set<String> discoveryTypes;
+
     public ClientBootStrap(PropertySources propertySources) {
         this.filters = new ArrayList<>();
         this.propertySources = propertySources;
         this.bootstrapPropertySource = new BootstrapPropertySource();
         this.serviceDiscoveryMap = new HashMap<>();
         this.types = new HashSet<>();
+        this.discoveryTypes = new HashSet<>();
+
+        bootstrapPropertySource.getMap().put("discovery.lazy", "false");
+        bootstrapPropertySource.getMap().put("balance", "simple");
+        bootstrapPropertySource.getMap().put("discovery.custer", "failfast");
         this.propertySources.addPropertySources(this.bootstrapPropertySource);
     }
     
@@ -43,8 +49,11 @@ public class ClientBootStrap {
         this.filters.addAll(Arrays.asList(filters));
         return this;
     }
-    
-    
+
+    public static ClientBootStrap build() {
+        PropertySources propertySources = new PropertySources();
+        return new ClientBootStrap(propertySources);
+    }
     public static ClientBootStrap build(String path) {
         PropertySources propertySources = new PropertySources();
         if (StringUtil.isNotBlank(path)) {
@@ -60,24 +69,39 @@ public class ClientBootStrap {
     }
     
     public ClientBootStrap discovery(String type, String serverAddr, String s) {
-        bootstrapPropertySource.getMap().put(type + ".serverAddr", serverAddr);
+        discoveryTypes.add(type);
         if (type.startsWith("nacos")) {
+            bootstrapPropertySource.getMap().put(type + ".serverAddr", serverAddr);
             bootstrapPropertySource.getMap().put(type + ".namespaceId", s);
         } else if (type.startsWith("zookeeper")) {
+            bootstrapPropertySource.getMap().put(type + ".serverAddr", serverAddr);
             bootstrapPropertySource.getMap().put(type + ".zkRegistryPath", s);
         }
         return this;
     }
-    
+
+    /**
+     * 运行时选择的注册中心
+     *
+     * @param type
+     * @return
+     */
     public ClientBootStrap type(String type) {
         bootstrapPropertySource.getMap().put("discovery.type", type);
         return this;
     }
 
+    public ClientBootStrap protocols(String protocols) {
+        types.add(protocols);
+        return this;
+    }
     
     public ClientBootStrap start(){
         if (!types.isEmpty()) {
             bootstrapPropertySource.getMap().put("discovery.protocols", String.join(",", types));
+        }
+        if (!discoveryTypes.isEmpty()) {
+            bootstrapPropertySource.getMap().put("discovery.types", String.join(",", discoveryTypes));
         }
         
         
@@ -88,8 +112,10 @@ public class ClientBootStrap {
         }
         return this;
     }
-    
+
     public ClientBootStrap refer(Object o) {
+        String defaultType = propertySources.resolveProperty("discovery.type");
+
         Field[] fields = o.getClass().getDeclaredFields();
         for (Field field : fields) {
             RPCReference annotation = field.getAnnotation(RPCReference.class);
@@ -99,7 +125,10 @@ public class ClientBootStrap {
             Class<?> referenceClass = field.getType();
             String serviceName = StringUtil.getServiceName(referenceClass);
             Map<String, String> config = RPCReference.ReferenceAnnotationInfo.getConfig(serviceName, annotation);
+
             String type = config.get(serviceName + "." + ConfigConstants.type);
+            type = StringUtil.isBlank(type) ? defaultType : type;
+
             if (serviceDiscoveryMap.get(type) ==null) {
                 serviceDiscoveryMap.put(type, DiscoveryFactory.createDiscovery(propertySources, type));
             }
@@ -138,10 +167,5 @@ public class ClientBootStrap {
 
     }
 
-
-    public ClientBootStrap protocols(String protocols) {
-        types.add(protocols);
-        return this;
-    }
 
 }
