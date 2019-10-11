@@ -67,7 +67,12 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
         }
         return cacheList;
     }
-    
+
+    @Override
+    public void close() {
+        curatorFramework.close();
+    }
+
     private void subscrible(String serviceName, String ...protocols) {
         // 服务监听 更新负载均衡中的可用服务
         try {

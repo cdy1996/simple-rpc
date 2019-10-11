@@ -13,4 +13,6 @@ public interface IServiceRegistry {
      * @param address
      */
     void register(String name, String address) throws Exception;
+
+    void close();
 }

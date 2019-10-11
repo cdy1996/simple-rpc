@@ -27,7 +27,9 @@ public interface IServiceDiscovery {
      * @throws Exception
      */
     List<String> listServer(String serviceName,  String ...protocols) throws Exception;
-    
+
+
+    void close();
 
     
 }

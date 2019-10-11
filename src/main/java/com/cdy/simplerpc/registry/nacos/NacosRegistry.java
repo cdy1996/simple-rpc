@@ -45,7 +45,10 @@ public class NacosRegistry implements IServiceRegistry {
         log.info("nacos注册 name = {}, address = {}", name, address);
         namingService.registerInstance(name, server.getFirst(), server.getSecond(), cluster);
     }
-    
-    
-   
+
+    @Override
+    public void close() {
+    }
+
+
 }

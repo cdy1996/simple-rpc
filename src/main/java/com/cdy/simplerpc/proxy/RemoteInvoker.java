@@ -47,5 +47,8 @@ public class RemoteInvoker implements Invoker{
         }
         return invoke;
     }
- 
+
+    public void close() {
+        client.close();
+    }
 }

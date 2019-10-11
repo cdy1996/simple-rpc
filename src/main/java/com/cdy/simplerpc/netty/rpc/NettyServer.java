@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.netty.rpc;
 
+import com.cdy.simplerpc.netty.ServerChannelHandler;
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.serialize.JdkSerialize;
 import io.netty.bootstrap.ServerBootstrap;
@@ -10,6 +11,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.flow.FlowControlHandler;
+import io.netty.handler.timeout.ReadTimeoutHandler;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,11 +36,22 @@ public class NettyServer<T, R> {
     private HandlerProcessor<R, Void> handlerProcessor = (t, context) -> {
         log.info("发送处理流程 -> " + context);
         context.setTarget(t);
-        ChannelFuture channelFuture = context.getCtx().writeAndFlush(context);
-        channelFuture.addListener((ChannelFutureListener) future ->
-                log.info("服务端发送完成 -> {}", context));
+        send(t, context);
         return null;
     };
+
+
+    private void send(Object o, RPCContext context) {
+        if (context.getCtx().channel().isWritable()) {
+            ChannelFuture channelFuture = context.getCtx().writeAndFlush(context);
+            channelFuture.addListener((ChannelFutureListener) future ->
+                    log.info("服务端发送完成 -> {}", context));
+        } else {
+            log.warn("通道不可写");
+            context.getCtx().executor().execute(() -> this.send(o, context));
+        }
+    }
+
     private Supplier<HandlerProcessor<T, Void>> supplier = null;
     
     public void addProcessor(HandlerProcessor<T, R> handlerProcessor) {
@@ -64,7 +78,7 @@ public class NettyServer<T, R> {
         ChannelFuture channelFuture = bootstrap.bind(ip, port);
         channelFuture.syncUninterruptibly();
         this.channel = channelFuture.channel();
-        
+
     }
     
     public void close() {
@@ -90,6 +104,10 @@ public class NettyServer<T, R> {
 //                                .addLast(new LengthFieldPrepender(4))
 //                                .addLast("encoder", new ObjectEncoder())
 //                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
+                .addLast(new ReadTimeoutHandler(60)) // 读心跳
+                .addLast(new FlowControlHandler())  //流量控制
+//                .addLast(new ChannelTrafficShapingHandler()) //流量整形
+                .addLast(new ServerChannelHandler())
                 .addLast("serialize-encoder", new SerializeEncoderHandler<>(serialize, RPCPackage.class))
                 .addLast("encoder", new RPCPackageEncoder())
                 .addLast("serialize-decoder", new SerializeDecoderHandler<>(serialize, RPCPackage.class))

@@ -68,8 +68,12 @@ public class NacosDiscovery extends AbstractDiscovery {
         }
         return cacheList;
     }
-    
-    
+
+    @Override
+    public void close() {
+    }
+
+
     private void subscribe(String serviceName, String... protocols) throws NacosException {
         namingService.subscribe(serviceName, event -> {
             log.info("nacos 服务监听发生变化 {}" ,((NamingEvent) event).getServiceName());

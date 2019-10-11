@@ -1,5 +1,6 @@
 package com.cdy.simplerpc.netty.rpc;
 
+import com.cdy.simplerpc.netty.ServerChannelHandler;
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.serialize.JdkSerialize;
 import io.netty.bootstrap.Bootstrap;
@@ -10,6 +11,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import lombok.Setter;
@@ -118,6 +120,8 @@ public class NettyClient<T, R> {
 //                                .addLast(new LengthFieldPrepender(4))
 //                                .addLast("encoder", new ObjectEncoder())
 //                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
+                .addLast(new WriteTimeoutHandler(60))
+                .addLast(new ServerChannelHandler())
                 .addLast("serialize-encoder", new SerializeEncoderHandler<>(serialize, RPCPackage.class))
                 .addLast("encoder", new RPCPackageEncoder())
                 .addLast("serialize-decoder", new SerializeDecoderHandler<>(serialize, RPCPackage.class))
@@ -142,9 +146,15 @@ public class NettyClient<T, R> {
     }
     
     private void send(RPCContext context, Channel channel) {
-        ChannelFuture channelFuture = channel.writeAndFlush(context);
-        channelFuture.addListener(future ->
-                log.info("客户端发送完成 -> {}", context));
+        if (channel.isWritable()) {
+            ChannelFuture channelFuture = channel.writeAndFlush(context);
+            channelFuture.addListener(future ->
+                    log.info("客户端发送完成 -> {}", context));
+        } else {
+            log.warn("通道不可写 \n {}", context.getRequestId());
+            channel.eventLoop().execute(() -> this.send(context, channel));
+        }
+
     }
    
     

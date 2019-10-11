@@ -32,14 +32,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public abstract class ClusterClient extends AbstractClient {
-    
-    private final Map<String, IServiceDiscovery> servceDiscoveryMap;
+
+    private final Map<String, IServiceDiscovery> serviceDiscoveryMap;
     // key -> serviceName:protocol
     private final Map<String, Client> clientMap = new ConcurrentHashMap<>();
-    
-    public ClusterClient(PropertySources propertySources, Map<String, IServiceDiscovery> servceDiscoveryMap) {
+
+    public ClusterClient(PropertySources propertySources, Map<String, IServiceDiscovery> serviceDiscoveryMap) {
         super(propertySources);
-        this.servceDiscoveryMap = servceDiscoveryMap;
+        this.serviceDiscoveryMap = serviceDiscoveryMap;
     }
     
     public void init(String annotationKey, String serviceName) throws Exception {
@@ -48,7 +48,7 @@ public abstract class ClusterClient extends AbstractClient {
             String protocols = getProtocols(annotationKey);
             String discoveryType = getDiscoveryType(annotationKey);
             //多订阅时,只能选择一个注册中心
-            List<String> list = servceDiscoveryMap.get(discoveryType).listServer(serviceName, protocols.split(","));
+            List<String> list = serviceDiscoveryMap.get(discoveryType).listServer(serviceName, protocols.split(","));
             for (String address : list) {
                 String[] split = address.split("-");
                 String protocol = split[0];
@@ -71,7 +71,7 @@ public abstract class ClusterClient extends AbstractClient {
             String protocols = getProtocols(serviceName);
             String discoveryType = getDiscoveryType(serviceName);
             //多订阅时,只能选择一个注册中心
-            IServiceDiscovery discovery = servceDiscoveryMap.get(discoveryType);
+            IServiceDiscovery discovery = serviceDiscoveryMap.get(discoveryType);
             address = discovery.discovery(serviceName, protocols.split(","));
     
             if (StringUtil.isBlank(address)) {
@@ -127,6 +127,7 @@ public abstract class ClusterClient extends AbstractClient {
     
     @Override
     public void close() {
-    
+        serviceDiscoveryMap.forEach((k, v) -> v.close());
+        clientMap.forEach((k, v) -> v.close());
     }
 }

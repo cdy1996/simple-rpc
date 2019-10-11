@@ -168,6 +168,8 @@ public class ServerBootStrap {
 
         }
         registryAll();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(this::closeAll));
         return this;
     }
 

@@ -29,9 +29,11 @@ public class ClientBootStrap {
     private final Map<String, IServiceDiscovery> serviceDiscoveryMap;
     private final Set<String> types;
     private final Set<String> discoveryTypes;
+    private final List<RemoteInvoker> remoteInvokers;
 
     public ClientBootStrap(PropertySources propertySources) {
         this.filters = new ArrayList<>();
+        this.remoteInvokers = new ArrayList<>();
         this.propertySources = propertySources;
         this.bootstrapPropertySource = new BootstrapPropertySource();
         this.serviceDiscoveryMap = new HashMap<>();
@@ -110,6 +112,9 @@ public class ClientBootStrap {
             IServiceDiscovery discovery = DiscoveryFactory.createDiscovery(propertySources, type);
             serviceDiscoveryMap.put(type, discovery);
         }
+
+
+        Runtime.getRuntime().addShutdownHook(new Thread(this::close));
         return this;
     }
 
@@ -146,7 +151,8 @@ public class ClientBootStrap {
             if (annotation == null) {
                 continue;
             }
-            Invoker invoker = new RemoteInvoker(propertySources, serviceDiscoveryMap, StringUtil.getServiceName(field.getType()));
+            RemoteInvoker invoker = new RemoteInvoker(propertySources, serviceDiscoveryMap, StringUtil.getServiceName(field.getType()));
+            remoteInvokers.add(invoker);
             Object proxy = ProxyFactory.createProxy(new FilterChain(invoker), field.getType());
             try {
                 field.setAccessible(true);
@@ -165,6 +171,10 @@ public class ClientBootStrap {
                 new GenericInvocationHandler(new FilterChain(invoker), className));
        return genericService;
 
+    }
+
+    public void close() {
+        remoteInvokers.forEach(RemoteInvoker::close);
     }
 
 

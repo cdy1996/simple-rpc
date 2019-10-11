@@ -71,5 +71,10 @@ public class SimpleDiscoveryImpl extends AbstractDiscovery {
         }
         return  value;
     }
-    
+
+    @Override
+    public void close() {
+
+    }
+
 }
