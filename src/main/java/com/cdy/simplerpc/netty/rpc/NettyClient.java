@@ -48,7 +48,7 @@ public class NettyClient<T, R> {
     
     protected NettyClient() {
         this.bootstrap = new Bootstrap();
-        this.bootstrap.group(boss)
+        this.bootstrap.group(boss.next())
                 .channel(NioSocketChannel.class)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
