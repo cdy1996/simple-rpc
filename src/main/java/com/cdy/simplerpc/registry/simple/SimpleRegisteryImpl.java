@@ -23,4 +23,9 @@ public class SimpleRegisteryImpl implements IServiceRegistry {
         }
         FileUtils.writeLines(file, UTF8, Collections.singleton(address), true);
     }
+    
+    @Override
+    public void close() {
+    
+    }
 }
