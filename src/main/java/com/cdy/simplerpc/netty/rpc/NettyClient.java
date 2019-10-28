@@ -1,6 +1,6 @@
 package com.cdy.simplerpc.netty.rpc;
 
-import com.cdy.simplerpc.netty.ServerChannelHandler;
+import com.cdy.simplerpc.netty.ClientChannelHandler;
 import com.cdy.simplerpc.serialize.ISerialize;
 import com.cdy.simplerpc.serialize.JdkSerialize;
 import io.netty.bootstrap.Bootstrap;
@@ -121,7 +121,7 @@ public class NettyClient<T, R> {
 //                                .addLast("encoder", new ObjectEncoder())
 //                                .addLast("dencoder", new ObjectDecoder(Integer.MAX_VALUE, ClassResolvers.cacheDisabled(null)))
                 .addLast(new WriteTimeoutHandler(60))
-                .addLast(new ServerChannelHandler())
+                .addLast(new ClientChannelHandler())
                 .addLast("serialize-encoder", new SerializeEncoderHandler<>(serialize, RPCPackage.class))
                 .addLast("encoder", new RPCPackageEncoder())
                 .addLast("serialize-decoder", new SerializeDecoderHandler<>(serialize, RPCPackage.class))
