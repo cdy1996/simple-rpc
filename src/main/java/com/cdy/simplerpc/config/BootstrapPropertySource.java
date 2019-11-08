@@ -18,7 +18,7 @@ import java.util.Map;
 public class BootstrapPropertySource implements PropertySource{
     
     @Getter
-    private final Map<String,String> map;
+    private final Map<String,String> map; //不变的
     
     public BootstrapPropertySource() {
         this.map = new HashMap<>();

@@ -13,6 +13,7 @@ import org.apache.curator.retry.ExponentialBackoffRetry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -60,7 +61,7 @@ public class ZKServiceDiscovery extends AbstractDiscovery {
             if (!(protocols == null || protocols.length==0)) {
                 cacheList = cacheList.stream()
                         .filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith))
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
             }
             cache.putIfAbsent(serviceName, cacheList);
             subscrible(serviceName, protocols);

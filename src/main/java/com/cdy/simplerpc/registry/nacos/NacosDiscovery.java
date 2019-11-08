@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -57,11 +58,11 @@ public class NacosDiscovery extends AbstractDiscovery {
         if (cacheList == null) { //启动时需要加载服务列表到缓存
             List<Instance> allInstances = namingService.getAllInstances(serviceName, false);
             cacheList = allInstances.stream().map(e -> e.getClusterName() + "-" + e.getIp() + ":" + e.getPort())
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
             if (!(protocols == null || protocols.length==0)) { //过滤需要的协议
                 cacheList = cacheList.stream()
                         .filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith))
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
             }
             cache.putIfAbsent(serviceName, cacheList);
             subscribe(serviceName, protocols);
@@ -82,7 +83,7 @@ public class NacosDiscovery extends AbstractDiscovery {
             if (!(protocols == null || protocols.length==0)) {
                 collect = collect.stream()
                         .filter(e-> Arrays.stream(protocols).anyMatch(e::startsWith))
-                        .collect(Collectors.toList());
+                        .collect(Collectors.toCollection(CopyOnWriteArrayList::new));
             }
             //todo 线程安全问题
             getCache().get(serviceName).addAll(collect);
